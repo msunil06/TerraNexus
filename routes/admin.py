@@ -1,14 +1,55 @@
 from datetime import datetime
 from functools import wraps
 from flask import Blueprint, render_template, request, flash, redirect, url_for, abort, jsonify
-from flask_login import login_required, current_user
+from flask_login import login_required, current_user, login_user
 from models import db
-from models.user import User, Role, UserRole, UserReport, AuditLog, SystemSetting
+from models.user import User, Role, UserRole, UserReport, AuditLog, SystemSetting, UserSession
 from models.geography import Country, AdministrativeDivision, Continent
 from models.marine_and_physical import Ocean, Sea, GeographicFeature, DataSource
 from services.data_import_service import DataImportService
+from server.connection_manager import ServerConnectionManager
+from api.config import API_REGISTRY, update_api_url
+from api.gateway import ApiGateway
 
 admin_bp = Blueprint("admin", __name__, url_prefix="/admin")
+
+@admin_bp.route("/login", methods=["GET", "POST"])
+def admin_login():
+    """High-Security Dedicated Admin Login Portal."""
+    if current_user.is_authenticated and current_user.is_admin:
+        return redirect(url_for("admin.dashboard"))
+
+    if request.method == "POST":
+        login_id = request.form.get("login_id", "").strip()
+        password = request.form.get("password", "")
+
+        user = User.query.filter((User.username == login_id) | (User.email == login_id.lower())).first()
+
+        if not user or not user.check_password(password):
+            log_admin_action("admin_login_failed", "Security", details=f"Failed admin login attempt for '{login_id}' from IP {request.remote_addr}")
+            flash("Invalid administrator credentials. Access attempt logged.", "danger")
+            return render_template("admin/login.html")
+
+        if not user.is_admin:
+            log_admin_action("unauthorized_admin_attempt", "Security", user.id, f"Non-admin user '{user.username}' attempted admin portal login from IP {request.remote_addr}")
+            flash("Access denied. High-security administrative privileges required.", "danger")
+            return render_template("admin/login.html")
+
+        if user.is_suspended:
+            flash("This administrative account has been suspended.", "danger")
+            return render_template("admin/login.html")
+
+        # Success - log in and register server connection
+        user.last_login_at = datetime.utcnow()
+        db.session.commit()
+        login_user(user, remember=False)
+        ServerConnectionManager.register_connection(user, request)
+
+        log_admin_action("admin_login_success", "Security", user.id, f"Administrator '{user.username}' authenticated successfully from IP {request.remote_addr}")
+        flash(f"Welcome to TerraNexus Secure Admin Command, {user.display_name or user.username}!", "success")
+        return redirect(url_for("admin.dashboard"))
+
+    return render_template("admin/login.html")
 
 def admin_required(f):
     @wraps(f)
@@ -199,3 +240,145 @@ def data_imports():
 def audit_logs():
     logs = AuditLog.query.order_by(AuditLog.created_at.desc()).limit(100).all()
     return render_template("admin/logs.html", logs=logs)
+
+# -------------------------------------------------------------
+# User Profile & Password Control by Administrator
+# -------------------------------------------------------------
+@admin_bp.route("/users/<int:user_id>/reset-password", methods=["POST"])
+@admin_required
+def reset_user_password(user_id):
+    """Admin overrides and resets a user's password."""
+    user = User.query.get_or_404(user_id)
+    new_password = request.form.get("new_password", "").strip()
+
+    if len(new_password) < 8:
+        flash("Password must be at least 8 characters long for security compliance.", "danger")
+        return redirect(url_for("admin.users"))
+
+    user.set_password(new_password)
+    # Revoke active server sessions for security so user must re-authenticate with new password
+    ServerConnectionManager.disconnect_all_user_sessions(user.id, admin_user=current_user)
+    db.session.commit()
+
+    log_admin_action("password_reset_by_admin", "User", user.id, f"Admin '{current_user.username}' reset password for '{user.username}' and revoked active sessions.")
+    flash(f"Password for user '{user.username}' was successfully reset. All active server sessions have been terminated.", "success")
+    return redirect(url_for("admin.users"))
+
+@admin_bp.route("/users/<int:user_id>/edit-profile", methods=["POST"])
+@admin_required
+def edit_user_profile(user_id):
+    """Admin controls and updates all profile data of any user."""
+    user = User.query.get_or_404(user_id)
+    username = request.form.get("username", "").strip()
+    email = request.form.get("email", "").strip().lower()
+    display_name = request.form.get("display_name", "").strip()
+    bio = request.form.get("bio", "").strip()
+    location = request.form.get("location", "").strip()
+    is_active_account = request.form.get("is_active_account") == "on"
+
+    if not username or not email:
+        flash("Username and Email cannot be empty.", "danger")
+        return redirect(url_for("admin.users"))
+
+    # Check uniqueness
+    existing_user = User.query.filter((User.username == username) & (User.id != user.id)).first()
+    if existing_user:
+        flash(f"Username '{username}' is already taken by another account.", "danger")
+        return redirect(url_for("admin.users"))
+
+    existing_email = User.query.filter((User.email == email) & (User.id != user.id)).first()
+    if existing_email:
+        flash(f"Email '{email}' is already registered to another account.", "danger")
+        return redirect(url_for("admin.users"))
+
+    changes = []
+    if user.username != username:
+        changes.append(f"username: {user.username} -> {username}")
+        user.username = username
+    if user.email != email:
+        changes.append(f"email: {user.email} -> {email}")
+        user.email = email
+    if user.display_name != display_name:
+        changes.append("display_name updated")
+        user.display_name = display_name
+    if user.bio != bio:
+        user.bio = bio
+    if user.location != location:
+        user.location = location
+    if user.is_active_account != is_active_account:
+        changes.append(f"active: {user.is_active_account} -> {is_active_account}")
+        user.is_active_account = is_active_account
+
+    db.session.commit()
+    log_admin_action("profile_edited_by_admin", "User", user.id, f"Admin updated profile for '{user.username}': {', '.join(changes) if changes else 'saved'}")
+    flash(f"Profile data for '{user.username}' updated successfully.", "success")
+    return redirect(url_for("admin.users"))
+
+# -------------------------------------------------------------
+# Server Connection Manager & Remote Session Disconnect
+# -------------------------------------------------------------
+@admin_bp.route("/connections")
+@admin_required
+def server_connections():
+    """Live Server Connections Monitor."""
+    connections = ServerConnectionManager.get_all_connections(active_only=False)
+    telemetry = ServerConnectionManager.get_server_telemetry()
+    return render_template("admin/connections.html", connections=connections, telemetry=telemetry)
+
+@admin_bp.route("/connections/<int:session_id>/disconnect", methods=["POST"])
+@admin_required
+def disconnect_session(session_id):
+    """Admin disconnects an individual profile server connection."""
+    success, msg = ServerConnectionManager.disconnect_session(session_id, admin_user=current_user)
+    if success:
+        log_admin_action("session_disconnected", "UserSession", session_id, f"Admin terminated server session #{session_id}")
+        flash(msg, "success")
+    else:
+        flash(msg, "warning")
+    return redirect(url_for("admin.server_connections"))
+
+@admin_bp.route("/users/<int:user_id>/disconnect-all", methods=["POST"])
+@admin_required
+def disconnect_user_connections(user_id):
+    """Admin terminates all active server connections for a user profile."""
+    user = User.query.get_or_404(user_id)
+    success, msg = ServerConnectionManager.disconnect_all_user_sessions(user.id, admin_user=current_user)
+    log_admin_action("all_user_sessions_disconnected", "User", user.id, f"Admin severed all active server connection(s) for user '{user.username}'")
+    flash(msg, "success" if success else "warning")
+    return redirect(request.referrer or url_for("admin.server_connections"))
+
+# -------------------------------------------------------------
+# Centralized API Hub & Gateway Monitor
+# -------------------------------------------------------------
+@admin_bp.route("/apis")
+@admin_required
+def apis_hub():
+    """Centralized API management dashboard - view, test, and swap APIs."""
+    all_apis = API_REGISTRY
+    return render_template("admin/apis.html", apis=all_apis)
+
+@admin_bp.route("/apis/<api_id>/test", methods=["POST"])
+@admin_required
+def test_api_connection(api_id):
+    """Benchmark and test live latency of any external API."""
+    result = ApiGateway.test_single_api(api_id)
+    return jsonify(result)
+
+@admin_bp.route("/apis/<api_id>/update-url", methods=["POST"])
+@admin_required
+def update_api_url_route(api_id):
+    """Replace an API endpoint with a new URL."""
+    new_url = request.form.get("new_url", "").strip()
+    if not new_url:
+        flash("New API URL cannot be empty.", "danger")
+        return redirect(url_for("admin.apis_hub"))
+
+    success = update_api_url(api_id, new_url)
+    if success:
+        log_admin_action("api_endpoint_updated", "API", api_id, f"Admin updated API '{api_id}' endpoint to: {new_url}")
+        flash(f"API '{api_id}' URL successfully replaced with: {new_url}", "success")
+    else:
+        flash(f"API identifier '{api_id}' was not found in registry.", "danger")
+
+    return redirect(url_for("admin.apis_hub"))
+

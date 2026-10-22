@@ -988,6 +988,7 @@ def seed_geographic_features(app):
         europe = Continent.query.filter_by(slug="europe").first()
         north_america = Continent.query.filter_by(slug="north-america").first()
         south_america = Continent.query.filter_by(slug="south-america").first()
+        oceania = Continent.query.filter_by(slug="oceania").first()
 
         features_data = [
             {
@@ -1093,6 +1094,98 @@ def seed_geographic_features(app):
                 "connected_features": "Pacific Ocean, Philippine Sea, Izu–Bonin–Mariana Arc",
                 "overview": "The Mariana Trench is an oceanic trench located in the western Pacific Ocean, about 200 kilometres (124 mi) east of the Mariana Islands; it is the deepest oceanic trench on Earth, reaching a maximum known depth of 10,994 meters at Challenger Deep.",
                 "data_source": "NOAA / GEBCO (2021 multibeam bathymetric surveys)"
+            },
+            # Major World Islands & Archipelagos
+            {
+                "name": "Greenland", "slug": "greenland-island",
+                "alternative_names": "Kalaallit Nunaat",
+                "feature_type": "island",
+                "continent_id": north_america.id if north_america else 4,
+                "primary_country_iso": "GRL",
+                "countries_involved": "Greenland (Autonomous territory within the Kingdom of Denmark)",
+                "latitude": 71.7069, "longitude": -42.6043,
+                "area_km2": 2166086, "elevation_m": 3694,
+                "connected_features": "Arctic Ocean, Atlantic Ocean, Baffin Bay, Greenland Ice Sheet",
+                "overview": "Greenland is the world's largest island, located between the Arctic and Atlantic oceans, east of the Canadian Arctic Archipelago. About 80% of its surface is covered by the massive Greenland ice sheet.",
+                "data_source": "National Park Service / GEUS Denmark"
+            },
+            {
+                "name": "Madagascar", "slug": "madagascar-island",
+                "alternative_names": "Nosy Madagasikara, Red Island",
+                "feature_type": "island",
+                "continent_id": africa.id if africa else 2,
+                "primary_country_iso": "MDG",
+                "countries_involved": "Madagascar",
+                "latitude": -18.7669, "longitude": 46.8691,
+                "area_km2": 587041, "elevation_m": 2876,
+                "connected_features": "Indian Ocean, Mozambique Channel",
+                "overview": "Madagascar is an island country in the Indian Ocean, approximately 400 kilometres off the coast of East Africa. It is the fourth largest island in the world, renowned for extraordinary endemic biodiversity.",
+                "data_source": "WWF / UNESCO World Heritage"
+            },
+            {
+                "name": "Borneo", "slug": "borneo-island",
+                "alternative_names": "Kalimantan",
+                "feature_type": "island",
+                "continent_id": asia.id if asia else 1,
+                "primary_country_iso": "IDN",
+                "countries_involved": "Indonesia, Malaysia, Brunei",
+                "latitude": 0.9619, "longitude": 114.5548,
+                "area_km2": 748168, "elevation_m": 4095,
+                "connected_features": "Pacific Ocean, South China Sea, Celebes Sea, Java Sea",
+                "overview": "Borneo is the third-largest island in the world and the largest in Asia. It is politically divided among three countries: Malaysia and Brunei in the north, and Indonesia to the south.",
+                "data_source": "ASEAN Centre for Biodiversity"
+            },
+            {
+                "name": "New Guinea", "slug": "new-guinea-island",
+                "alternative_names": "Papua",
+                "feature_type": "island",
+                "continent_id": oceania.id if oceania else 6,
+                "primary_country_iso": "PNG",
+                "countries_involved": "Papua New Guinea, Indonesia (Western New Guinea)",
+                "latitude": -4.2699, "longitude": 138.0804,
+                "area_km2": 785753, "elevation_m": 4884,
+                "connected_features": "Pacific Ocean, Coral Sea, Arafura Sea, Puncak Jaya",
+                "overview": "New Guinea is the world's second-largest island, located in the southwest Pacific Ocean, separated from the Australian continent by the shallow Torres Strait.",
+                "data_source": "UNESCO / Geoscience Australia"
+            },
+            {
+                "name": "Hawaii Archipelago", "slug": "hawaii-archipelago",
+                "alternative_names": "Hawaiian Islands, Mokupuni o Hawai'i",
+                "feature_type": "archipelago",
+                "continent_id": north_america.id if north_america else 4,
+                "primary_country_iso": "USA",
+                "countries_involved": "United States",
+                "latitude": 19.8968, "longitude": -155.5828,
+                "area_km2": 28311, "elevation_m": 4207,
+                "connected_features": "North Pacific Ocean, Mauna Kea, Mauna Loa",
+                "overview": "The Hawaiian Archipelago is an isolated volcanic island chain in the central Pacific Ocean, formed by a mantle plume hotspot and home to towering active shield volcanoes.",
+                "data_source": "USGS Hawaiian Volcano Observatory"
+            },
+            {
+                "name": "Maldives Archipelago", "slug": "maldives-archipelago",
+                "alternative_names": "Dhivehi Raajje, Maldivian Atolls",
+                "feature_type": "archipelago",
+                "continent_id": asia.id if asia else 1,
+                "primary_country_iso": "MDV",
+                "countries_involved": "Maldives",
+                "latitude": 3.2028, "longitude": 73.2207,
+                "area_km2": 298, "elevation_m": 2,
+                "connected_features": "Indian Ocean, Arabian Sea, Laccadive Sea",
+                "overview": "The Maldives is an archipelagic nation of 26 natural coral atolls encompassing 1,192 coral islands in the Indian Ocean, famous for its barrier reefs, turquoise lagoons, and low-lying topography.",
+                "data_source": "Ministry of Environment Maldives / GEBCO"
+            },
+            {
+                "name": "Iceland", "slug": "iceland-island",
+                "alternative_names": "Ísland",
+                "feature_type": "island",
+                "continent_id": europe.id if europe else 3,
+                "primary_country_iso": "ISL",
+                "countries_involved": "Iceland",
+                "latitude": 64.9631, "longitude": -19.0208,
+                "area_km2": 103000, "elevation_m": 2110,
+                "connected_features": "Atlantic Ocean, Arctic Ocean, Mid-Atlantic Ridge",
+                "overview": "Iceland is a Nordic island country in the North Atlantic situated on the Mid-Atlantic Ridge, famous for dramatic volcanic activity, geothermal geysers, glaciers, and black sand beaches.",
+                "data_source": "National Land Survey of Iceland"
             }
         ]
 

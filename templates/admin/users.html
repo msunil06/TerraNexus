@@ -1,12 +1,17 @@
 {% extends "admin/layout.html" %}
 
-{% block title %}User Management - Admin Console - {{ app_name }}{% endblock %}
+{% block title %}User Account & Profile Control - Admin Console - {{ app_name }}{% endblock %}
 
 {% block admin_content %}
 <div style="margin-bottom: 2rem;">
-  <h1 style="font-size: 2rem; margin-bottom: 0.25rem;">User Account Management</h1>
-  <p style="color: var(--text-secondary); font-size: 0.95rem;">
-    Manage user roles, review account holds, and audit account access privileges.
+  <span class="tn-badge" style="background: rgba(245, 158, 11, 0.15); color: var(--warning); border-color: var(--warning);">
+    Master Account Authority
+  </span>
+  <h1 style="font-size: 1.85rem; font-weight: 800; margin: 0.5rem 0 0.25rem;">
+    👥 User Profile & Security Control
+  </h1>
+  <p style="color: var(--text-muted); font-size: 0.92rem; margin: 0;">
+    Full administrative authority: edit profile information, change/override user passwords, disconnect profile server sockets, and manage roles.
   </p>
 </div>
 
@@ -37,83 +42,235 @@
 </form>
 
 <!-- Users Table -->
-<div class="tn-table-responsive">
-  <table class="tn-table">
-    <thead>
-      <tr>
-        <th>ID</th>
-        <th>User Details</th>
-        <th>Current Role</th>
-        <th>Status</th>
-        <th>Registered</th>
-        <th>Administrative Actions</th>
-      </tr>
-    </thead>
-    <tbody>
-      {% for u in users %}
-        <tr>
-          <td>#{{ u.id }}</td>
-          <td>
-            <div style="font-weight: 600; color: var(--text-primary);">{{ u.display_name or u.username }}</div>
-            <div style="font-size: 0.78rem; color: var(--text-muted);">@{{ u.username }} &bull; {{ u.email }}</div>
-            {% if u.deletion_requested %}
-              <span class="tn-badge" style="background: rgba(239, 68, 68, 0.2); color: var(--danger); border-color: var(--danger); font-size: 0.65rem; margin-top: 4px;">
-                Deletion Requested
-              </span>
-            {% endif %}
-          </td>
-          <td>
-            <form method="POST" action="{{ url_for('admin.update_user_role', user_id=u.id) }}" style="display: flex; gap: 4px;">
-              <select name="role_id" style="
-                padding: 0.35rem 0.6rem; background: rgba(6, 12, 24, 0.8); border: 1px solid var(--border-color);
-                border-radius: var(--radius-sm); color: var(--text-primary); font-size: 0.8rem; outline: none;
-              ">
-                {% for r in roles %}
-                  <option value="{{ r.id }}" {% if u.has_role(r.name) %}selected{% endif %}>{{ r.name }}</option>
-                {% endfor %}
-              </select>
-              <button type="submit" class="tn-btn tn-btn-outline tn-btn-sm" style="padding: 0.25rem 0.5rem; font-size: 0.75rem;">Set</button>
-            </form>
-          </td>
-          <td>
-            {% if u.is_suspended %}
-              <span class="tn-badge" style="background: rgba(239, 68, 68, 0.2); color: var(--danger); border-color: var(--danger);">
-                Suspended
-              </span>
-            {% else %}
-              <span class="tn-badge" style="background: rgba(16, 185, 129, 0.2); color: var(--success); border-color: var(--success);">
-                Active
-              </span>
-            {% endif %}
-          </td>
-          <td style="font-size: 0.82rem; color: var(--text-muted);">{{ u.created_at.strftime('%Y-%m-%d') }}</td>
-          <td>
-            {% if u.id != current_user.id %}
-              <form method="POST" action="{{ url_for('admin.toggle_suspend_user', user_id=u.id) }}" onsubmit="return confirm('Confirm account suspension state change for {{ u.username }}?');" style="display: inline;">
-                <input type="hidden" name="reason" value="Administrative action from console">
-                {% if u.is_suspended %}
-                  <button type="submit" class="tn-btn tn-btn-outline tn-btn-sm" style="color: var(--success); border-color: var(--success);">
-                    Reactivate
-                  </button>
-                {% else %}
-                  <button type="submit" class="tn-btn tn-btn-outline tn-btn-sm" style="color: var(--danger); border-color: var(--danger);">
-                    Suspend
-                  </button>
-                {% endif %}
+<div class="tn-card" style="padding: 1.25rem;">
+  <div style="overflow-x: auto;">
+    <table class="tn-table" style="width: 100%; border-collapse: collapse; font-size: 0.88rem;">
+      <thead>
+        <tr style="border-bottom: 1px solid var(--border-color); color: var(--text-muted); font-size: 0.76rem; text-transform: uppercase;">
+          <th style="padding: 0.75rem 0.5rem;">ID</th>
+          <th style="padding: 0.75rem 0.5rem;">User Profile Details</th>
+          <th style="padding: 0.75rem 0.5rem;">Role</th>
+          <th style="padding: 0.75rem 0.5rem;">Status</th>
+          <th style="padding: 0.75rem 0.5rem;">Server Sockets</th>
+          <th style="padding: 0.75rem 0.5rem; text-align: right;">Master Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for u in users %}
+          <tr style="border-bottom: 1px solid var(--border-color);">
+            <td style="padding: 0.85rem 0.5rem; font-weight: 700; color: var(--text-muted);">#{{ u.id }}</td>
+            
+            <td style="padding: 0.85rem 0.5rem;">
+              <div style="font-weight: 700; color: var(--text-primary);">{{ u.display_name or u.username }}</div>
+              <div style="font-size: 0.78rem; color: var(--text-muted);">@{{ u.username }} &bull; {{ u.email }}</div>
+              {% if u.bio %}
+                <div style="font-size: 0.75rem; color: var(--text-secondary); margin-top: 2px; max-width: 260px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+                  &ldquo;{{ u.bio }}&rdquo;
+                </div>
+              {% endif %}
+              {% if u.deletion_requested %}
+                <span class="tn-badge" style="background: rgba(239, 68, 68, 0.2); color: var(--danger); border-color: var(--danger); font-size: 0.65rem; margin-top: 4px;">
+                  Deletion Requested
+                </span>
+              {% endif %}
+            </td>
+
+            <td style="padding: 0.85rem 0.5rem;">
+              <form method="POST" action="{{ url_for('admin.update_user_role', user_id=u.id) }}" style="display: flex; gap: 4px;">
+                <select name="role_id" style="
+                  padding: 0.35rem 0.5rem; background: rgba(6, 12, 24, 0.8); border: 1px solid var(--border-color);
+                  border-radius: var(--radius-sm); color: var(--text-primary); font-size: 0.78rem; outline: none;
+                ">
+                  {% for r in roles %}
+                    <option value="{{ r.id }}" {% if u.has_role(r.name) %}selected{% endif %}>{{ r.name }}</option>
+                  {% endfor %}
+                </select>
+                <button type="submit" class="tn-btn tn-btn-outline tn-btn-sm" style="padding: 0.25rem 0.45rem; font-size: 0.72rem;">Set</button>
               </form>
-            {% else %}
-              <span style="font-size: 0.8rem; color: var(--text-muted);">Current Admin</span>
-            {% endif %}
-          </td>
-        </tr>
-      {% else %}
-        <tr>
-          <td colspan="6" style="text-align: center; padding: 2rem; color: var(--text-muted);">
-            No user accounts matched the filter criteria.
-          </td>
-        </tr>
-      {% endfor %}
-    </tbody>
-  </table>
+            </td>
+
+            <td style="padding: 0.85rem 0.5rem;">
+              {% if u.is_suspended %}
+                <span class="tn-badge" style="background: rgba(239, 68, 68, 0.2); color: var(--danger); border-color: var(--danger); font-size: 0.72rem;">
+                  Suspended
+                </span>
+              {% else %}
+                <span class="tn-badge" style="background: rgba(16, 185, 129, 0.2); color: var(--success); border-color: var(--success); font-size: 0.72rem;">
+                  Active
+                </span>
+              {% endif %}
+            </td>
+
+            <td style="padding: 0.85rem 0.5rem;">
+              <form method="POST" action="{{ url_for('admin.disconnect_user_connections', user_id=u.id) }}" onsubmit="return confirm('Force sever all server connections for user {{ u.username }}?');">
+                <button type="submit" class="tn-btn tn-btn-outline tn-btn-sm" style="padding: 0.3rem 0.6rem; font-size: 0.74rem; border-color: rgba(239, 68, 68, 0.4); color: #f87171;">
+                  ⚡ Sever Sockets
+                </button>
+              </form>
+            </td>
+
+            <td style="padding: 0.85rem 0.5rem; text-align: right;">
+              <div style="display: flex; gap: 0.35rem; justify-content: flex-end; flex-wrap: wrap;">
+                <!-- Edit Profile Button -->
+                <button 
+                  type="button" 
+                  onclick="openProfileModal({{ u.id }}, '{{ u.username|escape }}', '{{ u.email|escape }}', '{{ (u.display_name or '')|escape }}', '{{ (u.bio or '')|escape }}', '{{ (u.location or '')|escape }}', {{ 'true' if u.is_active_account else 'false' }})" 
+                  class="tn-btn tn-btn-secondary" 
+                  style="padding: 0.3rem 0.6rem; font-size: 0.75rem;"
+                  title="Edit user profile data"
+                >
+                  ✏️ Edit
+                </button>
+
+                <!-- Reset Password Button -->
+                <button 
+                  type="button" 
+                  onclick="openPasswordModal({{ u.id }}, '{{ u.username|escape }}')" 
+                  class="tn-btn tn-btn-secondary" 
+                  style="padding: 0.3rem 0.6rem; font-size: 0.75rem; border-color: rgba(245, 158, 11, 0.4); color: #fbbf24;"
+                  title="Override and change user password"
+                >
+                  🔑 Password
+                </button>
+
+                <!-- Suspend / Reactivate -->
+                {% if u.id != current_user.id %}
+                  <form method="POST" action="{{ url_for('admin.toggle_suspend_user', user_id=u.id) }}" onsubmit="return confirm('Confirm account suspension state change for {{ u.username }}?');" style="display: inline;">
+                    <input type="hidden" name="reason" value="Administrative action from console">
+                    {% if u.is_suspended %}
+                      <button type="submit" class="tn-btn tn-btn-outline tn-btn-sm" style="padding: 0.3rem 0.6rem; font-size: 0.75rem; color: var(--success); border-color: var(--success);">
+                        Reactivate
+                      </button>
+                    {% else %}
+                      <button type="submit" class="tn-btn tn-btn-outline tn-btn-sm" style="padding: 0.3rem 0.6rem; font-size: 0.75rem; color: var(--danger); border-color: var(--danger);">
+                        Suspend
+                      </button>
+                    {% endif %}
+                  </form>
+                {% else %}
+                  <span class="tn-badge" style="font-size: 0.65rem; background: rgba(59, 130, 246, 0.2); color: #60a5fa;">Current Admin</span>
+                {% endif %}
+              </div>
+            </td>
+          </tr>
+        {% else %}
+          <tr>
+            <td colspan="6" style="text-align: center; padding: 2rem; color: var(--text-muted);">
+              No user accounts matched the filter criteria.
+            </td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
 </div>
+
+<!-- Edit Profile Modal -->
+<div id="editProfileModal" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.75); z-index: 9999; align-items: center; justify-content: center; padding: 1rem;">
+  <div class="tn-card" style="max-width: 500px; width: 100%; padding: 1.75rem; border: 1px solid var(--border-color); background: var(--bg-surface);">
+    <h3 style="font-size: 1.25rem; font-weight: 800; margin: 0 0 0.5rem;">
+      ✏️ Admin Profile Control: <span id="modalUsername" style="color: var(--accent);"></span>
+    </h3>
+    <p style="font-size: 0.82rem; color: var(--text-muted); margin-bottom: 1.25rem;">
+      Administratively modify profile information for this user.
+    </p>
+
+    <form id="editProfileForm" method="POST" action="">
+      <div style="margin-bottom: 0.85rem;">
+        <label style="display: block; font-size: 0.78rem; font-weight: 700; color: var(--text-secondary); margin-bottom: 0.3rem;">Username</label>
+        <input type="text" id="profUsername" name="username" required class="tn-input" style="width: 100%; padding: 0.55rem; font-size: 0.85rem;" />
+      </div>
+
+      <div style="margin-bottom: 0.85rem;">
+        <label style="display: block; font-size: 0.78rem; font-weight: 700; color: var(--text-secondary); margin-bottom: 0.3rem;">Email Address</label>
+        <input type="email" id="profEmail" name="email" required class="tn-input" style="width: 100%; padding: 0.55rem; font-size: 0.85rem;" />
+      </div>
+
+      <div style="margin-bottom: 0.85rem;">
+        <label style="display: block; font-size: 0.78rem; font-weight: 700; color: var(--text-secondary); margin-bottom: 0.3rem;">Display Name</label>
+        <input type="text" id="profDisplayName" name="display_name" class="tn-input" style="width: 100%; padding: 0.55rem; font-size: 0.85rem;" />
+      </div>
+
+      <div style="margin-bottom: 0.85rem;">
+        <label style="display: block; font-size: 0.78rem; font-weight: 700; color: var(--text-secondary); margin-bottom: 0.3rem;">Location</label>
+        <input type="text" id="profLocation" name="location" class="tn-input" style="width: 100%; padding: 0.55rem; font-size: 0.85rem;" />
+      </div>
+
+      <div style="margin-bottom: 1rem;">
+        <label style="display: block; font-size: 0.78rem; font-weight: 700; color: var(--text-secondary); margin-bottom: 0.3rem;">Biography</label>
+        <textarea id="profBio" name="bio" rows="2" class="tn-input" style="width: 100%; padding: 0.55rem; font-size: 0.85rem;"></textarea>
+      </div>
+
+      <div style="margin-bottom: 1.5rem; display: flex; align-items: center; gap: 0.5rem;">
+        <input type="checkbox" id="profIsActive" name="is_active_account" />
+        <label for="profIsActive" style="font-size: 0.82rem; color: var(--text-primary); cursor: pointer;">Account Active Status</label>
+      </div>
+
+      <div style="display: flex; justify-content: flex-end; gap: 0.75rem;">
+        <button type="button" onclick="closeModal('editProfileModal')" class="tn-btn tn-btn-secondary">Cancel</button>
+        <button type="submit" class="tn-btn tn-btn-primary">💾 Save Profile Changes</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Password Override Modal -->
+<div id="resetPasswordModal" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.75); z-index: 9999; align-items: center; justify-content: center; padding: 1rem;">
+  <div class="tn-card" style="max-width: 440px; width: 100%; padding: 1.75rem; border: 1px solid rgba(245, 158, 11, 0.5); background: var(--bg-surface);">
+    <h3 style="font-size: 1.25rem; font-weight: 800; margin: 0 0 0.5rem; color: #fbbf24;">
+      🔑 Reset User Password
+    </h3>
+    <p style="font-size: 0.82rem; color: var(--text-muted); margin-bottom: 1.25rem;">
+      Override password for <strong id="pwModalUser" style="color: var(--text-primary);"></strong>. This will also terminate all their active server sessions for security.
+    </p>
+
+    <form id="resetPasswordForm" method="POST" action="">
+      <div style="margin-bottom: 1.25rem;">
+        <label style="display: block; font-size: 0.78rem; font-weight: 700; color: var(--text-secondary); margin-bottom: 0.4rem;">
+          New Password (minimum 8 characters)
+        </label>
+        <input 
+          type="password" 
+          name="new_password" 
+          required 
+          minlength="8" 
+          placeholder="Enter new secure password..."
+          class="tn-input" 
+          style="width: 100%; padding: 0.65rem; font-size: 0.9rem;"
+        />
+      </div>
+
+      <div style="display: flex; justify-content: flex-end; gap: 0.75rem;">
+        <button type="button" onclick="closeModal('resetPasswordModal')" class="tn-btn tn-btn-secondary">Cancel</button>
+        <button type="submit" class="tn-btn tn-btn-primary" style="background: #f59e0b; border-color: #f59e0b; color: #000; font-weight: 700;">
+          ⚡ Override Password
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+function openProfileModal(userId, username, email, displayName, bio, location, isActive) {
+  document.getElementById('modalUsername').textContent = '@' + username;
+  document.getElementById('editProfileForm').action = '/admin/users/' + userId + '/edit-profile';
+  document.getElementById('profUsername').value = username;
+  document.getElementById('profEmail').value = email;
+  document.getElementById('profDisplayName').value = displayName;
+  document.getElementById('profBio').value = bio;
+  document.getElementById('profLocation').value = location;
+  document.getElementById('profIsActive').checked = isActive;
+  document.getElementById('editProfileModal').style.display = 'flex';
+}
+
+function openPasswordModal(userId, username) {
+  document.getElementById('pwModalUser').textContent = '@' + username;
+  document.getElementById('resetPasswordForm').action = '/admin/users/' + userId + '/reset-password';
+  document.getElementById('resetPasswordModal').style.display = 'flex';
+}
+
+function closeModal(modalId) {
+  document.getElementById(modalId).style.display = 'none';
+}
+</script>
 {% endblock %}

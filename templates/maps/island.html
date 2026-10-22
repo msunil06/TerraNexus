@@ -1,0 +1,169 @@
+{% extends "base.html" %}
+
+{% block title %}{{ island.name }} Map & Geography - {{ app_name }}{% endblock %}
+
+{% block meta_description %}Explore {{ island.name }} on the interactive island map. Surface area {{ "{:,.0f}".format(island.area_km2) if island.area_km2 else 'N/A' }} km², elevation {{ "{:,}".format(island.elevation_m) if island.elevation_m else 'N/A' }} m, connected to {{ island.connected_features }}.{% endblock %}
+
+{% block content %}
+<section class="tn-detail-hero">
+  <div class="tn-detail-header">
+    <div>
+      <div style="display: flex; align-items: center; gap: 0.75rem; flex-wrap: wrap;">
+        <span style="font-size: 2.2rem;">🏝️</span>
+        <h1 class="tn-detail-title">{{ island.name }}</h1>
+        <span class="tn-badge">{{ island.feature_type | capitalize }}</span>
+        {% if parent_country %}
+          <span class="tn-badge">{{ parent_country.flag_emoji }} {{ parent_country.common_name }}</span>
+        {% endif %}
+      </div>
+      <p style="color: var(--text-secondary); font-size: 1.05rem; margin-bottom: 0.25rem;">
+        {{ island.countries_involved }}
+      </p>
+      <p style="color: var(--text-muted); font-size: 0.88rem; margin: 0;">
+        Connected Waters: <strong>{{ island.connected_features or 'World Ocean' }}</strong> &bull; Source: {{ island.data_source }}
+      </p>
+    </div>
+
+    <div style="display: flex; align-items: center; gap: 0.75rem; flex-wrap: wrap;">
+      <a href="{{ url_for('maps.islands_gallery') }}" class="tn-btn tn-btn-outline tn-btn-sm">
+        &larr; All Island Maps
+      </a>
+      {% if parent_country %}
+      <a href="{{ url_for('maps.country_map', slug=parent_country.slug) }}" class="tn-btn tn-btn-primary tn-btn-sm">
+        {{ parent_country.flag_emoji }} {{ parent_country.common_name }} Map
+      </a>
+      {% endif %}
+    </div>
+  </div>
+</section>
+
+<div style="max-width: 1440px; margin: 0 auto 4rem; padding: 0 1.5rem;">
+  
+  <!-- Map Card -->
+  <div class="tn-map-card" style="margin-bottom: 2rem;">
+    <div class="tn-map-header">
+      <div class="tn-map-title">
+        <span>🏝️</span> {{ island.name }} High-Resolution Island Map
+      </div>
+      <div class="tn-map-controls">
+        <select id="islandMapLayerSelect" style="
+          background: var(--bg-card); color: var(--text-primary); border: 1px solid var(--border-color);
+          border-radius: var(--radius-sm); padding: 0.4rem 0.75rem; font-size: 0.84rem; outline: none; cursor: pointer;
+        ">
+          <option value="satellite">🛰️ Satellite View (ESRI)</option>
+          <option value="topo">🏔️ Topographical Relief (OpenTopoMap)</option>
+          <option value="streets">🗺️ Street Map (OpenStreetMap)</option>
+          <option value="dark">🌙 Dark Cosmos (CartoDB)</option>
+          <option value="light">☀️ Light Atlas (CartoDB)</option>
+        </select>
+        <button id="resetIslandView" class="tn-btn tn-btn-outline tn-btn-sm">⟲ Center Island</button>
+      </div>
+    </div>
+
+    <div id="islandMap" style="height: 600px; width: 100%; position: relative;"></div>
+  </div>
+
+  <!-- Island Geographic Profile & Statistics -->
+  <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.5rem; margin-bottom: 2rem;">
+    <div class="tn-stat-card" style="border-left: 3px solid #10b981;">
+      <div class="tn-card-meta-label">Total Surface Area</div>
+      <div style="font-size: 1.8rem; font-weight: 700; color: var(--text-primary); margin-top: 4px;">
+        {{ "{:,.0f}".format(island.area_km2) if island.area_km2 else 'N/A' }} km²
+      </div>
+      <span style="font-size: 0.8rem; color: var(--text-muted);">Island terrestrial landmass</span>
+    </div>
+
+    <div class="tn-stat-card">
+      <div class="tn-card-meta-label">Highest Peak / Elevation</div>
+      <div style="font-size: 1.8rem; font-weight: 700; color: var(--text-primary); margin-top: 4px;">
+        {{ "{:,}".format(island.elevation_m) if island.elevation_m else 'Low-Lying Atoll' }} {% if island.elevation_m %}m{% endif %}
+      </div>
+      <span style="font-size: 0.8rem; color: var(--text-muted);">Above mean sea level</span>
+    </div>
+
+    <div class="tn-stat-card">
+      <div class="tn-card-meta-label">Center Geographic Coordinates</div>
+      <div style="font-size: 1.4rem; font-weight: 700; color: var(--text-primary); margin-top: 4px;">
+        {{ island.latitude }}° N, {{ island.longitude }}° E
+      </div>
+      <span style="font-size: 0.8rem; color: var(--text-muted);">GPS Geographic Reference</span>
+    </div>
+  </div>
+
+  <!-- Island Overview & Context -->
+  <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 1.75rem;">
+    <h3 style="font-size: 1.3rem; margin-bottom: 0.75rem; color: var(--accent-cyan);">Geographic & Natural Overview</h3>
+    <p style="font-size: 1.05rem; line-height: 1.8; color: var(--text-secondary); margin: 0;">
+      {{ island.overview }}
+    </p>
+  </div>
+
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+  const lat = {{ island.latitude or 0.0 }};
+  const lon = {{ island.longitude or 0.0 }};
+  
+  const map = L.map("islandMap", {
+    center: [lat, lon],
+    zoom: 6,
+    minZoom: 2,
+    maxZoom: 18,
+    zoomControl: true
+  });
+
+  const tileLayers = {
+    satellite: L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}", {
+      attribution: 'Tiles &copy; Esri &mdash; High-Resolution Satellite (Free Public)',
+      maxZoom: 18
+    }),
+    topo: L.tileLayer("https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png", {
+      attribution: '&copy; OpenTopoMap', maxZoom: 17
+    }),
+    streets: L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+      attribution: '&copy; OpenStreetMap contributors', maxZoom: 19
+    }),
+    dark: L.tileLayer("https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png", {
+      attribution: '&copy; CartoDB &copy; OpenStreetMap', subdomains: "abcd", maxZoom: 19
+    }),
+    light: L.tileLayer("https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png", {
+      attribution: '&copy; CartoDB &copy; OpenStreetMap', subdomains: "abcd", maxZoom: 19
+    })
+  };
+
+  // Satellite view default for islands
+  tileLayers.satellite.addTo(map);
+
+  const select = document.getElementById("islandMapLayerSelect");
+  let activeKey = "satellite";
+  if (select) {
+    select.value = "satellite";
+    select.addEventListener("change", (e) => {
+      map.removeLayer(tileLayers[activeKey]);
+      tileLayers[e.target.value].addTo(map);
+      activeKey = e.target.value;
+    });
+  }
+
+  const resetBtn = document.getElementById("resetIslandView");
+  if (resetBtn) {
+    resetBtn.addEventListener("click", () => map.setView([lat, lon], 6));
+  }
+
+  // Island Pin Marker
+  const islandIcon = L.divIcon({
+    className: "tn-island-marker",
+    html: `<div style="background: rgba(14,26,49,0.9); border: 2px solid #10b981; border-radius: 50%; width: 34px; height: 34px; display: flex; align-items: center; justify-content: center; font-size: 18px; box-shadow: 0 0 14px #10b981;">🏝️</div>`,
+    iconSize: [34, 34], iconAnchor: [17, 17]
+  });
+
+  L.marker([lat, lon], { icon: islandIcon })
+    .addTo(map)
+    .bindPopup(`<strong>{{ island.name }}</strong><br>Area: {{ "{:,.0f}".format(island.area_km2) if island.area_km2 else 'N/A' }} km²<br>Elevation: {{ "{:,}".format(island.elevation_m) if island.elevation_m else 'N/A' }} m`)
+    .openPopup();
+});
+</script>
+{% endblock %}

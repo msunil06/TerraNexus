@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+
+{% block title %}Island & Archipelago Maps Directory - {{ app_name }}{% endblock %}
+
+{% block content %}
+<section class="tn-detail-hero">
+  <div class="tn-detail-header">
+    <div>
+      <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.25rem;">
+        <a href="{{ url_for('maps.maps_hub') }}" style="color: var(--text-muted); font-size: 0.9rem;">&larr; Maps Hub</a>
+        <span style="color: var(--text-muted);">&bull;</span>
+        <h1 style="font-size: 2rem; margin: 0;">World Island & Archipelago Maps</h1>
+      </div>
+      <p style="color: var(--text-secondary); font-size: 0.95rem; margin: 0;">
+        Explore detailed geographic and high-resolution satellite maps for the planet's greatest islands and archipelagos.
+      </p>
+    </div>
+
+    <form method="GET" action="{{ url_for('maps.islands_gallery') }}" style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+      <select name="ocean" style="
+        padding: 0.5rem 0.85rem; background: var(--bg-card); border: 1px solid var(--border-color);
+        border-radius: var(--radius-sm); color: var(--text-primary); font-size: 0.9rem; outline: none;
+      ">
+        <option value="">All Oceans & Waters</option>
+        {% for o in oceans %}
+          <option value="{{ o.name }}" {% if selected_ocean == o.name %}selected{% endif %}>{{ o.name }}</option>
+        {% endfor %}
+      </select>
+      <button type="submit" class="tn-btn tn-btn-primary tn-btn-sm">Filter</button>
+    </form>
+  </div>
+</section>
+
+<div style="max-width: 1440px; margin: 0 auto 4rem; padding: 0 1.5rem;">
+  <div class="tn-grid" style="grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));">
+    {% for island in islands %}
+    <a href="{{ url_for('maps.island_map', slug=island.slug) }}" class="tn-card">
+      <div>
+        <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.5rem;">
+          <span style="font-size: 2rem;">🏝️</span>
+          <span class="tn-badge">{{ island.feature_type | capitalize }}</span>
+        </div>
+        <h3 class="tn-card-title">{{ island.name }}</h3>
+        <p class="tn-card-subtitle" style="margin-bottom: 0.5rem;">{{ island.countries_involved }}</p>
+        <span style="font-size: 0.78rem; color: var(--accent-cyan);">Waters: {{ island.connected_features or 'Ocean' }}</span>
+      </div>
+      <div class="tn-card-meta">
+        <div>
+          <span class="tn-card-meta-label">Surface Area</span>
+          <span class="tn-card-meta-val">{{ "{:,.0f}".format(island.area_km2) if island.area_km2 else 'N/A' }} km²</span>
+        </div>
+        <div>
+          <span class="tn-card-meta-label">Max Elevation</span>
+          <span class="tn-card-meta-val">{{ "{:,}".format(island.elevation_m) if island.elevation_m else 'Low-Lying' }} {% if island.elevation_m %}m{% endif %}</span>
+        </div>
+      </div>
+      <span style="color: var(--accent-cyan); font-weight: 600; font-size: 0.82rem; margin-top: 0.75rem; display: block;">
+        Open High-Res Map &rarr;
+      </span>
+    </a>
+    {% endfor %}
+  </div>
+</div>
+{% endblock %}

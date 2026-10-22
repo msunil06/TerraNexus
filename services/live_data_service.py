@@ -1,5 +1,6 @@
 import time
 import requests
+from api.config import API_REGISTRY
 
 # Weather Code Mapping per WMO standard
 WMO_WEATHER_CODES = {
@@ -48,8 +49,9 @@ class LiveDataService:
                 return data
 
         try:
+            base_url = API_REGISTRY.get("weather", {}).get("url", "https://api.open-meteo.com/v1/forecast")
             url = (
-                f"https://api.open-meteo.com/v1/forecast?"
+                f"{base_url}?"
                 f"latitude={lat}&longitude={lon}&current=temperature_2m,relative_humidity_2m,apparent_temperature,weather_code,wind_speed_10m"
             )
             res = requests.get(url, timeout=4)
@@ -91,7 +93,8 @@ class LiveDataService:
                 return data
 
         try:
-            url = f"https://open.er-api.com/v6/latest/{code}"
+            forex_tmpl = API_REGISTRY.get("forex", {}).get("url", "https://open.er-api.com/v6/latest/{currency}")
+            url = forex_tmpl.format(currency=code)
             res = requests.get(url, timeout=4)
             if res.ok:
                 json_data = res.json()
@@ -138,7 +141,8 @@ class LiveDataService:
                 return data
 
         try:
-            url = f"https://restcountries.com/v3.1/alpha/{iso_a2.upper()}"
+            telemetry_tmpl = API_REGISTRY.get("telemetry", {}).get("url", "https://restcountries.com/v3.1/alpha/{code}")
+            url = telemetry_tmpl.format(code=iso_a2.upper())
             res = requests.get(url, timeout=4)
             if res.ok:
                 items = res.json()
@@ -224,7 +228,8 @@ class LiveDataService:
                 _, wb_data = _CACHE[cache_key]
             else:
                 try:
-                    wb_url = f"https://api.worldbank.org/v2/country/{country.iso_a2.upper()}/indicator/SP.POP.TOTL?format=json&per_page=2"
+                    wb_tmpl = API_REGISTRY.get("demographics", {}).get("url", "https://api.worldbank.org/v2/country/{code}/indicator/SP.POP.TOTL?format=json")
+                    wb_url = f"{wb_tmpl.format(code=country.iso_a2.upper())}&per_page=2"
                     wb_res = requests.get(wb_url, timeout=3)
                     if wb_res.ok:
                         wb_json = wb_res.json()

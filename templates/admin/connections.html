@@ -1,0 +1,179 @@
+{% extends "admin/layout.html" %}
+
+{% block title %}Server Connections & Profile Sessions | Admin Command{% endblock %}
+
+{% block admin_content %}
+<div>
+  <!-- Header -->
+  <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 2rem; flex-wrap: wrap; gap: 1rem;">
+    <div>
+      <span class="tn-badge" style="background: rgba(16, 185, 129, 0.15); color: #10b981; border-color: #10b981;">
+        Real-Time Telemetry
+      </span>
+      <h1 style="font-size: 1.85rem; font-weight: 800; margin: 0.5rem 0 0.25rem;">
+        🔌 Profile Server Connections Manager
+      </h1>
+      <p style="color: var(--text-muted); margin: 0; font-size: 0.92rem;">
+        Monitor all active client-to-server connection sockets and terminate any user profile connection remotely.
+      </p>
+    </div>
+    
+    <div>
+      <button onclick="location.reload()" class="tn-btn tn-btn-secondary" style="font-size: 0.85rem;">
+        🔄 Refresh Telemetry
+      </button>
+    </div>
+  </div>
+
+  <!-- Telemetry Cards -->
+  <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 2rem;">
+    <div class="tn-card" style="padding: 1.25rem; border-left: 4px solid var(--accent);">
+      <div style="font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-muted); font-weight: 700;">
+        Active Client Connections
+      </div>
+      <div style="font-size: 2rem; font-weight: 800; color: var(--accent); margin-top: 0.25rem;">
+        {{ telemetry.active_connections }}
+      </div>
+      <div style="font-size: 0.78rem; color: #10b981; margin-top: 0.25rem;">● Live & Responding</div>
+    </div>
+
+    <div class="tn-card" style="padding: 1.25rem; border-left: 4px solid #3b82f6;">
+      <div style="font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-muted); font-weight: 700;">
+        Total Sessions Recorded
+      </div>
+      <div style="font-size: 2rem; font-weight: 800; color: #3b82f6; margin-top: 0.25rem;">
+        {{ telemetry.total_historical_sessions }}
+      </div>
+      <div style="font-size: 0.78rem; color: var(--text-muted); margin-top: 0.25rem;">All historical logins</div>
+    </div>
+
+    <div class="tn-card" style="padding: 1.25rem; border-left: 4px solid #8b5cf6;">
+      <div style="font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-muted); font-weight: 700;">
+        Server Host Engine
+      </div>
+      <div style="font-size: 1.05rem; font-weight: 700; color: var(--text-primary); margin-top: 0.5rem;">
+        {{ telemetry.server_os }}
+      </div>
+      <div style="font-size: 0.78rem; color: var(--text-muted); margin-top: 0.25rem;">Python {{ telemetry.python_version }} (PID: {{ telemetry.process_id }})</div>
+    </div>
+
+    <div class="tn-card" style="padding: 1.25rem; border-left: 4px solid #f59e0b;">
+      <div style="font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-muted); font-weight: 700;">
+        Server UTC Clock
+      </div>
+      <div style="font-size: 0.95rem; font-weight: 700; color: var(--text-primary); margin-top: 0.5rem;">
+        {{ telemetry.server_time }}
+      </div>
+      <div style="font-size: 0.78rem; color: var(--text-muted); margin-top: 0.25rem;">Synchronized Telemetry</div>
+    </div>
+  </div>
+
+  <!-- Connection Table Card -->
+  <div class="tn-card" style="padding: 1.5rem;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem; flex-wrap: wrap; gap: 0.75rem;">
+      <h2 style="font-size: 1.2rem; font-weight: 800; margin: 0;">
+        Active Client-Server Sockets ({{ connections|length }})
+      </h2>
+      <div style="font-size: 0.85rem; color: var(--text-muted);">
+        Disconnecting a connection instantly revokes authorization and expels the user back to login.
+      </div>
+    </div>
+
+    {% if connections %}
+    <div style="overflow-x: auto;">
+      <table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 0.88rem;">
+        <thead>
+          <tr style="border-bottom: 1px solid var(--border-color); color: var(--text-muted); font-size: 0.78rem; text-transform: uppercase;">
+            <th style="padding: 0.75rem 0.5rem;">Status</th>
+            <th style="padding: 0.75rem 0.5rem;">User Profile</th>
+            <th style="padding: 0.75rem 0.5rem;">Device</th>
+            <th style="padding: 0.75rem 0.5rem;">IP Address</th>
+            <th style="padding: 0.75rem 0.5rem;">Connected Since</th>
+            <th style="padding: 0.75rem 0.5rem;">Last Activity</th>
+            <th style="padding: 0.75rem 0.5rem; text-align: right;">Sever Connection</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for conn in connections %}
+          <tr style="border-bottom: 1px solid var(--border-color); transition: background 0.2s;">
+            <!-- Status Badge -->
+            <td style="padding: 0.85rem 0.5rem;">
+              {% if conn.is_active %}
+                <span class="tn-badge" style="background: rgba(16, 185, 129, 0.2); color: #10b981; border-color: #10b981; font-size: 0.72rem;">
+                  ● Active
+                </span>
+              {% else %}
+                <span class="tn-badge" style="background: rgba(239, 68, 68, 0.15); color: #ef4444; border-color: rgba(239, 68, 68, 0.3); font-size: 0.72rem;">
+                  ○ Terminated
+                </span>
+              {% endif %}
+            </td>
+
+            <!-- User Info -->
+            <td style="padding: 0.85rem 0.5rem;">
+              <div style="font-weight: 700; color: var(--text-primary);">
+                {{ conn.user.display_name or conn.user.username }}
+                {% if conn.user.is_admin %}
+                  <span class="tn-badge" style="font-size: 0.65rem; background: rgba(245, 158, 11, 0.2); color: var(--warning); margin-left: 4px;">Admin</span>
+                {% endif %}
+              </div>
+              <div style="font-size: 0.78rem; color: var(--text-muted);">
+                @{{ conn.user.username }} &bull; {{ conn.user.email }}
+              </div>
+            </td>
+
+            <!-- Device Type -->
+            <td style="padding: 0.85rem 0.5rem;">
+              <span style="font-size: 0.85rem; font-weight: 600;">{{ conn.device_type }}</span>
+              <div style="font-size: 0.72rem; color: var(--text-muted); max-width: 180px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="{{ conn.user_agent }}">
+                {{ conn.user_agent }}
+              </div>
+            </td>
+
+            <!-- IP Address -->
+            <td style="padding: 0.85rem 0.5rem; font-family: monospace; font-size: 0.82rem; color: var(--text-secondary);">
+              {{ conn.ip_address }}
+            </td>
+
+            <!-- Created At -->
+            <td style="padding: 0.85rem 0.5rem; font-size: 0.8rem; color: var(--text-muted);">
+              {{ conn.created_at.strftime('%Y-%m-%d %H:%M') if conn.created_at else 'N/A' }}
+            </td>
+
+            <!-- Last Activity -->
+            <td style="padding: 0.85rem 0.5rem; font-size: 0.8rem; color: var(--text-muted);">
+              {{ conn.last_activity.strftime('%H:%M:%S') if conn.last_activity else 'N/A' }}
+            </td>
+
+            <!-- Actions -->
+            <td style="padding: 0.85rem 0.5rem; text-align: right;">
+              {% if conn.is_active %}
+                <form method="POST" action="{{ url_for('admin.disconnect_session', session_id=conn.id) }}" style="display: inline-block;" onsubmit="return confirm('Force terminate this client server connection? The user will be instantly logged out.');">
+                  <button type="submit" class="tn-btn tn-btn-danger" style="padding: 0.35rem 0.7rem; font-size: 0.78rem; background: #ef4444; border: none; cursor: pointer;">
+                    ⚡ Disconnect
+                  </button>
+                </form>
+
+                <form method="POST" action="{{ url_for('admin.disconnect_user_connections', user_id=conn.user_id) }}" style="display: inline-block; margin-left: 4px;" onsubmit="return confirm('Terminate ALL active server connections for @{{ conn.user.username }}?');">
+                  <button type="submit" class="tn-btn tn-btn-secondary" style="padding: 0.35rem 0.65rem; font-size: 0.75rem; border-color: rgba(239, 68, 68, 0.4); color: #f87171;">
+                    Sever All
+                  </button>
+                </form>
+              {% else %}
+                <span style="font-size: 0.78rem; color: var(--text-muted); font-style: italic;">Disconnected</span>
+              {% endif %}
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% else %}
+    <div style="text-align: center; padding: 3rem 1rem; color: var(--text-muted);">
+      <p style="font-size: 1.1rem; margin-bottom: 0.5rem;">No active server sessions recorded yet.</p>
+      <p style="font-size: 0.85rem;">When users sign in to TerraNexus, their active sockets appear here.</p>
+    </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

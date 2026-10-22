@@ -26,6 +26,7 @@ def create_app(config_class=Config):
     from routes.features import features_bp
     from routes.api import api_bp
     from routes.admin import admin_bp
+    from routes.maps import maps_bp
 
     app.register_blueprint(main_bp)
     app.register_blueprint(auth_bp)
@@ -36,6 +37,21 @@ def create_app(config_class=Config):
     app.register_blueprint(features_bp)
     app.register_blueprint(api_bp)
     app.register_blueprint(admin_bp)
+    app.register_blueprint(maps_bp)
+
+    @app.before_request
+    def check_server_connection():
+        from flask_login import current_user, logout_user
+        from flask import request, redirect, url_for, flash
+        if current_user.is_authenticated:
+            # Don't intercept static assets or auth logout
+            if request.endpoint and (request.endpoint.startswith("static") or request.endpoint == "auth.logout"):
+                return
+            from server.connection_manager import ServerConnectionManager
+            if not ServerConnectionManager.validate_connection(current_user):
+                logout_user()
+                flash("Your server session has been terminated by an administrator or has expired.", "warning")
+                return redirect(url_for("auth.login"))
 
     # Context processors
     @app.context_processor

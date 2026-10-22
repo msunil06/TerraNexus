@@ -1,8 +1,9 @@
 from datetime import datetime
-from flask import Blueprint, render_template, request, flash, redirect, url_for
+from flask import Blueprint, render_template, request, flash, redirect, url_for, session
 from flask_login import login_user, logout_user, login_required, current_user
 from models import db
 from models.user import User, Role, UserRole, UserFavorite, SavedLocation
+from server.connection_manager import ServerConnectionManager
 
 auth_bp = Blueprint("auth", __name__)
 
@@ -63,6 +64,7 @@ def register():
         db.session.commit()
 
         login_user(new_user)
+        ServerConnectionManager.register_connection(new_user, request)
         flash(f"Welcome to TerraNexus, {new_user.display_name}! Your exploration begins now.", "success")
         return redirect(url_for("main.index"))
 
@@ -89,6 +91,7 @@ def login():
             user.last_login_at = datetime.utcnow()
             db.session.commit()
             login_user(user, remember=remember)
+            ServerConnectionManager.register_connection(user, request)
 
             flash(f"Welcome back, {user.display_name or user.username}!", "success")
             next_page = request.args.get("next")
@@ -101,6 +104,14 @@ def login():
 @auth_bp.route("/logout")
 @login_required
 def logout():
+    token = session.get("tn_session_token")
+    if token:
+        from models.user import UserSession
+        s = UserSession.query.filter_by(session_token=token).first()
+        if s:
+            s.is_active = False
+            db.session.commit()
+        session.pop("tn_session_token", None)
     logout_user()
     flash("You have successfully signed out.", "info")
     return redirect(url_for("main.index"))

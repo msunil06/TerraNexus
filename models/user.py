@@ -38,6 +38,8 @@ class User(UserMixin, db.Model):
     profile_image = db.Column(db.String(255), default="default_avatar.png")
     preferred_language = db.Column(db.String(10), default="en")
     theme_preference = db.Column(db.String(20), default="dark") # 'dark' or 'light'
+    bio = db.Column(db.Text, nullable=True)
+    location = db.Column(db.String(120), nullable=True)
     
     is_active_account = db.Column(db.Boolean, default=True)
     is_suspended = db.Column(db.Boolean, default=False)
@@ -69,7 +71,7 @@ class User(UserMixin, db.Model):
 
     @property
     def is_admin(self):
-        return self.has_role("administrator") or self.has_role("super administrator")
+        return any(ur.role and ("admin" in ur.role.name.lower()) for ur in self.roles)
 
     @property
     def is_moderator(self):
@@ -177,3 +179,21 @@ class SystemSetting(db.Model):
     value = db.Column(db.Text, nullable=True)
     description = db.Column(db.String(255), nullable=True)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+class UserSession(db.Model):
+    __tablename__ = "user_sessions"
+
+    id = db.Column(db.Integer, primary_key=True)
+    session_token = db.Column(db.String(128), unique=True, nullable=False, index=True)
+    user_id = db.Column(db.Integer, db.ForeignKey("users.id", ondelete="CASCADE"), nullable=False, index=True)
+    ip_address = db.Column(db.String(45), nullable=True)
+    user_agent = db.Column(db.String(255), nullable=True)
+    device_type = db.Column(db.String(50), default="Desktop / Mobile")
+    is_active = db.Column(db.Boolean, default=True, index=True)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    last_activity = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+    user = db.relationship("User", backref=db.backref("sessions", cascade="all, delete-orphan", lazy="dynamic"))
+
+    def __repr__(self):
+        return f"<UserSession {self.session_token[:8]} (User {self.user_id}) Active={self.is_active}>"

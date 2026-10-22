@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+
+{% block title %}Country Maps Directory - {{ app_name }}{% endblock %}
+
+{% block content %}
+<section class="tn-detail-hero">
+  <div class="tn-detail-header">
+    <div>
+      <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.25rem;">
+        <a href="{{ url_for('maps.maps_hub') }}" style="color: var(--text-muted); font-size: 0.9rem;">&larr; Maps Hub</a>
+        <span style="color: var(--text-muted);">&bull;</span>
+        <h1 style="font-size: 2rem; margin: 0;">Country Maps Explorer</h1>
+      </div>
+      <p style="color: var(--text-secondary); font-size: 0.95rem; margin: 0;">
+        Explore individual country cartographic maps, regional divisions, capitals, and boundaries.
+      </p>
+    </div>
+
+    <form method="GET" action="{{ url_for('maps.countries_gallery') }}" style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+      <input type="text" name="q" value="{{ search_query or '' }}" placeholder="Search country..." style="
+        padding: 0.5rem 0.85rem; background: var(--bg-card); border: 1px solid var(--border-color);
+        border-radius: var(--radius-sm); color: var(--text-primary); font-size: 0.9rem; outline: none;
+      ">
+      <select name="continent" style="
+        padding: 0.5rem 0.85rem; background: var(--bg-card); border: 1px solid var(--border-color);
+        border-radius: var(--radius-sm); color: var(--text-primary); font-size: 0.9rem; outline: none;
+      ">
+        <option value="">All Continents</option>
+        {% for c in continents %}
+          <option value="{{ c.slug }}" {% if selected_continent == c.slug %}selected{% endif %}>{{ c.name }}</option>
+        {% endfor %}
+      </select>
+      <button type="submit" class="tn-btn tn-btn-primary tn-btn-sm">Filter</button>
+    </form>
+  </div>
+</section>
+
+<div style="max-width: 1440px; margin: 0 auto 4rem; padding: 0 1.5rem;">
+  <div class="tn-grid" style="grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));">
+    {% for country in countries %}
+    <a href="{{ url_for('maps.country_map', slug=country.slug) }}" class="tn-card">
+      <div class="tn-card-header">
+        <div>
+          <div class="tn-card-title">{{ country.common_name }}</div>
+          <div class="tn-card-subtitle">Capital: {{ country.capital_name or 'N/A' }}</div>
+        </div>
+        <div class="tn-card-flag">{{ country.flag_emoji or '🌐' }}</div>
+      </div>
+      <div class="tn-card-meta">
+        <div>
+          <span class="tn-card-meta-label">Surface Area</span>
+          <span class="tn-card-meta-val">{{ "{:,.0f}".format(country.area_km2) if country.area_km2 else 'N/A' }} km²</span>
+        </div>
+        <div>
+          <span class="tn-card-meta-label">Continent</span>
+          <span class="tn-card-meta-val">{{ country.continent_rel.name if country.continent_rel else 'Global' }}</span>
+        </div>
+      </div>
+      <span style="color: var(--accent-cyan); font-weight: 600; font-size: 0.82rem; margin-top: 0.75rem; display: block;">
+        Open Interactive Map &rarr;
+      </span>
+    </a>
+    {% endfor %}
+  </div>
+</div>
+{% endblock %}

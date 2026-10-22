@@ -1,0 +1,192 @@
+{% extends "base.html" %}
+
+{% block title %}{{ ocean.name }} Hydrographic Map - {{ app_name }}{% endblock %}
+
+{% block meta_description %}Interactive Map of the {{ ocean.name }}: Surface area {{ "{:,}".format(ocean.area_km2) }} km², max depth {{ "{:,}".format(ocean.max_depth_m) if ocean.max_depth_m else 'N/A' }} m, marginal seas and oceanic trenches.{% endblock %}
+
+{% block content %}
+<section class="tn-detail-hero">
+  <div class="tn-detail-header">
+    <div>
+      <div style="display: flex; align-items: center; gap: 0.75rem; flex-wrap: wrap;">
+        <span style="font-size: 2.2rem;">🌊</span>
+        <h1 class="tn-detail-title">{{ ocean.name }} Map</h1>
+        <span class="tn-badge">World Ocean</span>
+      </div>
+      <p style="color: var(--text-secondary); font-size: 1.05rem; margin-bottom: 0.25rem;">
+        Surrounding Continents: {{ ocean.surrounding_continents }}
+      </p>
+      <p style="color: var(--text-muted); font-size: 0.88rem; margin: 0;">
+        Deepest Location: <strong>{{ ocean.max_depth_location }}</strong> ({{ "{:,}".format(ocean.max_depth_m) if ocean.max_depth_m else 'N/A' }} m)
+      </p>
+    </div>
+
+    <div style="display: flex; align-items: center; gap: 0.75rem; flex-wrap: wrap;">
+      <a href="{{ url_for('oceans.ocean_detail', slug=ocean.slug) }}" class="tn-btn tn-btn-primary tn-btn-sm">
+        📖 Ocean Encyclopedia
+      </a>
+      <a href="{{ url_for('maps.oceans_gallery') }}" class="tn-btn tn-btn-outline tn-btn-sm">
+        &larr; All Ocean Maps
+      </a>
+    </div>
+  </div>
+</section>
+
+<div style="max-width: 1440px; margin: 0 auto 4rem; padding: 0 1.5rem;">
+  
+  <!-- Map Card -->
+  <div class="tn-map-card" style="margin-bottom: 2rem;">
+    <div class="tn-map-header">
+      <div class="tn-map-title">
+        <span>🌊</span> {{ ocean.name }} Hydrographic Focus Map
+      </div>
+      <div class="tn-map-controls">
+        <select id="oceanMapLayerSelect" style="
+          background: var(--bg-card); color: var(--text-primary); border: 1px solid var(--border-color);
+          border-radius: var(--radius-sm); padding: 0.4rem 0.75rem; font-size: 0.84rem; outline: none; cursor: pointer;
+        ">
+          <option value="satellite">🛰️ Satellite View (ESRI)</option>
+          <option value="dark">🌙 Dark Cosmos (CartoDB)</option>
+          <option value="light">☀️ Light Atlas (CartoDB)</option>
+          <option value="topo">🏔️ Bathymetry / Relief (OpenTopoMap)</option>
+          <option value="streets">🗺️ Street Map (OpenStreetMap)</option>
+        </select>
+        <button id="resetOceanView" class="tn-btn tn-btn-outline tn-btn-sm">⟲ Center Ocean</button>
+      </div>
+    </div>
+
+    <div id="oceanMap" style="height: 600px; width: 100%; position: relative;"></div>
+  </div>
+
+  <!-- Connected Marginal Seas & Trenches Grid -->
+  <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 1.5rem;">
+    
+    <!-- Marginal Seas -->
+    <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 1.5rem;">
+      <h3 style="font-size: 1.2rem; margin-bottom: 1rem; color: var(--text-primary); display: flex; align-items: center; justify-content: space-between;">
+        <span>Connected Marginal Seas</span>
+        <span class="tn-badge">{{ seas|length }}</span>
+      </h3>
+      {% if seas %}
+      <div style="max-height: 280px; overflow-y: auto; display: flex; flex-direction: column; gap: 0.5rem;">
+        {% for sea in seas %}
+        <a href="{{ url_for('seas.sea_detail', slug=sea.slug) }}" style="padding: 0.6rem 0.8rem; background: var(--bg-primary); border-radius: var(--radius-sm); border: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center; text-decoration: none;">
+          <div>
+            <strong style="color: var(--text-primary); font-size: 0.9rem;">⛵ {{ sea.name }}</strong>
+            <span style="display: block; font-size: 0.75rem; color: var(--text-muted);">Depth: {{ "{:,}".format(sea.max_depth_m) if sea.max_depth_m else 'N/A' }} m</span>
+          </div>
+          <span style="color: var(--accent-cyan); font-size: 0.8rem; font-weight: 600;">Explore &rarr;</span>
+        </a>
+        {% endfor %}
+      </div>
+      {% else %}
+      <p style="color: var(--text-muted); font-size: 0.9rem;">Marginal seas for {{ ocean.name }} are cataloged in the marine database.</p>
+      {% endif %}
+    </div>
+
+    <!-- Oceanic Currents & Trenches -->
+    <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 1.5rem;">
+      <h3 style="font-size: 1.2rem; margin-bottom: 1rem; color: var(--text-primary);">
+        Major Currents & Trenches
+      </h3>
+      <div style="margin-bottom: 1rem;">
+        <span class="tn-card-meta-label">Major Oceanic Currents</span>
+        <p style="font-size: 0.9rem; color: var(--text-secondary); margin-top: 4px; line-height: 1.6;">
+          {{ ocean.major_currents or 'Global thermohaline circulation systems' }}
+        </p>
+      </div>
+
+      <div>
+        <span class="tn-card-meta-label">Deep Trenches & Abyssal Plains</span>
+        <p style="font-size: 0.9rem; color: var(--text-secondary); margin-top: 4px; line-height: 1.6;">
+          {{ ocean.major_trenches or ocean.max_depth_location }}
+        </p>
+      </div>
+    </div>
+  </div>
+
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+  let centerLat = 0.0;
+  let centerLon = 0.0;
+  let initialZoom = 3;
+
+  {% if 'Pacific' in ocean.name %}
+    centerLat = 0.0; centerLon = -160.0; initialZoom = 3;
+  {% elif 'Atlantic' in ocean.name %}
+    centerLat = 10.0; centerLon = -30.0; initialZoom = 3;
+  {% elif 'Indian' in ocean.name %}
+    centerLat = -20.0; centerLon = 80.0; initialZoom = 3;
+  {% elif 'Arctic' in ocean.name %}
+    centerLat = 85.0; centerLon = 0.0; initialZoom = 3;
+  {% elif 'Southern' in ocean.name %}
+    centerLat = -65.0; centerLon = 0.0; initialZoom = 3;
+  {% endif %}
+
+  const map = L.map("oceanMap", {
+    center: [centerLat, centerLon],
+    zoom: initialZoom,
+    minZoom: 2,
+    maxZoom: 18,
+    zoomControl: true,
+    worldCopyJump: true
+  });
+
+  const tileLayers = {
+    satellite: L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}", {
+      attribution: 'Tiles &copy; Esri &mdash; High-Resolution Satellite (Free Public)',
+      maxZoom: 18
+    }),
+    dark: L.tileLayer("https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png", {
+      attribution: '&copy; CartoDB &copy; OpenStreetMap', subdomains: "abcd", maxZoom: 19
+    }),
+    light: L.tileLayer("https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png", {
+      attribution: '&copy; CartoDB &copy; OpenStreetMap', subdomains: "abcd", maxZoom: 19
+    }),
+    topo: L.tileLayer("https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png", {
+      attribution: '&copy; OpenTopoMap', maxZoom: 17
+    }),
+    streets: L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+      attribution: '&copy; OpenStreetMap contributors', maxZoom: 19
+    })
+  };
+
+  tileLayers.satellite.addTo(map);
+
+  const select = document.getElementById("oceanMapLayerSelect");
+  let activeKey = "satellite";
+  if (select) {
+    select.value = "satellite";
+    select.addEventListener("change", (e) => {
+      map.removeLayer(tileLayers[activeKey]);
+      tileLayers[e.target.value].addTo(map);
+      activeKey = e.target.value;
+    });
+  }
+
+  const resetBtn = document.getElementById("resetOceanView");
+  if (resetBtn) {
+    resetBtn.addEventListener("click", () => map.setView([centerLat, centerLon], initialZoom));
+  }
+
+  // Plot Marginal Seas Markers
+  {% for sea in seas %}
+    {% if sea.latitude and sea.longitude %}
+      const seaIcon = L.divIcon({
+        className: "tn-sea-marker",
+        html: `<div style="background: rgba(6,182,212,0.85); border: 1.5px solid #ffffff; border-radius: 50%; width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; font-size: 13px; box-shadow: 0 0 10px #06b6d4;">⛵</div>`,
+        iconSize: [28, 28], iconAnchor: [14, 14]
+      });
+
+      L.marker([{{ sea.latitude }}, {{ sea.longitude }}], { icon: seaIcon })
+        .addTo(map)
+        .bindPopup(`<strong>{{ sea.name }}</strong><br>Type: {{ sea.sea_type | capitalize }}<br><a href="/seas/{{ sea.slug }}">View Sea Profile &rarr;</a>`);
+    {% endif %}
+  {% endfor %}
+});
+</script>
+{% endblock %}

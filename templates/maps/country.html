@@ -1,0 +1,198 @@
+{% extends "base.html" %}
+
+{% block title %}{{ country.common_name }} Interactive Country Map - {{ app_name }}{% endblock %}
+
+{% block meta_description %}Interactive Map of {{ country.common_name }} ({{ country.official_name }}): Capital {{ country.capital_name }}, administrative divisions, and neighboring borders.{% endblock %}
+
+{% block content %}
+<section class="tn-detail-hero">
+  <div class="tn-detail-header">
+    <div class="tn-detail-title-group">
+      <div class="tn-detail-flag">{{ country.flag_emoji or '🌐' }}</div>
+      <div>
+        <div style="display: flex; align-items: center; gap: 0.75rem; flex-wrap: wrap;">
+          <h1 class="tn-detail-title">{{ country.common_name }} Map</h1>
+          <span class="tn-badge">{{ country.iso_a3 }}</span>
+          <span class="tn-badge">{{ country.continent_rel.name if country.continent_rel else 'Global' }}</span>
+        </div>
+        <p style="color: var(--text-secondary); font-size: 1.05rem; margin-bottom: 0.25rem;">
+          {{ country.official_name }} &bull; Capital: <strong>{{ country.capital_name or 'N/A' }}</strong>
+        </p>
+        <p style="color: var(--text-muted); font-size: 0.88rem; margin: 0;">
+          Coordinates: {{ country.latitude }}° N, {{ country.longitude }}° E &bull; Surface Area: {{ "{:,.0f}".format(country.area_km2) if country.area_km2 else 'N/A' }} km²
+        </p>
+      </div>
+    </div>
+
+    <div style="display: flex; align-items: center; gap: 0.75rem; flex-wrap: wrap;">
+      <a href="{{ url_for('countries.country_detail', slug=country.slug) }}" class="tn-btn tn-btn-primary tn-btn-sm">
+        📖 Full Country Profile
+      </a>
+      <a href="{{ url_for('maps.countries_gallery') }}" class="tn-btn tn-btn-outline tn-btn-sm">
+        &larr; All Country Maps
+      </a>
+    </div>
+  </div>
+</section>
+
+<div style="max-width: 1440px; margin: 0 auto 4rem; padding: 0 1.5rem;">
+  
+  <!-- Map Card -->
+  <div class="tn-map-card" style="margin-bottom: 2rem;">
+    <div class="tn-map-header">
+      <div class="tn-map-title">
+        <span>📍</span> {{ country.common_name }} Geographic Focus Map
+      </div>
+      <div class="tn-map-controls">
+        <select id="countryMapLayerSelect" style="
+          background: var(--bg-card); color: var(--text-primary); border: 1px solid var(--border-color);
+          border-radius: var(--radius-sm); padding: 0.4rem 0.75rem; font-size: 0.84rem; outline: none; cursor: pointer;
+        ">
+          <option value="satellite">🛰️ Satellite View (ESRI)</option>
+          <option value="dark">🌙 Dark Cosmos (CartoDB)</option>
+          <option value="light">☀️ Light Atlas (CartoDB)</option>
+          <option value="streets">🗺️ Street Map (OpenStreetMap)</option>
+          <option value="topo">🏔️ Topographical (OpenTopoMap)</option>
+        </select>
+        <button id="resetCountryView" class="tn-btn tn-btn-outline tn-btn-sm">⟲ Center Country</button>
+      </div>
+    </div>
+
+    <div id="countryMap" style="height: 600px; width: 100%; position: relative;"></div>
+  </div>
+
+  <!-- Regional Divisions & Neighbors Grid -->
+  <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 1.5rem;">
+    <!-- Administrative Divisions -->
+    <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 1.5rem;">
+      <h3 style="font-size: 1.2rem; margin-bottom: 1rem; color: var(--text-primary); display: flex; align-items: center; justify-content: space-between;">
+        <span>Administrative Divisions</span>
+        <span class="tn-badge">{{ divisions|length }}</span>
+      </h3>
+      {% if divisions %}
+      <div style="max-height: 280px; overflow-y: auto; display: flex; flex-direction: column; gap: 0.5rem;">
+        {% for div in divisions %}
+        <div style="padding: 0.6rem 0.8rem; background: var(--bg-primary); border-radius: var(--radius-sm); border: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center;">
+          <div>
+            <strong style="color: var(--text-primary); font-size: 0.9rem;">{{ div.name }}</strong>
+            <span style="display: block; font-size: 0.75rem; color: var(--text-muted);">Center: {{ div.capital_or_center or 'N/A' }}</span>
+          </div>
+          <span class="tn-badge" style="font-size: 0.7rem;">{{ div.division_type }}</span>
+        </div>
+        {% endfor %}
+      </div>
+      {% else %}
+      <p style="color: var(--text-muted); font-size: 0.9rem;">Sub-national boundary layers are being compiled for {{ country.common_name }}.</p>
+      {% endif %}
+    </div>
+
+    <!-- Neighboring Borders -->
+    <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 1.5rem;">
+      <h3 style="font-size: 1.2rem; margin-bottom: 1rem; color: var(--text-primary); display: flex; align-items: center; justify-content: space-between;">
+        <span>Neighboring Borders</span>
+        <span class="tn-badge">{{ neighbors|length }}</span>
+      </h3>
+      {% if neighbors %}
+      <div style="max-height: 280px; overflow-y: auto; display: flex; flex-direction: column; gap: 0.5rem;">
+        {% for n in neighbors %}
+        <a href="{{ url_for('maps.country_map', slug=n.country.slug) }}" style="padding: 0.6rem 0.8rem; background: var(--bg-primary); border-radius: var(--radius-sm); border: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center; text-decoration: none;">
+          <div>
+            <strong style="color: var(--text-primary); font-size: 0.9rem;">{{ n.country.flag_emoji }} {{ n.country.common_name }}</strong>
+            <span style="display: block; font-size: 0.75rem; color: var(--text-muted);">Border: {{ n.border_type | capitalize }}</span>
+          </div>
+          <span style="color: var(--accent-cyan); font-size: 0.8rem; font-weight: 600;">View Map &rarr;</span>
+        </a>
+        {% endfor %}
+      </div>
+      {% else %}
+      <p style="color: var(--text-muted); font-size: 0.9rem;">{{ country.common_name }} has no shared land borders (island or oceanic territory).</p>
+      {% endif %}
+    </div>
+  </div>
+
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+  const lat = {{ country.latitude or 20.0 }};
+  const lon = {{ country.longitude or 10.0 }};
+  
+  const map = L.map("countryMap", {
+    center: [lat, lon],
+    zoom: 5,
+    minZoom: 2,
+    maxZoom: 18,
+    zoomControl: true
+  });
+
+  const tileLayers = {
+    satellite: L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}", {
+      attribution: 'Tiles &copy; Esri &mdash; High-Resolution Satellite (Free Public)',
+      maxZoom: 18
+    }),
+    dark: L.tileLayer("https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png", {
+      attribution: '&copy; CartoDB &copy; OpenStreetMap',
+      subdomains: "abcd", maxZoom: 19
+    }),
+    light: L.tileLayer("https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png", {
+      attribution: '&copy; CartoDB &copy; OpenStreetMap',
+      subdomains: "abcd", maxZoom: 19
+    }),
+    streets: L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+      attribution: '&copy; OpenStreetMap contributors', maxZoom: 19
+    }),
+    topo: L.tileLayer("https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png", {
+      attribution: '&copy; OpenTopoMap', maxZoom: 17
+    })
+  };
+
+  const initialTheme = document.documentElement.getAttribute("data-theme") || "dark";
+  let activeKey = initialTheme === "light" ? "light" : "dark";
+  tileLayers[activeKey].addTo(map);
+
+  const select = document.getElementById("countryMapLayerSelect");
+  if (select) {
+    select.value = activeKey;
+    select.addEventListener("change", (e) => {
+      map.removeLayer(tileLayers[activeKey]);
+      tileLayers[e.target.value].addTo(map);
+      activeKey = e.target.value;
+    });
+  }
+
+  const resetBtn = document.getElementById("resetCountryView");
+  if (resetBtn) {
+    resetBtn.addEventListener("click", () => map.setView([lat, lon], 5));
+  }
+
+  // Capital Marker
+  {% if capital and capital.latitude and capital.longitude %}
+  const capitalIcon = L.divIcon({
+    className: "tn-capital-marker",
+    html: `<div style="background: rgba(14,26,49,0.9); border: 2px solid #00f5d4; border-radius: 50%; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; font-size: 16px; box-shadow: 0 0 12px #00f5d4;">🏛️</div>`,
+    iconSize: [32, 32], iconAnchor: [16, 16]
+  });
+  L.marker([{{ capital.latitude }}, {{ capital.longitude }}], { icon: capitalIcon })
+    .addTo(map)
+    .bindPopup(`<strong>Capital: {{ capital.name }}</strong><br>Population: {{ "{:,}".format(capital.population) if capital.population else 'N/A' }}`)
+    .openPopup();
+  {% endif %}
+
+  // Administrative Divisions Markers
+  {% for div in divisions %}
+    {% if div.latitude and div.longitude %}
+      L.circleMarker([{{ div.latitude }}, {{ div.longitude }}], {
+        radius: 6,
+        fillColor: "#38bdf8",
+        color: "#ffffff",
+        weight: 1.5,
+        opacity: 1,
+        fillOpacity: 0.8
+      }).addTo(map).bindPopup("<strong>{{ div.name }}</strong> ({{ div.division_type }})<br>Center: {{ div.capital_or_center or 'N/A' }}");
+    {% endif %}
+  {% endfor %}
+});
+</script>
+{% endblock %}

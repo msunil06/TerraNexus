@@ -1,0 +1,254 @@
+{% extends "base.html" %}
+
+{% block title %}Cartographic Atlas & Interactive Maps - {{ app_name }}{% endblock %}
+
+{% block meta_description %}Explore TerraNexus Cartographic Atlas: Interactive World Map, 200+ Country Maps, Island Maps, and Ocean Hydrographic Maps with real-time public tile APIs.{% endblock %}
+
+{% block content %}
+<section class="tn-detail-hero">
+  <div class="tn-detail-header">
+    <div>
+      <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.5rem;">
+        <span style="font-size: 2.2rem;">🗺️</span>
+        <h1 style="font-size: 2.2rem; font-weight: 800; margin: 0;">Cartographic Atlas & Maps Hub</h1>
+      </div>
+      <p style="color: var(--text-secondary); font-size: 1.05rem; max-width: 780px;">
+        Explore Earth through dedicated interactive maps. Navigate the entire globe, inspect 200+ sovereign countries, explore marine oceans and marginal seas, or study remote islands and oceanic archipelagos.
+      </p>
+      <div style="margin-top: 0.75rem; display: inline-flex; align-items: center; gap: 0.5rem; background: rgba(16, 185, 129, 0.12); border: 1px solid rgba(16, 185, 129, 0.3); padding: 0.3rem 0.85rem; border-radius: 999px; font-size: 0.84rem; color: #10b981;">
+        <span>🔒 100% Free Public Map APIs</span>
+        <span style="color: var(--text-muted);">&bull; Zero API Key Required &bull; ESRI Satellite, CartoDB, OpenStreetMap & OpenTopoMap</span>
+      </div>
+    </div>
+
+    <!-- Quick Search Widget -->
+    <div style="min-width: 300px; max-width: 420px; width: 100%;">
+      <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 1.25rem;">
+        <label style="font-size: 0.85rem; font-weight: 600; color: var(--text-secondary); display: block; margin-bottom: 0.5rem;">
+          🔍 Live Geocoding Search (Any Place or Island)
+        </label>
+        <div style="display: flex; gap: 0.5rem;">
+          <input type="text" id="mapSearchInput" placeholder="e.g. Greenland, Tokyo, Maldives..." style="
+            flex: 1; padding: 0.55rem 0.85rem; background: var(--bg-primary); border: 1px solid var(--border-color);
+            border-radius: var(--radius-sm); color: var(--text-primary); font-size: 0.9rem; outline: none;
+          ">
+          <button id="mapSearchBtn" class="tn-btn tn-btn-primary tn-btn-sm">Search</button>
+        </div>
+        <div id="mapSearchResults" style="display: none; margin-top: 0.75rem; max-height: 200px; overflow-y: auto; font-size: 0.85rem;"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Atlas Sections Navigation Grid -->
+<div style="max-width: 1440px; margin: 0 auto 4rem; padding: 0 1.5rem;">
+  
+  <h2 style="font-size: 1.5rem; margin-bottom: 1.5rem; color: var(--text-primary); display: flex; align-items: center; gap: 0.5rem;">
+    <span>🌐</span> Choose Your Map View
+  </h2>
+
+  <div class="tn-grid" style="grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); margin-bottom: 3.5rem;">
+    
+    <!-- 1. Fullscreen Global World Map -->
+    <a href="{{ url_for('maps.world_map') }}" class="tn-card" style="border-top: 3px solid var(--accent-cyan);">
+      <div>
+        <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.75rem;">
+          <span style="font-size: 2.2rem;">🌍</span>
+          <span class="tn-badge">Global Interactive</span>
+        </div>
+        <h3 class="tn-card-title">Global World Interactive Map</h3>
+        <p class="tn-card-subtitle" style="line-height: 1.6; margin-top: 0.5rem;">
+          Full-featured planetary map viewer with high-resolution satellite imagery, dark matter theme, and vector country boundaries.
+        </p>
+      </div>
+      <div style="margin-top: 1.5rem; display: flex; justify-content: space-between; align-items: center;">
+        <span style="font-size: 0.82rem; color: var(--text-muted);">5 Free Basemaps</span>
+        <span style="color: var(--accent-cyan); font-weight: 600; font-size: 0.88rem;">Open World Map &rarr;</span>
+      </div>
+    </a>
+
+    <!-- 2. Country Maps -->
+    <a href="{{ url_for('maps.countries_gallery') }}" class="tn-card" style="border-top: 3px solid #3b82f6;">
+      <div>
+        <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.75rem;">
+          <span style="font-size: 2.2rem;">🏛️</span>
+          <span class="tn-badge">{{ total_countries }} Countries</span>
+        </div>
+        <h3 class="tn-card-title">Country Maps & Divisions</h3>
+        <p class="tn-card-subtitle" style="line-height: 1.6; margin-top: 0.5rem;">
+          Individual sovereign country boundary maps with administrative states, provinces, capital city markers, and shared borders.
+        </p>
+      </div>
+      <div style="margin-top: 1.5rem; display: flex; justify-content: space-between; align-items: center;">
+        <span style="font-size: 0.82rem; color: var(--text-muted);">Vector Boundaries</span>
+        <span style="color: #3b82f6; font-weight: 600; font-size: 0.88rem;">Explore Countries &rarr;</span>
+      </div>
+    </a>
+
+    <!-- 3. Island Maps -->
+    <a href="{{ url_for('maps.islands_gallery') }}" class="tn-card" style="border-top: 3px solid #10b981;">
+      <div>
+        <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.75rem;">
+          <span style="font-size: 2.2rem;">🏝️</span>
+          <span class="tn-badge">{{ total_islands }} Key Islands</span>
+        </div>
+        <h3 class="tn-card-title">Island & Archipelago Maps</h3>
+        <p class="tn-card-subtitle" style="line-height: 1.6; margin-top: 0.5rem;">
+          Explore the world's greatest islands and archipelagos across the Pacific, Atlantic, Indian, and Arctic oceans by detail.
+        </p>
+      </div>
+      <div style="margin-top: 1.5rem; display: flex; justify-content: space-between; align-items: center;">
+        <span style="font-size: 0.82rem; color: var(--text-muted);">Island Geography</span>
+        <span style="color: #10b981; font-weight: 600; font-size: 0.88rem;">Explore Islands &rarr;</span>
+      </div>
+    </a>
+
+    <!-- 4. Ocean & Marine Maps -->
+    <a href="{{ url_for('maps.oceans_gallery') }}" class="tn-card" style="border-top: 3px solid #06b6d4;">
+      <div>
+        <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.75rem;">
+          <span style="font-size: 2.2rem;">🌊</span>
+          <span class="tn-badge">{{ total_oceans }} Oceans & Seas</span>
+        </div>
+        <h3 class="tn-card-title">Ocean & Marine Maps</h3>
+        <p class="tn-card-subtitle" style="line-height: 1.6; margin-top: 0.5rem;">
+          Hydrographic maps of Earth's 5 World Oceans, marginal seas, continental shelves, deep-sea trenches, and ocean currents.
+        </p>
+      </div>
+      <div style="margin-top: 1.5rem; display: flex; justify-content: space-between; align-items: center;">
+        <span style="font-size: 0.82rem; color: var(--text-muted);">Marine Cartography</span>
+        <span style="color: #06b6d4; font-weight: 600; font-size: 0.88rem;">Explore Oceans &rarr;</span>
+      </div>
+    </a>
+  </div>
+
+  <!-- Featured World Islands Preview -->
+  <div style="margin-bottom: 3.5rem;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem;">
+      <h3 style="font-size: 1.3rem; margin: 0; color: var(--text-primary); display: flex; align-items: center; gap: 0.5rem;">
+        <span>🏝️</span> Featured Oceanic Islands & Archipelagos
+      </h3>
+      <a href="{{ url_for('maps.islands_gallery') }}" style="color: var(--accent-cyan); font-weight: 600; font-size: 0.9rem;">
+        View All Islands &rarr;
+      </a>
+    </div>
+
+    <div class="tn-grid" style="grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));">
+      {% for island in islands[:6] %}
+      <a href="{{ url_for('maps.island_map', slug=island.slug) }}" class="tn-card">
+        <div>
+          <span class="tn-badge" style="margin-bottom: 6px;">{{ island.feature_type | capitalize }}</span>
+          <h4 class="tn-card-title">{{ island.name }}</h4>
+          <p class="tn-card-subtitle">{{ island.countries_involved }}</p>
+        </div>
+        <div class="tn-card-meta">
+          <div>
+            <span class="tn-card-meta-label">Surface Area</span>
+            <span class="tn-card-meta-val">{{ "{:,.0f}".format(island.area_km2) if island.area_km2 else 'N/A' }} km²</span>
+          </div>
+          <div>
+            <span class="tn-card-meta-label">Max Elevation</span>
+            <span class="tn-card-meta-val">{{ "{:,}".format(island.elevation_m) if island.elevation_m else 'N/A' }} m</span>
+          </div>
+        </div>
+        <span style="color: var(--accent-cyan); font-weight: 600; font-size: 0.82rem; margin-top: 0.75rem; display: block;">
+          View Island Map &rarr;
+        </span>
+      </a>
+      {% endfor %}
+    </div>
+  </div>
+
+  <!-- Featured Country Maps Preview -->
+  <div>
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem;">
+      <h3 style="font-size: 1.3rem; margin: 0; color: var(--text-primary); display: flex; align-items: center; gap: 0.5rem;">
+        <span>🏛️</span> Featured Country Maps
+      </h3>
+      <a href="{{ url_for('maps.countries_gallery') }}" style="color: var(--accent-cyan); font-weight: 600; font-size: 0.9rem;">
+        View All 200+ Country Maps &rarr;
+      </a>
+    </div>
+
+    <div class="tn-grid" style="grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));">
+      {% for country in countries[:6] %}
+      <a href="{{ url_for('maps.country_map', slug=country.slug) }}" class="tn-card">
+        <div class="tn-card-header">
+          <div>
+            <div class="tn-card-title">{{ country.common_name }}</div>
+            <div class="tn-card-subtitle">Capital: {{ country.capital_name or 'N/A' }}</div>
+          </div>
+          <div class="tn-card-flag">{{ country.flag_emoji or '🌐' }}</div>
+        </div>
+        <div class="tn-card-meta">
+          <div>
+            <span class="tn-card-meta-label">Surface Area</span>
+            <span class="tn-card-meta-val">{{ "{:,.0f}".format(country.area_km2) if country.area_km2 else 'N/A' }} km²</span>
+          </div>
+          <div>
+            <span class="tn-card-meta-label">Continent</span>
+            <span class="tn-card-meta-val">{{ country.continent_rel.name if country.continent_rel else 'Global' }}</span>
+          </div>
+        </div>
+        <span style="color: var(--accent-cyan); font-weight: 600; font-size: 0.82rem; margin-top: 0.75rem; display: block;">
+          Open Focused Map &rarr;
+        </span>
+      </a>
+      {% endfor %}
+    </div>
+  </div>
+
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+  const input = document.getElementById("mapSearchInput");
+  const btn = document.getElementById("mapSearchBtn");
+  const resultsDiv = document.getElementById("mapSearchResults");
+
+  async function performSearch() {
+    const q = input.value.trim();
+    if (!q) return;
+
+    btn.textContent = "Searching...";
+    try {
+      const res = await fetch(`/maps/search?q=${encodeURIComponent(q)}`);
+      const data = await res.json();
+      btn.textContent = "Search";
+
+      resultsDiv.innerHTML = "";
+      if (data.results && data.results.length > 0) {
+        data.results.forEach(item => {
+          const row = document.createElement("a");
+          row.href = item.url !== "#" ? item.url : `/maps/world?lat=${item.lat}&lon=${item.lon}&zoom=${item.zoom}`;
+          row.style.display = "block";
+          row.style.padding = "0.5rem 0.65rem";
+          row.style.borderBottom = "1px solid var(--border-color)";
+          row.style.color = "var(--text-primary)";
+          row.style.textDecoration = "none";
+          row.innerHTML = `<strong>${item.title}</strong> <span style="font-size: 0.75rem; color: var(--accent-cyan); float: right;">${item.type}</span>`;
+          row.addEventListener("mouseenter", () => row.style.background = "var(--bg-card-hover)");
+          row.addEventListener("mouseleave", () => row.style.background = "transparent");
+          resultsDiv.appendChild(row);
+        });
+        resultsDiv.style.display = "block";
+      } else {
+        resultsDiv.innerHTML = `<div style="padding: 0.5rem; color: var(--text-muted);">No locations found for "${q}".</div>`;
+        resultsDiv.style.display = "block";
+      }
+    } catch (e) {
+      btn.textContent = "Search";
+    }
+  }
+
+  if (btn && input) {
+    btn.addEventListener("click", performSearch);
+    input.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") performSearch();
+    });
+  }
+});
+</script>
+{% endblock %}

@@ -29,10 +29,19 @@
       <li class="tn-admin-nav-item {% if request.endpoint == 'admin.data_imports' %}active{% endif %}">
         <a href="{{ url_for('admin.data_imports') }}">📥 Dataset Importer</a>
       </li>
+      <li class="tn-admin-nav-item {% if request.endpoint == 'admin.server_connections' %}active{% endif %}">
+        <a href="{{ url_for('admin.server_connections') }}">🔌 Server Connections</a>
+      </li>
+      <li class="tn-admin-nav-item {% if request.endpoint == 'admin.apis_hub' %}active{% endif %}">
+        <a href="{{ url_for('admin.apis_hub') }}">🌐 Centralized APIs</a>
+      </li>
       <li class="tn-admin-nav-item {% if request.endpoint == 'admin.audit_logs' %}active{% endif %}">
         <a href="{{ url_for('admin.audit_logs') }}">🛡️ Security Audit Logs</a>
       </li>
       <li class="tn-admin-nav-item" style="margin-top: 1.5rem;">
+        <a href="{{ url_for('maps.maps_hub') }}" style="color: var(--accent);">🗺️ View Map Hub</a>
+      </li>
+      <li class="tn-admin-nav-item">
         <a href="{{ url_for('main.index') }}" style="color: var(--text-muted);">&larr; Public Platform</a>
       </li>
     </ul>

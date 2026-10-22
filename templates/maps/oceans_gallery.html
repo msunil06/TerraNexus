@@ -1,0 +1,80 @@
+{% extends "base.html" %}
+
+{% block title %}Ocean & Marine Maps Directory - {{ app_name }}{% endblock %}
+
+{% block content %}
+<section class="tn-detail-hero">
+  <div class="tn-detail-header">
+    <div>
+      <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.25rem;">
+        <a href="{{ url_for('maps.maps_hub') }}" style="color: var(--text-muted); font-size: 0.9rem;">&larr; Maps Hub</a>
+        <span style="color: var(--text-muted);">&bull;</span>
+        <h1 style="font-size: 2rem; margin: 0;">Ocean & Marine Maps</h1>
+      </div>
+      <p style="color: var(--text-secondary); font-size: 0.95rem; margin: 0;">
+        Explore hydrographic and bathymetric maps for Earth's 5 World Oceans and marginal seas.
+      </p>
+    </div>
+  </div>
+</section>
+
+<div style="max-width: 1440px; margin: 0 auto 4rem; padding: 0 1.5rem;">
+  <h2 style="font-size: 1.35rem; margin-bottom: 1.25rem; color: var(--text-primary);">The 5 World Oceans</h2>
+  <div class="tn-grid" style="grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); margin-bottom: 3rem;">
+    {% for ocean in oceans %}
+    <a href="{{ url_for('maps.ocean_map', slug=ocean.slug) }}" class="tn-card">
+      <div>
+        <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.5rem;">
+          <span style="font-size: 2.2rem;">🌊</span>
+          <span class="tn-badge">Ocean</span>
+        </div>
+        <h3 class="tn-card-title">{{ ocean.name }}</h3>
+        <p class="tn-card-subtitle" style="margin-bottom: 0.5rem;">{{ ocean.surrounding_continents }}</p>
+        <span style="font-size: 0.78rem; color: var(--accent-cyan);">Max Depth: {{ "{:,}".format(ocean.max_depth_m) if ocean.max_depth_m else 'N/A' }} m ({{ ocean.max_depth_location or 'Abyssal' }})</span>
+      </div>
+      <div class="tn-card-meta">
+        <div>
+          <span class="tn-card-meta-label">Surface Area</span>
+          <span class="tn-card-meta-val">{{ "{:,}".format(ocean.area_km2) }} km²</span>
+        </div>
+        <div>
+          <span class="tn-card-meta-label">Avg Depth</span>
+          <span class="tn-card-meta-val">{{ "{:,}".format(ocean.avg_depth_m) if ocean.avg_depth_m else 'N/A' }} m</span>
+        </div>
+      </div>
+      <span style="color: var(--accent-cyan); font-weight: 600; font-size: 0.82rem; margin-top: 0.75rem; display: block;">
+        Open Marine Map &rarr;
+      </span>
+    </a>
+    {% endfor %}
+  </div>
+
+  <h2 style="font-size: 1.35rem; margin-bottom: 1.25rem; color: var(--text-primary);">Marginal Seas & Gulfs</h2>
+  <div class="tn-grid" style="grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));">
+    {% for sea in seas %}
+    <a href="{{ url_for('seas.sea_detail', slug=sea.slug) }}" class="tn-card">
+      <div class="tn-card-header">
+        <div>
+          <div class="tn-card-title">{{ sea.name }}</div>
+          <div class="tn-card-subtitle">{{ sea.ocean.name if sea.ocean else 'World Ocean' }}</div>
+        </div>
+        <span style="font-size: 1.5rem;">⛵</span>
+      </div>
+      <div class="tn-card-meta">
+        <div>
+          <span class="tn-card-meta-label">Max Depth</span>
+          <span class="tn-card-meta-val">{{ "{:,}".format(sea.max_depth_m) if sea.max_depth_m else 'N/A' }} m</span>
+        </div>
+        <div>
+          <span class="tn-card-meta-label">Type</span>
+          <span class="tn-card-meta-val">{{ sea.sea_type | capitalize }}</span>
+        </div>
+      </div>
+      <span style="color: var(--accent-cyan); font-weight: 600; font-size: 0.82rem; margin-top: 0.75rem; display: block;">
+        Explore Sea &rarr;
+      </span>
+    </a>
+    {% endfor %}
+  </div>
+</div>
+{% endblock %}

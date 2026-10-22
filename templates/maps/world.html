@@ -1,0 +1,95 @@
+{% extends "base.html" %}
+
+{% block title %}Interactive Global World Map - {{ app_name }}{% endblock %}
+
+{% block meta_description %}Interactive World Map with high-resolution satellite photography, dark matter theme, country boundaries, capital cities, and zero API key requirement.{% endblock %}
+
+{% block content %}
+<div style="max-width: 1600px; margin: 1.5rem auto; padding: 0 1.5rem;">
+  <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.25rem; flex-wrap: wrap; gap: 1rem;">
+    <div>
+      <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.25rem;">
+        <a href="{{ url_for('maps.maps_hub') }}" style="color: var(--text-muted); font-size: 0.9rem;">&larr; Maps Hub</a>
+        <span style="color: var(--text-muted);">&bull;</span>
+        <h1 style="font-size: 1.8rem; margin: 0;">Global Interactive World Map</h1>
+      </div>
+      <p style="color: var(--text-secondary); font-size: 0.92rem; margin: 0;">
+        Click on any country boundary or marker to view key facts, capitals, demographics, and connected geography.
+      </p>
+      <div style="margin-top: 0.35rem; display: inline-flex; align-items: center; gap: 0.4rem; font-size: 0.8rem; color: #10b981;">
+        <span>🔒 Zero API Key Required</span>
+        <span style="color: var(--text-muted);">&bull; Built-in Satellite (ESRI), CartoDB, OpenStreetMap & OpenTopoMap Public APIs</span>
+      </div>
+    </div>
+    
+    <!-- Controls Bar -->
+    <div style="display: flex; align-items: center; gap: 0.75rem; flex-wrap: wrap;">
+      <select id="tileLayerSelect" style="
+        background: var(--bg-card); color: var(--text-primary); border: 1px solid var(--border-color);
+        border-radius: var(--radius-sm); padding: 0.55rem 0.85rem; font-size: 0.88rem; outline: none; cursor: pointer;
+      ">
+        <option value="satellite">🛰️ Satellite View (ESRI Imagery - Free)</option>
+        <option value="dark">🌙 Dark Cosmos (CartoDB Dark)</option>
+        <option value="light">☀️ Light Atlas (CartoDB Positron)</option>
+        <option value="streets">🗺️ Street Map (OpenStreetMap)</option>
+        <option value="topo">🏔️ Topographical Relief (OpenTopoMap)</option>
+      </select>
+
+      <button id="resetMapView" class="tn-btn tn-btn-outline tn-btn-sm">
+        ⟲ Reset World Center
+      </button>
+
+      <a href="{{ url_for('maps.countries_gallery') }}" class="tn-btn tn-btn-outline tn-btn-sm">
+        🏛️ Country Maps
+      </a>
+
+      <a href="{{ url_for('maps.islands_gallery') }}" class="tn-btn tn-btn-outline tn-btn-sm">
+        🏝️ Island Maps
+      </a>
+    </div>
+  </div>
+
+  <div class="tn-map-card" style="margin-bottom: 2rem;">
+    <div id="worldMap" class="tn-map-frame" style="height: 720px;" data-lat="20.0" data-lon="10.0" data-zoom="3">
+      <!-- Mouse Coordinates Pill -->
+      <div id="coordsDisplay" class="tn-coords-pill">0.0000° N, 0.0000° E</div>
+
+      <!-- Slideout Info Panel -->
+      <div id="mapInfoPanel" class="tn-map-panel">
+        <div class="tn-map-panel-header">
+          <h4 id="panelTitle" style="font-size: 1.2rem; font-weight: 700; color: var(--accent-cyan); margin: 0;">Country Info</h4>
+          <button class="tn-map-panel-close" onclick="closeMapPanel()">&times;</button>
+        </div>
+        <div id="panelBody" style="margin-bottom: 1rem;"></div>
+        <a id="panelLink" href="#" class="tn-btn tn-btn-primary tn-btn-sm" style="width: 100%;">
+          View Comprehensive Dossier &rarr;
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Map Legend & Instructions -->
+  <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 1.25rem; display: flex; align-items: center; justify-content: space-around; flex-wrap: wrap; gap: 1rem; font-size: 0.88rem;">
+    <div style="display: flex; align-items: center; gap: 0.5rem;">
+      <span style="font-size: 1.2rem;">🏛️</span>
+      <span><strong>Country Capitals</strong>: Administrative and national governance seats</span>
+    </div>
+    <div style="display: flex; align-items: center; gap: 0.5rem;">
+      <span style="font-size: 1.2rem;">⛵</span>
+      <span><strong>Seas & Gulfs</strong>: Hydrographic bodies and connecting straits</span>
+    </div>
+    <div style="display: flex; align-items: center; gap: 0.5rem;">
+      <span style="font-size: 1.2rem;">🏔️</span>
+      <span><strong>Mountain Peaks</strong>: High-altitude elevations and ranges</span>
+    </div>
+    <div style="display: flex; align-items: center; gap: 0.5rem;">
+      <span style="font-size: 1.2rem;">🌊</span>
+      <span><strong>Rivers & Waterways</strong>: Major continental drainage systems</span>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script src="/static/js/map.js"></script>
+{% endblock %}
