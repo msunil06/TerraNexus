@@ -1,0 +1,24 @@
+{
+  "name": "TerraNexus - Global Geography Exploration",
+  "short_name": "TerraNexus",
+  "description": "Explore the World. Discover Every Connection. Interactive maps, countries, oceans, seas, and geographical features.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0a1128",
+  "theme_color": "#001f54",
+  "orientation": "any",
+  "icons": [
+    {
+      "src": "/static/icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/static/icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

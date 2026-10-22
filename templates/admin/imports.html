@@ -1,0 +1,93 @@
+{% extends "admin/layout.html" %}
+
+{% block title %}Dataset Importer & Validator - Admin Console - {{ app_name }}{% endblock %}
+
+{% block admin_content %}
+<div style="margin-bottom: 2rem;">
+  <h1 style="font-size: 2rem; margin-bottom: 0.25rem;">Geographic Dataset Ingestion & Validation</h1>
+  <p style="color: var(--text-secondary); font-size: 0.95rem;">
+    Validate external GeoJSON or tabular geographic boundaries before staging them into production storage.
+  </p>
+</div>
+
+<!-- Validation Results Feedback -->
+{% if validation_result %}
+  <div style="
+    background: {% if validation_result.success %}rgba(16, 185, 129, 0.15){% else %}rgba(239, 68, 68, 0.15){% endif %};
+    border: 1px solid {% if validation_result.success %}#10b981{% else %}#ef4444{% endif %};
+    border-radius: var(--radius-md); padding: 1.5rem; margin-bottom: 2rem;
+  ">
+    <h3 style="color: {% if validation_result.success %}var(--success){% else %}var(--danger){% endif %}; font-size: 1.2rem; margin-bottom: 0.5rem;">
+      {% if validation_result.success %}✓ Ingestion Validation Passed{% else %}✕ Ingestion Validation Failed{% endif %}
+    </h3>
+
+    {% if validation_result.success %}
+      <p style="color: var(--text-primary); font-size: 0.92rem;">
+        Total Features Inspected: <strong>{{ validation_result.total_features }}</strong> | Validated: <strong>{{ validation_result.validated_count }}</strong>
+      </p>
+      {% if validation_result.errors %}
+        <div style="margin-top: 10px;">
+          <h4 style="font-size: 0.88rem; color: var(--warning);">Field Warnings Encountered:</h4>
+          <ul style="margin-left: 1.25rem; font-size: 0.82rem; color: var(--text-secondary);">
+            {% for err in validation_result.errors %}
+              <li>{{ err }}</li>
+            {% endfor %}
+          </ul>
+        </div>
+      {% endif %}
+    {% else %}
+      <p style="color: var(--text-primary); font-size: 0.92rem;">Error: {{ validation_result.error }}</p>
+    {% endif %}
+  </div>
+{% endif %}
+
+<!-- Ingestion Form -->
+<div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 2rem; margin-bottom: 2.5rem;">
+  <h3 style="font-size: 1.25rem; margin-bottom: 1rem; color: var(--accent-cyan);">Validate & Import GeoJSON Payload</h3>
+  
+  <form method="POST" action="{{ url_for('admin.data_imports') }}">
+    <div style="margin-bottom: 1.25rem;">
+      <label style="display: block; font-weight: 600; font-size: 0.88rem; margin-bottom: 0.4rem; color: var(--text-secondary);">
+        Paste GeoJSON FeatureCollection:
+      </label>
+      <textarea name="geojson_content" rows="10" required style="
+        width: 100%; padding: 0.75rem 1rem; background: rgba(6, 12, 24, 0.7); border: 1px solid var(--border-color);
+        border-radius: var(--radius-sm); color: #00f5d4; font-family: monospace; font-size: 0.85rem; outline: none;
+      " placeholder='{ "type": "FeatureCollection", "features": [ ... ] }'></textarea>
+    </div>
+
+    <button type="submit" class="tn-btn tn-btn-primary">
+      Validate & Run Integrity Audit
+    </button>
+  </form>
+</div>
+
+<!-- Active Data Sources Reference -->
+<div>
+  <h2 style="font-size: 1.4rem; margin-bottom: 1rem;">Registered Ingestion Upstreams</h2>
+  <div class="tn-table-responsive">
+    <table class="tn-table">
+      <thead>
+        <tr>
+          <th>Source Name</th>
+          <th>Category</th>
+          <th>Organization</th>
+          <th>License Covenant</th>
+          <th>Last Synced</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for ds in data_sources %}
+          <tr>
+            <td><strong>{{ ds.name }}</strong></td>
+            <td><span class="tn-badge" style="font-size: 0.65rem;">{{ ds.category }}</span></td>
+            <td>{{ ds.organization }}</td>
+            <td>{{ ds.license }}</td>
+            <td style="font-size: 0.8rem; color: var(--text-muted);">{{ ds.last_synced_at.strftime('%Y-%m-%d') }}</td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

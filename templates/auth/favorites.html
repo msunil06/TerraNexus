@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+
+{% block title %}My Saved Favorites - {{ app_name }}{% endblock %}
+
+{% block content %}
+<div style="max-width: 1200px; margin: 2rem auto 4rem; padding: 0 1.5rem;">
+  <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 2rem; flex-wrap: wrap; gap: 1rem;">
+    <div>
+      <h1 style="font-size: 2.2rem; margin-bottom: 0.25rem;">My Saved Geography</h1>
+      <p style="color: var(--text-secondary); font-size: 0.95rem;">
+        Your bookmarked countries, oceans, seas, and geographical features.
+      </p>
+    </div>
+    <a href="{{ url_for('main.explore_map') }}" class="tn-btn tn-btn-primary tn-btn-sm">
+      Open Interactive Map &rarr;
+    </a>
+  </div>
+
+  {% if favorites %}
+    <div class="tn-grid">
+      {% for fav in favorites %}
+        <div class="tn-card">
+          <div class="tn-card-header">
+            <div>
+              <span class="tn-badge" style="font-size: 0.65rem; margin-bottom: 4px;">{{ fav.item_type | capitalize }}</span>
+              <h3 class="tn-card-title">{{ fav.item_title }}</h3>
+              <p class="tn-card-subtitle">Saved on {{ fav.created_at.strftime('%b %d, %Y') }}</p>
+            </div>
+            <div style="font-size: 2rem;">
+              {% if fav.item_type == 'country' %}🏛️
+              {% elif fav.item_type == 'ocean' %}🌊
+              {% elif fav.item_type == 'sea' %}⛵
+              {% else %}🏔️{% endif %}
+            </div>
+          </div>
+
+          <div style="margin-top: 1.25rem; display: flex; align-items: center; justify-content: space-between;">
+            <a href="{% if fav.item_type == 'country' %}/countries/{{ fav.item_id }}{% elif fav.item_type == 'ocean' %}/oceans/{{ fav.item_id }}{% elif fav.item_type == 'sea' %}/seas/{{ fav.item_id }}{% else %}/features/{{ fav.item_id }}{% endif %}"
+               class="tn-btn tn-btn-outline tn-btn-sm">
+              View Dossier &rarr;
+            </a>
+
+            <button class="tn-btn tn-btn-outline tn-btn-sm tn-fav-btn active"
+                    data-item-type="{{ fav.item_type }}"
+                    data-item-id="{{ fav.item_id }}"
+                    style="border-color: var(--danger); color: var(--danger);">
+              Remove
+            </button>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+  {% else %}
+    <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 3.5rem; text-align: center;">
+      <div style="font-size: 3rem; margin-bottom: 1rem;">🌐</div>
+      <h3 style="font-size: 1.4rem; margin-bottom: 0.5rem;">No Saved Favorites Yet</h3>
+      <p style="color: var(--text-secondary); max-width: 500px; margin: 0 auto 1.5rem;">
+        Click the "Save to Favorites" button on any country, ocean, sea, or geographic feature page to assemble your personal geographic collection.
+      </p>
+      <a href="{{ url_for('countries.list_countries') }}" class="tn-btn tn-btn-primary">Explore Countries</a>
+    </div>
+  {% endif %}
+</div>
+{% endblock %}

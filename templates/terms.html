@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+
+{% block title %}Terms of Service - {{ app_name }}{% endblock %}
+
+{% block content %}
+<div style="max-width: 900px; margin: 3rem auto 5rem; padding: 0 1.5rem;">
+  <h1 style="font-size: 2.4rem; margin-bottom: 0.75rem;">Terms of Service</h1>
+  <p style="color: var(--text-secondary); margin-bottom: 2rem;">Last Updated: October 2026</p>
+
+  <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 2rem; display: flex; flex-direction: column; gap: 1.5rem; line-height: 1.8; color: var(--text-secondary);">
+    <div>
+      <h3 style="color: var(--accent-cyan); margin-bottom: 0.5rem;">1. Acceptance of Terms</h3>
+      <p>By accessing or using TerraNexus, you agree to be bound by these Terms of Service and all applicable international data laws.</p>
+    </div>
+
+    <div>
+      <h3 style="color: var(--accent-cyan); margin-bottom: 0.5rem;">2. Educational & Non-Sovereign Scope</h3>
+      <p>All maps, boundaries, and territorial nomenclature presented on TerraNexus are strictly for educational and geographic exploration purposes and do not imply legal sovereignty or political endorsement.</p>
+    </div>
+  </div>
+</div>
+{% endblock %}

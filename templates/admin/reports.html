@@ -1,0 +1,97 @@
+{% extends "admin/layout.html" %}
+
+{% block title %}Reports & Corrections - Admin Console - {{ app_name }}{% endblock %}
+
+{% block admin_content %}
+<div style="margin-bottom: 2rem;">
+  <h1 style="font-size: 2rem; margin-bottom: 0.25rem;">User Correction Reports</h1>
+  <p style="color: var(--text-secondary); font-size: 0.95rem;">
+    Review user-submitted corrections regarding factual discrepancies, boundary issues, and outdated metrics.
+  </p>
+</div>
+
+<!-- Status Filter Tabs -->
+<div style="display: flex; gap: 0.5rem; margin-bottom: 1.5rem; flex-wrap: wrap;">
+  <a href="{{ url_for('admin.reports', status='pending') }}" class="tn-btn tn-btn-sm {% if current_status == 'pending' %}tn-btn-primary{% else %}tn-btn-outline{% endif %}">
+    Pending Review
+  </a>
+  <a href="{{ url_for('admin.reports', status='in_review') }}" class="tn-btn tn-btn-sm {% if current_status == 'in_review' %}tn-btn-primary{% else %}tn-btn-outline{% endif %}">
+    In Review
+  </a>
+  <a href="{{ url_for('admin.reports', status='resolved') }}" class="tn-btn tn-btn-sm {% if current_status == 'resolved' %}tn-btn-primary{% else %}tn-btn-outline{% endif %}">
+    Resolved
+  </a>
+  <a href="{{ url_for('admin.reports', status='all') }}" class="tn-btn tn-btn-sm {% if current_status == 'all' %}tn-btn-primary{% else %}tn-btn-outline{% endif %}">
+    All Reports
+  </a>
+</div>
+
+<!-- Reports Table -->
+<div class="tn-table-responsive">
+  <table class="tn-table">
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>Target Subject</th>
+        <th>Type</th>
+        <th>Description & Suggestion</th>
+        <th>Status</th>
+        <th>Submitted</th>
+        <th>Action</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for rep in reports %}
+        <tr>
+          <td>#{{ rep.id }}</td>
+          <td>
+            <strong>{{ rep.subject_name or rep.subject_id }}</strong>
+            <div style="font-size: 0.75rem; color: var(--text-muted);">{{ rep.subject_type }} &bull; {{ rep.subject_id }}</div>
+          </td>
+          <td><span class="tn-badge" style="font-size: 0.65rem;">{{ rep.report_type }}</span></td>
+          <td style="max-width: 320px;">
+            <p style="font-size: 0.85rem; margin-bottom: 4px;">{{ rep.description }}</p>
+            {% if rep.suggested_correction %}
+              <div style="font-size: 0.78rem; color: var(--accent-cyan);">
+                <em>Correction:</em> {{ rep.suggested_correction }}
+              </div>
+            {% endif %}
+          </td>
+          <td>
+            <span class="tn-badge" style="
+              font-size: 0.65rem;
+              background: {% if rep.status == 'resolved' %}rgba(16, 185, 129, 0.2){% elif rep.status == 'in_review' %}rgba(59, 130, 246, 0.2){% elif rep.status == 'pending' %}rgba(245, 158, 11, 0.2){% else %}rgba(100, 116, 139, 0.2){% endif %};
+              color: {% if rep.status == 'resolved' %}var(--success){% elif rep.status == 'in_review' %}var(--info){% elif rep.status == 'pending' %}var(--warning){% else %}var(--text-muted){% endif %};
+              border-color: currentColor;
+            ">
+              {{ rep.status | capitalize }}
+            </span>
+          </td>
+          <td style="font-size: 0.78rem; color: var(--text-muted);">{{ rep.created_at.strftime('%Y-%m-%d') }}</td>
+          <td>
+            <form method="POST" action="{{ url_for('admin.update_report_status', report_id=rep.id) }}" style="display: flex; gap: 4px;">
+              <select name="status" style="
+                padding: 0.35rem; background: rgba(6, 12, 24, 0.8); border: 1px solid var(--border-color);
+                border-radius: var(--radius-sm); color: var(--text-primary); font-size: 0.75rem; outline: none;
+              ">
+                <option value="in_review" {% if rep.status == 'in_review' %}selected{% endif %}>In Review</option>
+                <option value="resolved" {% if rep.status == 'resolved' %}selected{% endif %}>Resolved</option>
+                <option value="dismissed" {% if rep.status == 'dismissed' %}selected{% endif %}>Dismiss</option>
+              </select>
+              <button type="submit" class="tn-btn tn-btn-primary tn-btn-sm" style="padding: 0.25rem 0.5rem; font-size: 0.75rem;">
+                Save
+              </button>
+            </form>
+          </td>
+        </tr>
+      {% else %}
+        <tr>
+          <td colspan="7" style="text-align: center; padding: 2.5rem; color: var(--text-muted);">
+            No correction reports currently in this status.
+          </td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

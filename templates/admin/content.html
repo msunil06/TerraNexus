@@ -1,0 +1,164 @@
+{% extends "admin/layout.html" %}
+
+{% block title %}Geographic Content - Admin Console - {{ app_name }}{% endblock %}
+
+{% block admin_content %}
+<div style="margin-bottom: 2rem;">
+  <h1 style="font-size: 2rem; margin-bottom: 0.25rem;">Geographic Content Directory</h1>
+  <p style="color: var(--text-secondary); font-size: 0.95rem;">
+    Review and manage published geopolitical and physical entities cataloged within TerraNexus.
+  </p>
+</div>
+
+<!-- Tabs for Content Categories -->
+<div class="tn-tabs-container">
+  <div class="tn-detail-tabs" style="margin-bottom: 1.5rem;">
+    <button class="tn-tab-btn active" data-target="admin-countries">Countries ({{ countries|length }})</button>
+    <button class="tn-tab-btn" data-target="admin-oceans">Oceans ({{ oceans|length }})</button>
+    <button class="tn-tab-btn" data-target="admin-seas">Seas ({{ seas|length }})</button>
+    <button class="tn-tab-btn" data-target="admin-features">Physical Features ({{ features|length }})</button>
+  </div>
+
+  <!-- Countries Tab -->
+  <div id="admin-countries" class="tn-tab-content active">
+    <div class="tn-table-responsive">
+      <table class="tn-table">
+        <thead>
+          <tr>
+            <th>Flag & Name</th>
+            <th>ISO A2/A3</th>
+            <th>Continent</th>
+            <th>Capital</th>
+            <th>Population</th>
+            <th>Area (km²)</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for c in countries %}
+            <tr>
+              <td>
+                <span style="font-size: 1.25rem; margin-right: 6px;">{{ c.flag_emoji }}</span>
+                <strong>{{ c.common_name }}</strong>
+              </td>
+              <td><code>{{ c.iso_a2 }} / {{ c.iso_a3 }}</code></td>
+              <td>{{ c.continent_rel.name }}</td>
+              <td>{{ c.capital_name or 'N/A' }}</td>
+              <td>{{ "{:,}".format(c.population) if c.population else 'N/A' }}</td>
+              <td>{{ "{:,.0f}".format(c.area_km2) if c.area_km2 else 'N/A' }}</td>
+              <td>
+                <a href="{{ url_for('countries.country_detail', slug=c.slug) }}" class="tn-btn tn-btn-outline tn-btn-sm" target="_blank">
+                  View Page &nearr;
+                </a>
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Oceans Tab -->
+  <div id="admin-oceans" class="tn-tab-content">
+    <div class="tn-table-responsive">
+      <table class="tn-table">
+        <thead>
+          <tr>
+            <th>Ocean Name</th>
+            <th>Surface Area</th>
+            <th>Max Depth</th>
+            <th>Deepest Sounding</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for o in oceans %}
+            <tr>
+              <td><strong>{{ o.name }}</strong></td>
+              <td>{{ "{:,}".format(o.area_km2) }} km²</td>
+              <td>{{ "{:,}".format(o.max_depth_m) }} m</td>
+              <td>{{ o.max_depth_location }}</td>
+              <td>
+                <a href="{{ url_for('oceans.ocean_detail', slug=o.slug) }}" class="tn-btn tn-btn-outline tn-btn-sm" target="_blank">
+                  View Page &nearr;
+                </a>
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Seas Tab -->
+  <div id="admin-seas" class="tn-tab-content">
+    <div class="tn-table-responsive">
+      <table class="tn-table">
+        <thead>
+          <tr>
+            <th>Sea Name</th>
+            <th>Type</th>
+            <th>Parent Ocean</th>
+            <th>Max Depth</th>
+            <th>Coordinates</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for s in seas %}
+            <tr>
+              <td><strong>{{ s.name }}</strong></td>
+              <td><span class="tn-badge" style="font-size: 0.65rem;">{{ s.sea_type }}</span></td>
+              <td>{{ s.ocean.name if s.ocean else 'Inland / Endorheic' }}</td>
+              <td>{{ "{:,}".format(s.max_depth_m) if s.max_depth_m else 'N/A' }} m</td>
+              <td>{{ s.latitude }}°, {{ s.longitude }}°</td>
+              <td>
+                <a href="{{ url_for('seas.sea_detail', slug=s.slug) }}" class="tn-btn tn-btn-outline tn-btn-sm" target="_blank">
+                  View Page &nearr;
+                </a>
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Features Tab -->
+  <div id="admin-features" class="tn-tab-content">
+    <div class="tn-table-responsive">
+      <table class="tn-table">
+        <thead>
+          <tr>
+            <th>Feature Name</th>
+            <th>Type</th>
+            <th>Location / Countries</th>
+            <th>Elevation / Length</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for f in features %}
+            <tr>
+              <td><strong>{{ f.name }}</strong></td>
+              <td><span class="tn-badge" style="font-size: 0.65rem;">{{ f.feature_type }}</span></td>
+              <td>{{ f.countries_involved }}</td>
+              <td>
+                {% if f.elevation_m %}{{ "{:,}".format(f.elevation_m) }} m
+                {% elif f.depth_m %}{{ "{:,}".format(f.depth_m) }} m
+                {% elif f.length_km %}{{ "{:,.0f}".format(f.length_km) }} km
+                {% else %}N/A{% endif %}
+              </td>
+              <td>
+                <a href="{{ url_for('features.feature_detail', slug=f.slug) }}" class="tn-btn tn-btn-outline tn-btn-sm" target="_blank">
+                  View Page &nearr;
+                </a>
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+{% endblock %}

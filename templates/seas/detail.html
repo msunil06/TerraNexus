@@ -1,0 +1,114 @@
+{% extends "base.html" %}
+
+{% block title %}{{ sea.name }} - Sea Dossier - {{ app_name }}{% endblock %}
+
+{% block content %}
+<section class="tn-detail-hero">
+  <div class="tn-detail-header">
+    <div>
+      <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.5rem; flex-wrap: wrap;">
+        <span style="font-size: 2.8rem;">⛵</span>
+        <h1 class="tn-detail-title">{{ sea.name }}</h1>
+        <span class="tn-badge">{{ sea.sea_type | capitalize }} Sea</span>
+      </div>
+      {% if sea.alternative_names %}
+        <p style="color: var(--text-muted); font-size: 0.95rem; margin-bottom: 0.25rem;">
+          Alternative Names: <em>{{ sea.alternative_names }}</em>
+        </p>
+      {% endif %}
+      <p style="color: var(--text-secondary); font-size: 1.05rem;">
+        Parent Ocean Basin: <strong>{{ sea.ocean.name if sea.ocean else 'Endorheic / Inland' }}</strong>
+      </p>
+    </div>
+
+    <div style="display: flex; align-items: center; gap: 0.75rem;">
+      <button class="tn-btn tn-btn-outline tn-fav-btn {% if is_favorite %}active{% endif %}"
+              data-item-type="sea"
+              data-item-id="{{ sea.slug }}"
+              data-item-title="{{ sea.name }}">
+        {% if is_favorite %}★ Saved{% else %}☆ Save Sea{% endif %}
+      </button>
+      <a href="{{ url_for('seas.list_seas') }}" class="tn-btn tn-btn-outline tn-btn-sm">&larr; All Seas</a>
+    </div>
+  </div>
+</section>
+
+<div style="max-width: 1200px; margin: 0 auto 4rem; padding: 0 1.5rem;">
+  <!-- Stats Grid -->
+  <div class="tn-stats-grid" style="margin-bottom: 2.5rem;">
+    <div class="tn-stat-card">
+      <span class="tn-stat-label">Surface Area</span>
+      <div class="tn-stat-num" style="font-size: 1.8rem;">{{ "{:,.0f}".format(sea.area_km2) if sea.area_km2 else 'N/A' }}</div>
+      <span style="font-size: 0.8rem; color: var(--text-muted);">km²</span>
+    </div>
+
+    <div class="tn-stat-card">
+      <span class="tn-stat-label">Maximum Depth</span>
+      <div class="tn-stat-num" style="font-size: 1.8rem;">{{ "{:,}".format(sea.max_depth_m) if sea.max_depth_m else 'N/A' }}</div>
+      <span style="font-size: 0.8rem; color: var(--text-muted);">Meters</span>
+    </div>
+
+    <div class="tn-stat-card">
+      <span class="tn-stat-label">Average Depth</span>
+      <div class="tn-stat-num" style="font-size: 1.8rem;">{{ "{:,}".format(sea.avg_depth_m) if sea.avg_depth_m else 'N/A' }}</div>
+      <span style="font-size: 0.8rem; color: var(--text-muted);">Meters</span>
+    </div>
+
+    <div class="tn-stat-card">
+      <span class="tn-stat-label">Center Coordinates</span>
+      <div style="font-size: 1.15rem; font-weight: 700; margin-top: 8px;">{{ sea.latitude }}° N, {{ sea.longitude }}° E</div>
+    </div>
+  </div>
+
+  <!-- Detailed Table -->
+  <div class="tn-table-responsive" style="margin-bottom: 2.5rem;">
+    <table class="tn-table">
+      <tbody>
+        <tr>
+          <th style="width: 28%;">Surrounding Countries & Littoral States</th>
+          <td>{{ sea.surrounding_countries or 'N/A' }}</td>
+        </tr>
+        <tr>
+          <th>Connected Oceans, Seas & Straits</th>
+          <td>{{ sea.connected_water_bodies or 'N/A' }}</td>
+        </tr>
+        <tr>
+          <th>Major Commercial Ports</th>
+          <td>{{ sea.major_ports or 'N/A' }}</td>
+        </tr>
+        <tr>
+          <th>Major Ocean Currents & Circulation</th>
+          <td>{{ sea.major_currents or 'N/A' }}</td>
+        </tr>
+        <tr>
+          <th>Marine Biodiversity & Habitats</th>
+          <td>{{ sea.marine_life or 'Coral reefs, pelagic fish stocks, and coastal mangroves' }}</td>
+        </tr>
+        <tr>
+          <th>Economic & Trade Importance</th>
+          <td>{{ sea.economic_importance or 'Strategic maritime routes and regional fisheries' }}</td>
+        </tr>
+        <tr>
+          <th>Environmental Vulnerabilities</th>
+          <td>{{ sea.environmental_concerns or 'Hypoxia, coastal runoff, and temperature anomalies' }}</td>
+        </tr>
+        <tr>
+          <th>Historical Significance</th>
+          <td>{{ sea.historical_significance or 'Maritime commercial crossroads' }}</td>
+        </tr>
+        <tr>
+          <th>Hydrographic Authority Source</th>
+          <td>{{ sea.data_source }}</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 1.75rem;">
+    <h3 style="color: var(--accent-cyan); font-size: 1.25rem; margin-bottom: 0.75rem;">Detailed Marine Overview</h3>
+    <p style="font-size: 1.05rem; line-height: 1.8; color: var(--text-secondary);">
+      {{ sea.overview }}
+    </p>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,96 @@
+{% extends "base.html" %}
+
+{% block title %}Submit Geographic Correction - {{ app_name }}{% endblock %}
+
+{% block content %}
+<div style="max-width: 680px; margin: 3rem auto 5rem; padding: 0 1.5rem;">
+  <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--radius-lg); padding: 2.25rem;">
+    <h1 style="font-size: 2rem; margin-bottom: 0.5rem;">Geographic Correction & Feedback</h1>
+    <p style="color: var(--text-secondary); font-size: 0.95rem; margin-bottom: 2rem;">
+      Help us maintain the world's most accurate geographic platform. Submit corrections regarding outdated statistics, incorrect boundaries, or missing features.
+    </p>
+
+    <form method="POST" action="{{ url_for('main.submit_report') }}">
+      <div class="tn-grid" style="grid-template-columns: 1fr 1fr; margin-bottom: 1.25rem;">
+        <div>
+          <label style="display: block; font-weight: 600; font-size: 0.88rem; margin-bottom: 0.4rem; color: var(--text-secondary);">
+            Subject Category
+          </label>
+          <select name="subject_type" style="
+            width: 100%; padding: 0.65rem 1rem; background: rgba(6, 12, 24, 0.7); border: 1px solid var(--border-color);
+            border-radius: var(--radius-sm); color: var(--text-primary); font-size: 0.95rem; outline: none;
+          ">
+            <option value="country" {% if prefill_type == 'country' %}selected{% endif %}>Country</option>
+            <option value="ocean" {% if prefill_type == 'ocean' %}selected{% endif %}>Ocean</option>
+            <option value="sea" {% if prefill_type == 'sea' %}selected{% endif %}>Sea</option>
+            <option value="division" {% if prefill_type == 'division' %}selected{% endif %}>Administrative Division</option>
+            <option value="feature" {% if prefill_type == 'feature' %}selected{% endif %}>Geographic Feature</option>
+          </select>
+        </div>
+
+        <div>
+          <label style="display: block; font-weight: 600; font-size: 0.88rem; margin-bottom: 0.4rem; color: var(--text-secondary);">
+            Issue Nature
+          </label>
+          <select name="report_type" style="
+            width: 100%; padding: 0.65rem 1rem; background: rgba(6, 12, 24, 0.7); border: 1px solid var(--border-color);
+            border-radius: var(--radius-sm); color: var(--text-primary); font-size: 0.95rem; outline: none;
+          ">
+            <option value="incorrect_info">Incorrect Statistic / Fact</option>
+            <option value="missing_feature">Missing Division / Feature</option>
+            <option value="boundary_issue">Boundary / Coordinate Anomaly</option>
+            <option value="outdated_stat">Outdated Demographic or Economic Metric</option>
+            <option value="translation">Translation / Spelling Error</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="tn-grid" style="grid-template-columns: 1fr 1fr; margin-bottom: 1.25rem;">
+        <div>
+          <label style="display: block; font-weight: 600; font-size: 0.88rem; margin-bottom: 0.4rem; color: var(--text-secondary);">
+            Subject Code / ID
+          </label>
+          <input type="text" name="subject_id" value="{{ prefill_id }}" required style="
+            width: 100%; padding: 0.65rem 1rem; background: rgba(6, 12, 24, 0.7); border: 1px solid var(--border-color);
+            border-radius: var(--radius-sm); color: var(--text-primary); font-size: 0.95rem; outline: none;
+          " placeholder="e.g. IND, arabian-sea">
+        </div>
+
+        <div>
+          <label style="display: block; font-weight: 600; font-size: 0.88rem; margin-bottom: 0.4rem; color: var(--text-secondary);">
+            Subject Common Name
+          </label>
+          <input type="text" name="subject_name" value="{{ prefill_name }}" style="
+            width: 100%; padding: 0.65rem 1rem; background: rgba(6, 12, 24, 0.7); border: 1px solid var(--border-color);
+            border-radius: var(--radius-sm); color: var(--text-primary); font-size: 0.95rem; outline: none;
+          " placeholder="e.g. India, Arabian Sea">
+        </div>
+      </div>
+
+      <div style="margin-bottom: 1.25rem;">
+        <label style="display: block; font-weight: 600; font-size: 0.88rem; margin-bottom: 0.4rem; color: var(--text-secondary);">
+          Detailed Description of Issue
+        </label>
+        <textarea name="description" rows="4" required style="
+          width: 100%; padding: 0.75rem 1rem; background: rgba(6, 12, 24, 0.7); border: 1px solid var(--border-color);
+          border-radius: var(--radius-sm); color: var(--text-primary); font-size: 0.95rem; outline: none;
+        " placeholder="Explain the discrepancy and provide citation or reference if possible..."></textarea>
+      </div>
+
+      <div style="margin-bottom: 1.75rem;">
+        <label style="display: block; font-weight: 600; font-size: 0.88rem; margin-bottom: 0.4rem; color: var(--text-secondary);">
+          Suggested Correction & Source Link (Optional)
+        </label>
+        <textarea name="suggested_correction" rows="2" style="
+          width: 100%; padding: 0.75rem 1rem; background: rgba(6, 12, 24, 0.7); border: 1px solid var(--border-color);
+          border-radius: var(--radius-sm); color: var(--text-primary); font-size: 0.95rem; outline: none;
+        " placeholder="e.g. Correct value is X, verified by UN Statistics Report (https://...)"></textarea>
+      </div>
+
+      <button type="submit" class="tn-btn tn-btn-primary" style="width: 100%; padding: 0.75rem;">
+        Submit Correction to Editorial Review
+      </button>
+    </form>
+  </div>
+</div>
+{% endblock %}

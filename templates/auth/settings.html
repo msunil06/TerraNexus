@@ -1,0 +1,74 @@
+{% extends "base.html" %}
+
+{% block title %}Account Settings - {{ app_name }}{% endblock %}
+
+{% block content %}
+<div style="max-width: 700px; margin: 3rem auto 4rem; padding: 0 1.5rem;">
+  <div style="margin-bottom: 2rem;">
+    <h1 style="font-size: 2.2rem; margin-bottom: 0.25rem;">Account Settings</h1>
+    <p style="color: var(--text-secondary); font-size: 0.95rem;">Manage your password security and account lifecycle.</p>
+  </div>
+
+  <!-- Change Password Form -->
+  <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 2rem; margin-bottom: 2rem;">
+    <h3 style="font-size: 1.25rem; margin-bottom: 1.25rem; color: var(--accent-cyan);">Update Password</h3>
+    
+    <form method="POST" action="{{ url_for('auth.settings') }}">
+      <input type="hidden" name="action" value="change_password">
+
+      <div style="margin-bottom: 1.15rem;">
+        <label style="display: block; font-weight: 600; font-size: 0.88rem; margin-bottom: 0.4rem; color: var(--text-secondary);">
+          Current Password
+        </label>
+        <input type="password" name="current_password" required style="
+          width: 100%; padding: 0.65rem 1rem; background: rgba(6, 12, 24, 0.7); border: 1px solid var(--border-color);
+          border-radius: var(--radius-sm); color: var(--text-primary); font-size: 0.95rem; outline: none;
+        ">
+      </div>
+
+      <div style="margin-bottom: 1.15rem;">
+        <label style="display: block; font-weight: 600; font-size: 0.88rem; margin-bottom: 0.4rem; color: var(--text-secondary);">
+          New Password (min 8 characters)
+        </label>
+        <input type="password" name="new_password" minlength="8" required style="
+          width: 100%; padding: 0.65rem 1rem; background: rgba(6, 12, 24, 0.7); border: 1px solid var(--border-color);
+          border-radius: var(--radius-sm); color: var(--text-primary); font-size: 0.95rem; outline: none;
+        ">
+      </div>
+
+      <div style="margin-bottom: 1.5rem;">
+        <label style="display: block; font-weight: 600; font-size: 0.88rem; margin-bottom: 0.4rem; color: var(--text-secondary);">
+          Confirm New Password
+        </label>
+        <input type="password" name="confirm_new_password" minlength="8" required style="
+          width: 100%; padding: 0.65rem 1rem; background: rgba(6, 12, 24, 0.7); border: 1px solid var(--border-color);
+          border-radius: var(--radius-sm); color: var(--text-primary); font-size: 0.95rem; outline: none;
+        ">
+      </div>
+
+      <button type="submit" class="tn-btn tn-btn-primary">Update Password</button>
+    </form>
+  </div>
+
+  <!-- Account Deletion Request -->
+  <div style="background: var(--bg-card); border: 1px solid rgba(239, 68, 68, 0.3); border-radius: var(--radius-md); padding: 2rem;">
+    <h3 style="font-size: 1.25rem; margin-bottom: 0.5rem; color: var(--danger);">Danger Zone</h3>
+    <p style="color: var(--text-secondary); font-size: 0.9rem; margin-bottom: 1.25rem;">
+      Submitting a deletion request flags your profile for permanent removal and revokes all active favorites and saved locations.
+    </p>
+
+    {% if current_user.deletion_requested %}
+      <div style="padding: 0.85rem; border-radius: var(--radius-sm); background: rgba(245, 158, 11, 0.15); color: var(--warning); font-size: 0.9rem; font-weight: 500;">
+        ⚠️ Your account deletion request is currently pending administrative review.
+      </div>
+    {% else %}
+      <form method="POST" action="{{ url_for('auth.settings') }}" onsubmit="return confirm('Are you sure you want to request account deletion?');">
+        <input type="hidden" name="action" value="delete_account_request">
+        <button type="submit" class="tn-btn" style="background: var(--danger); color: #ffffff;">
+          Request Account Deletion
+        </button>
+      </form>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

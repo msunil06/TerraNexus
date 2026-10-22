@@ -1,0 +1,311 @@
+{% extends "base.html" %}
+
+{% block title %}{{ country.common_name }} ({{ country.official_name }}) - Country Profile - {{ app_name }}{% endblock %}
+
+{% block meta_description %}Explore {{ country.common_name }}: capital {{ country.capital_name }}, population {{ "{:,}".format(country.population) if country.population else 'N/A' }}, currency {{ country.currency_code }}, administrative divisions, and neighboring borders.{% endblock %}
+
+{% block content %}
+<!-- Country Hero Section -->
+<section class="tn-detail-hero">
+  <div class="tn-detail-header">
+    <div class="tn-detail-title-group">
+      <div class="tn-detail-flag">{{ country.flag_emoji or '🌐' }}</div>
+      <div>
+        <div style="display: flex; align-items: center; gap: 0.75rem; flex-wrap: wrap;">
+          <h1 class="tn-detail-title">{{ country.common_name }}</h1>
+          <span class="tn-badge">{{ country.iso_a3 }}</span>
+          <span class="tn-badge">{{ country.iso_a2 }}</span>
+        </div>
+        <p style="color: var(--text-secondary); font-size: 1.1rem; margin-bottom: 0.25rem;">
+          {{ country.official_name }}
+        </p>
+        <p style="color: var(--text-muted); font-size: 0.9rem;">
+          {{ country.continent_rel.name }} &bull; {{ country.subregion or 'Global' }}
+        </p>
+      </div>
+    </div>
+
+    <!-- Actions: Save to Favorites & Correction Report -->
+    <div style="display: flex; align-items: center; gap: 0.75rem; flex-wrap: wrap;">
+      <button class="tn-btn tn-btn-outline tn-fav-btn {% if is_favorite %}active{% endif %}"
+              data-item-type="country"
+              data-item-id="{{ country.slug }}"
+              data-item-title="{{ country.common_name }}">
+        {% if is_favorite %}★ Saved{% else %}☆ Save to Favorites{% endif %}
+      </button>
+
+      <a href="{{ url_for('main.submit_report', type='country', id=country.iso_a3, name=country.common_name) }}"
+         class="tn-btn tn-btn-outline tn-btn-sm" style="border-color: var(--border-color); color: var(--text-muted);"
+         title="Submit a verified correction">
+        ✏️ Report Correction
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- Country Dossier Content Tabs -->
+<div style="max-width: 1200px; margin: 0 auto 4rem; padding: 0 1.5rem;" class="tn-tabs-container">
+  
+  <!-- Navigation Tabs -->
+  <div class="tn-detail-tabs" role="tablist">
+    <button class="tn-tab-btn active" data-target="tab-overview" role="tab">Overview & Facts</button>
+    <button class="tn-tab-btn" data-target="tab-geography" role="tab">Geography & Terrain</button>
+    <button class="tn-tab-btn" data-target="tab-divisions" role="tab">Administrative Divisions ({{ divisions|length }})</button>
+    <button class="tn-tab-btn" data-target="tab-neighbors" role="tab">Neighbors & Borders ({{ neighbors|length }})</button>
+    <button class="tn-tab-btn" data-target="tab-economy" role="tab">Economy & Currency</button>
+    <button class="tn-tab-btn" data-target="tab-society" role="tab">Society & Languages</button>
+    <button class="tn-tab-btn" data-target="tab-sources" role="tab">Sources & Metadata</button>
+  </div>
+
+  <!-- Tab 1: Overview & Facts -->
+  <div id="tab-overview" class="tn-tab-content active" role="tabpanel">
+    <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 1.75rem; margin-bottom: 2rem;">
+      <h3 style="font-size: 1.3rem; margin-bottom: 0.75rem; color: var(--accent-cyan);">Geographic Profile Overview</h3>
+      <p style="font-size: 1.05rem; line-height: 1.8; color: var(--text-secondary);">
+        {{ country.overview or 'Detailed historical overview is currently undergoing academic editorial review.' }}
+      </p>
+    </div>
+
+    <div class="tn-grid" style="grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));">
+      <div class="tn-stat-card">
+        <div class="tn-card-meta-label">Primary Capital</div>
+        <div style="font-size: 1.4rem; font-weight: 700; color: var(--text-primary); margin-top: 4px;">
+          {{ country.capital_name or 'N/A' }}
+        </div>
+      </div>
+
+      <div class="tn-stat-card">
+        <div class="tn-card-meta-label">Total Population ({{ country.population_year }})</div>
+        <div style="font-size: 1.4rem; font-weight: 700; color: var(--text-primary); margin-top: 4px;">
+          {{ "{:,}".format(country.population) if country.population else 'N/A' }}
+        </div>
+      </div>
+
+      <div class="tn-stat-card">
+        <div class="tn-card-meta-label">Total Surface Area</div>
+        <div style="font-size: 1.4rem; font-weight: 700; color: var(--text-primary); margin-top: 4px;">
+          {{ "{:,.0f}".format(country.area_km2) if country.area_km2 else 'N/A' }} km²
+        </div>
+        <span style="font-size: 0.78rem; color: var(--text-muted);">
+          ({{ "{:,.0f}".format(country.area_sq_mi) if country.area_sq_mi else 'N/A' }} sq mi)
+        </span>
+      </div>
+
+      <div class="tn-stat-card">
+        <div class="tn-card-meta-label">Official Currency</div>
+        <div style="font-size: 1.4rem; font-weight: 700; color: var(--text-primary); margin-top: 4px;">
+          {{ country.currency_code }} ({{ country.currency_symbol }})
+        </div>
+        <span style="font-size: 0.78rem; color: var(--text-muted);">{{ country.currency_name }}</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tab 2: Geography & Terrain -->
+  <div id="tab-geography" class="tn-tab-content" role="tabpanel">
+    <div class="tn-table-responsive" style="margin-bottom: 2rem;">
+      <table class="tn-table">
+        <tbody>
+          <tr>
+            <th style="width: 30%;">Geographic Center Coordinates</th>
+            <td>{{ country.latitude }}° N, {{ country.longitude }}° E</td>
+          </tr>
+          <tr>
+            <th>Highest Elevation</th>
+            <td><strong>{{ country.highest_point or 'N/A' }}</strong> ({{ country.highest_elevation_m }} m)</td>
+          </tr>
+          <tr>
+            <th>Lowest Elevation</th>
+            <td><strong>{{ country.lowest_point or 'N/A' }}</strong> ({{ country.lowest_elevation_m }} m)</td>
+          </tr>
+          <tr>
+            <th>Coastline Length</th>
+            <td>{{ "{:,.1f}".format(country.coastline_km) if country.coastline_km else 'Landlocked (0 km)' }} km</td>
+          </tr>
+          <tr>
+            <th>Landlocked Classification</th>
+            <td>{{ 'Yes (No direct access to World Ocean)' if country.is_landlocked else 'No (Maritime access)' }}</td>
+          </tr>
+          <tr>
+            <th>Climate Description</th>
+            <td>{{ country.climate or 'Classification per Köppen-Geiger climate standard' }}</td>
+          </tr>
+          <tr>
+            <th>Natural Resources</th>
+            <td>{{ country.natural_resources or 'Sourced from USGS Mineral Resources Data' }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Tab 3: Administrative Divisions -->
+  <div id="tab-divisions" class="tn-tab-content" role="tabpanel">
+    <div style="margin-bottom: 1.5rem;">
+      <h3 style="font-size: 1.3rem; margin-bottom: 0.5rem;">Administrative Hierarchy</h3>
+      <p style="color: var(--text-secondary); font-size: 0.92rem;">
+        Divisions adhere to national governance frameworks (e.g., States, Union Territories, Prefectures, Bundesländer).
+      </p>
+    </div>
+
+    {% if divisions %}
+      <div class="tn-grid" style="grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));">
+        {% for div in divisions %}
+          <a href="{{ url_for('countries.division_detail', country_slug=country.slug, division_slug=div.slug) }}" class="tn-card">
+            <div>
+              <span class="tn-badge" style="margin-bottom: 6px;">{{ div.division_type }}</span>
+              <h4 class="tn-card-title">{{ div.name }}</h4>
+              <p class="tn-card-subtitle">Center: {{ div.capital_or_center or 'N/A' }}</p>
+            </div>
+            <div class="tn-card-meta">
+              <div>
+                <span class="tn-card-meta-label">Population</span>
+                <span class="tn-card-meta-val">{{ "{:,}".format(div.population) if div.population else 'N/A' }}</span>
+              </div>
+              <div>
+                <span class="tn-card-meta-label">Area</span>
+                <span class="tn-card-meta-val">{{ "{:,.0f}".format(div.area_km2) if div.area_km2 else 'N/A' }} km²</span>
+              </div>
+            </div>
+            <div style="margin-top: 0.75rem; text-align: right; font-size: 0.8rem; color: var(--accent-cyan); font-weight: 600;">
+              View Districts & Cities &rarr;
+            </div>
+          </a>
+        {% endfor %}
+      </div>
+    {% else %}
+      <div style="padding: 2rem; background: var(--bg-card); border-radius: var(--radius-md); text-align: center; color: var(--text-muted);">
+        Detailed sub-national boundary layers for {{ country.common_name }} are pending integration.
+      </div>
+    {% endif %}
+  </div>
+
+  <!-- Tab 4: Neighboring Countries & Borders -->
+  <div id="tab-neighbors" class="tn-tab-content" role="tabpanel">
+    <div style="margin-bottom: 1.5rem;">
+      <h3 style="font-size: 1.3rem; margin-bottom: 0.5rem;">Neighboring Countries & Borders</h3>
+      <p style="color: var(--text-secondary); font-size: 0.92rem;">
+        Distinguishes between shared land boundaries, maritime boundaries, and narrow straits.
+      </p>
+    </div>
+
+    {% if neighbors %}
+      <div class="tn-grid">
+        {% for n in neighbors %}
+          <a href="{{ url_for('countries.country_detail', slug=n.country.slug) }}" class="tn-card">
+            <div class="tn-card-header">
+              <div>
+                <div class="tn-card-title">{{ n.country.common_name }}</div>
+                <div class="tn-card-subtitle">Border: <strong>{{ n.border_type | capitalize }}</strong></div>
+              </div>
+              <div class="tn-card-flag">{{ n.country.flag_emoji or '🌐' }}</div>
+            </div>
+            <div class="tn-card-meta">
+              <div>
+                <span class="tn-card-meta-label">Border Length</span>
+                <span class="tn-card-meta-val">{{ "{:,.1f}".format(n.length_km) if n.length_km else 'Demarcated' }} km</span>
+              </div>
+              <div>
+                <span class="tn-card-meta-label">Capital</span>
+                <span class="tn-card-meta-val">{{ n.country.capital_name or 'N/A' }}</span>
+              </div>
+            </div>
+            <span style="color: var(--accent-cyan); font-size: 0.82rem; font-weight: 600; margin-top: 0.75rem; display: block;">
+              Explore Neighbor &rarr;
+            </span>
+          </a>
+        {% endfor %}
+      </div>
+    {% else %}
+      <div style="padding: 2rem; background: var(--bg-card); border-radius: var(--radius-md); text-align: center; color: var(--text-muted);">
+        {{ country.common_name }} has no shared land borders (island or oceanic territory).
+      </div>
+    {% endif %}
+  </div>
+
+  <!-- Tab 5: Economy & Currency -->
+  <div id="tab-economy" class="tn-tab-content" role="tabpanel">
+    <div class="tn-table-responsive" style="margin-bottom: 2rem;">
+      <table class="tn-table">
+        <tbody>
+          <tr>
+            <th style="width: 30%;">Currency Name</th>
+            <td>{{ country.currency_name }} ({{ country.currency_code }}, Symbol: {{ country.currency_symbol }})</td>
+          </tr>
+          <tr>
+            <th>Nominal GDP ({{ country.gdp_reference_year }})</th>
+            <td>${{ "{:,.1f}".format(country.gdp_usd_billions) if country.gdp_usd_billions else 'N/A' }} Billion USD</td>
+          </tr>
+          <tr>
+            <th>GDP Per Capita</th>
+            <td>${{ "{:,}".format(country.gdp_per_capita_usd) if country.gdp_per_capita_usd else 'N/A' }} USD</td>
+          </tr>
+          <tr>
+            <th>Key Economic Sectors</th>
+            <td>{{ country.major_industries or 'Manufacturing, service, and agricultural datasets' }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Tab 6: Society & Languages -->
+  <div id="tab-society" class="tn-tab-content" role="tabpanel">
+    <div class="tn-table-responsive" style="margin-bottom: 2rem;">
+      <table class="tn-table">
+        <tbody>
+          <tr>
+            <th style="width: 30%;">Official Languages</th>
+            <td>{{ country.official_languages or 'N/A' }}</td>
+          </tr>
+          <tr>
+            <th>Widely Spoken Languages</th>
+            <td>{{ country.widely_spoken_languages or 'N/A' }}</td>
+          </tr>
+          <tr>
+            <th>Demonym / Nationality</th>
+            <td>{{ country.demonym or 'N/A' }}</td>
+          </tr>
+          <tr>
+            <th>Government Framework</th>
+            <td>{{ country.government_system or 'Constitutional system' }}</td>
+          </tr>
+          <tr>
+            <th>Independence / Founding</th>
+            <td>{{ country.independence_date or 'N/A' }}</td>
+          </tr>
+          <tr>
+            <th>International Calling Code</th>
+            <td>{{ country.calling_code }}</td>
+          </tr>
+          <tr>
+            <th>Internet Country Code TLD</th>
+            <td>{{ country.tld }}</td>
+          </tr>
+          <tr>
+            <th>Time Zones</th>
+            <td>{{ country.time_zones }}</td>
+          </tr>
+          <tr>
+            <th>Road Driving Side</th>
+            <td>{{ country.driving_side | capitalize }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Tab 7: Sources & Metadata -->
+  <div id="tab-sources" class="tn-tab-content" role="tabpanel">
+    <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 1.5rem;">
+      <h3 style="font-size: 1.2rem; margin-bottom: 0.75rem; color: var(--accent-cyan);">Authoritative Sources & Data Veracity</h3>
+      <ul style="list-style: disc; margin-left: 1.5rem; color: var(--text-secondary); line-height: 1.8;">
+        <li>Primary Vector Boundaries: <strong>Natural Earth 1:10m Physical & Cultural Vectors (Public Domain)</strong></li>
+        <li>Economic & Demographic Indicators: <strong>World Bank Open Data (Reference Year: {{ country.gdp_reference_year }})</strong></li>
+        <li>ISO Standards: <strong>ISO 3166-1 alpha-2 ({{ country.iso_a2 }}), alpha-3 ({{ country.iso_a3 }}), 4217 Currency ({{ country.currency_code }})</strong></li>
+        <li>Last Data Audit & Update: <strong>{{ country.last_updated.strftime('%B %d, %Y') if country.last_updated else 'Verified Active' }}</strong></li>
+      </ul>
+    </div>
+  </div>
+</div>
+{% endblock %}

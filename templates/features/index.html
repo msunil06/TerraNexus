@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+
+{% block title %}Geographic Features of Earth - {{ app_name }}{% endblock %}
+
+{% block content %}
+<div style="max-width: 1440px; margin: 2rem auto 4rem; padding: 0 1.5rem;">
+  <div style="margin-bottom: 2rem;">
+    <h1 style="font-size: 2.4rem; margin-bottom: 0.5rem;">Physical Geographic Features</h1>
+    <p style="color: var(--text-secondary); font-size: 1rem; max-width: 800px;">
+      Explore Earth's prominent geomorphological formations: mountain ranges, trans-boundary rivers, vast deserts, oceanic trenches, and straits.
+    </p>
+  </div>
+
+  <!-- Type Filter Buttons -->
+  <div style="display: flex; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 2rem;">
+    <a href="{{ url_for('features.list_features') }}" class="tn-btn tn-btn-sm {% if not selected_type %}tn-btn-primary{% else %}tn-btn-outline{% endif %}">
+      All Features
+    </a>
+    {% for fval, flabel in feature_types %}
+      <a href="{{ url_for('features.list_features', type=fval) }}" class="tn-btn tn-btn-sm {% if selected_type == fval %}tn-btn-primary{% else %}tn-btn-outline{% endif %}">
+        {{ flabel }}
+      </a>
+    {% endfor %}
+  </div>
+
+  <div class="tn-grid">
+    {% for feat in features %}
+      <a href="{{ url_for('features.feature_detail', slug=feat.slug) }}" class="tn-card">
+        <div class="tn-card-header">
+          <div>
+            <h3 class="tn-card-title">{{ feat.name }}</h3>
+            <span class="tn-badge" style="font-size: 0.65rem;">{{ feat.feature_type.replace('_', ' ') | title }}</span>
+          </div>
+          <div style="font-size: 1.8rem;">
+            {% if 'mountain' in feat.feature_type %}🏔️{% elif 'river' in feat.feature_type or 'strait' in feat.feature_type %}🌊{% elif 'desert' in feat.feature_type %}🏜️{% elif 'trench' in feat.feature_type %}⚓{% else %}📍{% endif %}
+          </div>
+        </div>
+
+        <p style="font-size: 0.85rem; color: var(--text-secondary); margin: 0.75rem 0; line-height: 1.6;">
+          {{ feat.overview[:120] }}...
+        </p>
+
+        <div class="tn-card-meta">
+          <div>
+            <span class="tn-card-meta-label">Countries Involved</span>
+            <span class="tn-card-meta-val">{{ feat.countries_involved or 'Global' }}</span>
+          </div>
+          <div>
+            <span class="tn-card-meta-label">Scale / Measurement</span>
+            <span class="tn-card-meta-val">
+              {% if feat.elevation_m %}{{ "{:,}".format(feat.elevation_m) }} m (Elev)
+              {% elif feat.depth_m %}{{ "{:,}".format(feat.depth_m) }} m (Depth)
+              {% elif feat.length_km %}{{ "{:,.0f}".format(feat.length_km) }} km (Len)
+              {% elif feat.area_km2 %}{{ "{:,.0f}".format(feat.area_km2) }} km² (Area)
+              {% else %}Documented{% endif %}
+            </span>
+          </div>
+        </div>
+
+        <div style="margin-top: 1rem; text-align: right; color: var(--accent-cyan); font-weight: 600; font-size: 0.82rem;">
+          View Feature Dossier &rarr;
+        </div>
+      </a>
+    {% endfor %}
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+
+{% block title %}About TerraNexus - Global Geography Exploration{% endblock %}
+
+{% block content %}
+<div style="max-width: 1000px; margin: 3rem auto 5rem; padding: 0 1.5rem;">
+  <div style="text-align: center; margin-bottom: 3.5rem;">
+    <div class="tn-hero-badge">About the Platform</div>
+    <h1 style="font-size: 2.8rem; margin-bottom: 0.75rem;">Explore the World. Discover Every Connection.</h1>
+    <p style="color: var(--text-secondary); font-size: 1.15rem; max-width: 720px; margin: 0 auto; line-height: 1.7;">
+      TerraNexus is an authoritative, open geographic exploration platform designed to connect people with Earth's geopolitical entities, oceanic depths, and geomorphological phenomena.
+    </p>
+  </div>
+
+  <div style="display: flex; flex-direction: column; gap: 2rem;">
+    <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 2rem;">
+      <h2 style="font-size: 1.4rem; color: var(--accent-cyan); margin-bottom: 0.75rem;">1. Guiding Philosophy & Geographic Veracity</h2>
+      <p style="color: var(--text-secondary); line-height: 1.8;">
+        TerraNexus adheres strictly to open, verified, and authoritative international standards. We derive territorial polygons, population indicators, and hydrographic depths directly from accredited organizations like Natural Earth, the United Nations Statistics Division, the World Bank, and the International Hydrographic Organization. We never invent coordinates, statistics, or boundaries.
+      </p>
+    </div>
+
+    <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 2rem;">
+      <h2 style="font-size: 1.4rem; color: var(--accent-cyan); margin-bottom: 0.75rem;">2. Architecture & Technology Stack</h2>
+      <p style="color: var(--text-secondary); line-height: 1.8; margin-bottom: 1rem;">
+        Engineered with a clean, decoupled, and maintainable architecture:
+      </p>
+      <ul style="list-style: disc; margin-left: 1.5rem; color: var(--text-secondary); line-height: 1.8;">
+        <li><strong>Backend:</strong> Python Flask, Flask-SQLAlchemy, Werkzeug secure password hashing, Flask-Login.</li>
+        <li><strong>Database:</strong> MySQL primary database with relational integrity, foreign keys, and indexes.</li>
+        <li><strong>Frontend:</strong> Responsive HTML5, Vanilla CSS3 design system with dark/light themes, JavaScript (ES6+).</li>
+        <li><strong>Mapping:</strong> Leaflet.js with multi-layer CartoDB & OpenStreetMap vector boundary overlays.</li>
+        <li><strong>Mobile:</strong> Installable Progressive Web App (PWA) with service worker caching.</li>
+      </ul>
+    </div>
+
+    <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 2rem;">
+      <h2 style="font-size: 1.4rem; color: var(--accent-cyan); margin-bottom: 0.75rem;">3. Boundary Neutrality & Educational Scope</h2>
+      <p style="color: var(--text-secondary); line-height: 1.8;">
+        Map lines and administrative divisions displayed within TerraNexus are intended purely for geographic reference and educational visualization. They do not imply the expression of any political opinion concerning the legal status or sovereignty of any territory or border.
+      </p>
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,115 @@
+{% extends "base.html" %}
+
+{% block title %}{{ ocean.name }} - Ocean Encyclopedia - {{ app_name }}{% endblock %}
+
+{% block content %}
+<section class="tn-detail-hero">
+  <div class="tn-detail-header">
+    <div>
+      <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.5rem;">
+        <span style="font-size: 2.8rem;">🌊</span>
+        <h1 class="tn-detail-title">{{ ocean.name }}</h1>
+      </div>
+      <p style="color: var(--text-secondary); font-size: 1.1rem; max-width: 800px;">
+        Surrounding Continents: {{ ocean.surrounding_continents }}
+      </p>
+    </div>
+
+    <div style="display: flex; align-items: center; gap: 0.75rem;">
+      <button class="tn-btn tn-btn-outline tn-fav-btn {% if is_favorite %}active{% endif %}"
+              data-item-type="ocean"
+              data-item-id="{{ ocean.slug }}"
+              data-item-title="{{ ocean.name }}">
+        {% if is_favorite %}★ Saved{% else %}☆ Save Ocean{% endif %}
+      </button>
+      <a href="{{ url_for('oceans.list_oceans') }}" class="tn-btn tn-btn-outline tn-btn-sm">&larr; All Oceans</a>
+    </div>
+  </div>
+</section>
+
+<div style="max-width: 1200px; margin: 0 auto 4rem; padding: 0 1.5rem;">
+  <!-- Bathymetric Stats -->
+  <div class="tn-stats-grid" style="margin-bottom: 2.5rem;">
+    <div class="tn-stat-card">
+      <span class="tn-stat-label">Surface Area</span>
+      <div class="tn-stat-num" style="font-size: 1.8rem;">{{ "{:,}".format(ocean.area_km2) }}</div>
+      <span style="font-size: 0.8rem; color: var(--text-muted);">km² (Square Kilometers)</span>
+    </div>
+
+    <div class="tn-stat-card">
+      <span class="tn-stat-label">Maximum Sounding Depth</span>
+      <div class="tn-stat-num" style="font-size: 1.8rem;">{{ "{:,}".format(ocean.max_depth_m) }}</div>
+      <span style="font-size: 0.8rem; color: var(--text-muted);">Meters ({{ ocean.max_depth_location }})</span>
+    </div>
+
+    <div class="tn-stat-card">
+      <span class="tn-stat-label">Mean Bathymetric Depth</span>
+      <div class="tn-stat-num" style="font-size: 1.8rem;">{{ "{:,}".format(ocean.avg_depth_m) if ocean.avg_depth_m else 'N/A' }}</div>
+      <span style="font-size: 0.8rem; color: var(--text-muted);">Meters</span>
+    </div>
+  </div>
+
+  <!-- Detailed Sections -->
+  <div style="display: flex; flex-direction: column; gap: 1.5rem;">
+    <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 1.75rem;">
+      <h3 style="color: var(--accent-cyan); font-size: 1.3rem; margin-bottom: 0.75rem;">Hydrographic Overview</h3>
+      <p style="font-size: 1.05rem; line-height: 1.8; color: var(--text-secondary);">
+        {{ ocean.overview }}
+      </p>
+    </div>
+
+    <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 1.75rem;">
+      <h3 style="color: var(--accent-cyan); font-size: 1.3rem; margin-bottom: 0.75rem;">Marine Biodiversity & Ecosystems</h3>
+      <p style="font-size: 1rem; line-height: 1.8; color: var(--text-secondary);">
+        {{ ocean.marine_biodiversity }}
+      </p>
+    </div>
+
+    <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 1.75rem;">
+      <h3 style="color: var(--accent-cyan); font-size: 1.3rem; margin-bottom: 0.75rem;">Maritime Economic Significance</h3>
+      <p style="font-size: 1rem; line-height: 1.8; color: var(--text-secondary);">
+        {{ ocean.economic_importance }}
+      </p>
+    </div>
+
+    <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 1.75rem;">
+      <h3 style="color: var(--danger); font-size: 1.3rem; margin-bottom: 0.75rem;">Environmental Vulnerabilities & Conservation</h3>
+      <p style="font-size: 1rem; line-height: 1.8; color: var(--text-secondary);">
+        {{ ocean.environmental_challenges }}
+      </p>
+    </div>
+  </div>
+
+  <!-- Connected Marginal Seas -->
+  <div style="margin-top: 3rem;">
+    <h2 style="font-size: 1.5rem; margin-bottom: 1rem;">Marginal & Connected Seas ({{ seas|length }})</h2>
+    {% if seas %}
+      <div class="tn-grid">
+        {% for s in seas %}
+          <a href="{{ url_for('seas.sea_detail', slug=s.slug) }}" class="tn-card">
+            <div class="tn-card-header">
+              <div>
+                <h4 class="tn-card-title">{{ s.name }}</h4>
+                <p class="tn-card-subtitle">{{ s.sea_type.capitalize() }} Sea</p>
+              </div>
+              <div style="font-size: 1.5rem;">⛵</div>
+            </div>
+            <div class="tn-card-meta">
+              <div>
+                <span class="tn-card-meta-label">Area</span>
+                <span class="tn-card-meta-val">{{ "{:,.0f}".format(s.area_km2) if s.area_km2 else 'N/A' }} km²</span>
+              </div>
+              <div>
+                <span class="tn-card-meta-label">Max Depth</span>
+                <span class="tn-card-meta-val">{{ "{:,}".format(s.max_depth_m) if s.max_depth_m else 'N/A' }} m</span>
+              </div>
+            </div>
+          </a>
+        {% endfor %}
+      </div>
+    {% else %}
+      <p style="color: var(--text-muted);">No separate marginal seas cataloged under this ocean division.</p>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+
+{% block title %}Privacy Policy - {{ app_name }}{% endblock %}
+
+{% block content %}
+<div style="max-width: 900px; margin: 3rem auto 5rem; padding: 0 1.5rem;">
+  <h1 style="font-size: 2.4rem; margin-bottom: 0.75rem;">Privacy Policy</h1>
+  <p style="color: var(--text-secondary); margin-bottom: 2rem;">Last Updated: October 2026</p>
+
+  <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 2rem; display: flex; flex-direction: column; gap: 1.5rem; line-height: 1.8; color: var(--text-secondary);">
+    <div>
+      <h3 style="color: var(--accent-cyan); margin-bottom: 0.5rem;">1. Information We Collect</h3>
+      <p>We collect only the minimum required information necessary to provide an authentic exploration experience: username, email address, password hash (stored using irreversible cryptographic salted hashing), display preferences, and saved favorites.</p>
+    </div>
+
+    <div>
+      <h3 style="color: var(--accent-cyan); margin-bottom: 0.5rem;">2. Data Retention & Cookies</h3>
+      <p>Session cookies are configured with HttpOnly and SameSite protections. We do not track users across third-party networks or sell any user information.</p>
+    </div>
+
+    <div>
+      <h3 style="color: var(--accent-cyan); margin-bottom: 0.5rem;">3. Right to Deletion</h3>
+      <p>Users maintain the absolute right to request permanent account deletion via Account Settings at any time.</p>
+    </div>
+  </div>
+</div>
+{% endblock %}

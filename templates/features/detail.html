@@ -1,0 +1,93 @@
+{% extends "base.html" %}
+
+{% block title %}{{ feature.name }} ({{ feature.feature_type.replace('_', ' ')|title }}) - {{ app_name }}{% endblock %}
+
+{% block content %}
+<section class="tn-detail-hero">
+  <div class="tn-detail-header">
+    <div>
+      <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.5rem; flex-wrap: wrap;">
+        <span style="font-size: 2.8rem;">
+          {% if 'mountain' in feature.feature_type %}🏔️{% elif 'river' in feature.feature_type or 'strait' in feature.feature_type %}🌊{% elif 'desert' in feature.feature_type %}🏜️{% elif 'trench' in feature.feature_type %}⚓{% else %}📍{% endif %}
+        </span>
+        <h1 class="tn-detail-title">{{ feature.name }}</h1>
+        <span class="tn-badge">{{ feature.feature_type.replace('_', ' ') | title }}</span>
+      </div>
+      {% if feature.alternative_names %}
+        <p style="color: var(--text-muted); font-size: 0.95rem; margin-bottom: 0.25rem;">
+          Alternative Names: <em>{{ feature.alternative_names }}</em>
+        </p>
+      {% endif %}
+      <p style="color: var(--text-secondary); font-size: 1.05rem;">
+        Countries Involved: <strong>{{ feature.countries_involved or 'International Waters / Domain' }}</strong>
+      </p>
+    </div>
+
+    <div style="display: flex; align-items: center; gap: 0.75rem;">
+      <button class="tn-btn tn-btn-outline tn-fav-btn {% if is_favorite %}active{% endif %}"
+              data-item-type="feature"
+              data-item-id="{{ feature.slug }}"
+              data-item-title="{{ feature.name }}">
+        {% if is_favorite %}★ Saved{% else %}☆ Save Feature{% endif %}
+      </button>
+      <a href="{{ url_for('features.list_features') }}" class="tn-btn tn-btn-outline tn-btn-sm">&larr; All Features</a>
+    </div>
+  </div>
+</section>
+
+<div style="max-width: 1200px; margin: 0 auto 4rem; padding: 0 1.5rem;">
+  <div class="tn-table-responsive" style="margin-bottom: 2rem;">
+    <table class="tn-table">
+      <tbody>
+        <tr>
+          <th style="width: 28%;">Feature Classification</th>
+          <td><strong>{{ feature.feature_type.replace('_', ' ') | title }}</strong></td>
+        </tr>
+        <tr>
+          <th>Geographic Coordinates</th>
+          <td>{{ feature.latitude }}° N, {{ feature.longitude }}° E</td>
+        </tr>
+        {% if feature.elevation_m %}
+          <tr>
+            <th>Peak Elevation</th>
+            <td><strong>{{ "{:,}".format(feature.elevation_m) }}</strong> meters above sea level</td>
+          </tr>
+        {% endif %}
+        {% if feature.depth_m %}
+          <tr>
+            <th>Maximum Depth</th>
+            <td><strong>{{ "{:,}".format(feature.depth_m) }}</strong> meters below sea level</td>
+          </tr>
+        {% endif %}
+        {% if feature.length_km %}
+          <tr>
+            <th>Course / Length</th>
+            <td><strong>{{ "{:,.1f}".format(feature.length_km) }}</strong> km</td>
+          </tr>
+        {% endif %}
+        {% if feature.area_km2 %}
+          <tr>
+            <th>Surface Area</th>
+            <td><strong>{{ "{:,.0f}".format(feature.area_km2) }}</strong> km²</td>
+          </tr>
+        {% endif %}
+        <tr>
+          <th>Connected Features & Basins</th>
+          <td>{{ feature.connected_features or 'N/A' }}</td>
+        </tr>
+        <tr>
+          <th>Primary Authority / Source</th>
+          <td>{{ feature.data_source }}</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 1.75rem;">
+    <h3 style="color: var(--accent-cyan); font-size: 1.25rem; margin-bottom: 0.75rem;">Geomorphological Overview</h3>
+    <p style="font-size: 1.05rem; line-height: 1.8; color: var(--text-secondary);">
+      {{ feature.overview }}
+    </p>
+  </div>
+</div>
+{% endblock %}

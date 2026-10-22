@@ -1,0 +1,119 @@
+{% extends "admin/layout.html" %}
+
+{% block title %}User Management - Admin Console - {{ app_name }}{% endblock %}
+
+{% block admin_content %}
+<div style="margin-bottom: 2rem;">
+  <h1 style="font-size: 2rem; margin-bottom: 0.25rem;">User Account Management</h1>
+  <p style="color: var(--text-secondary); font-size: 0.95rem;">
+    Manage user roles, review account holds, and audit account access privileges.
+  </p>
+</div>
+
+<!-- Search & Filters -->
+<form method="GET" action="{{ url_for('admin.users') }}" style="
+  background: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--radius-md);
+  padding: 1.25rem; margin-bottom: 2rem; display: flex; align-items: center; gap: 1rem; flex-wrap: wrap;
+">
+  <input type="text" name="q" value="{{ search or '' }}" placeholder="Search username, email, or display name..." style="
+    flex: 1; min-width: 240px; padding: 0.6rem 1rem; background: rgba(6, 12, 24, 0.7); border: 1px solid var(--border-color);
+    border-radius: var(--radius-sm); color: var(--text-primary); font-size: 0.9rem; outline: none;
+  ">
+
+  <select name="status" style="
+    padding: 0.6rem 1rem; background: rgba(6, 12, 24, 0.7); border: 1px solid var(--border-color);
+    border-radius: var(--radius-sm); color: var(--text-primary); font-size: 0.9rem; outline: none;
+  ">
+    <option value="">All Account Statuses</option>
+    <option value="active" {% if status_filter == 'active' %}selected{% endif %}>Active Only</option>
+    <option value="suspended" {% if status_filter == 'suspended' %}selected{% endif %}>Suspended Only</option>
+    <option value="deletion_requested" {% if status_filter == 'deletion_requested' %}selected{% endif %}>Deletion Requested</option>
+  </select>
+
+  <button type="submit" class="tn-btn tn-btn-primary tn-btn-sm">Filter Users</button>
+  {% if search or status_filter %}
+    <a href="{{ url_for('admin.users') }}" class="tn-btn tn-btn-outline tn-btn-sm">Reset</a>
+  {% endif %}
+</form>
+
+<!-- Users Table -->
+<div class="tn-table-responsive">
+  <table class="tn-table">
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>User Details</th>
+        <th>Current Role</th>
+        <th>Status</th>
+        <th>Registered</th>
+        <th>Administrative Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for u in users %}
+        <tr>
+          <td>#{{ u.id }}</td>
+          <td>
+            <div style="font-weight: 600; color: var(--text-primary);">{{ u.display_name or u.username }}</div>
+            <div style="font-size: 0.78rem; color: var(--text-muted);">@{{ u.username }} &bull; {{ u.email }}</div>
+            {% if u.deletion_requested %}
+              <span class="tn-badge" style="background: rgba(239, 68, 68, 0.2); color: var(--danger); border-color: var(--danger); font-size: 0.65rem; margin-top: 4px;">
+                Deletion Requested
+              </span>
+            {% endif %}
+          </td>
+          <td>
+            <form method="POST" action="{{ url_for('admin.update_user_role', user_id=u.id) }}" style="display: flex; gap: 4px;">
+              <select name="role_id" style="
+                padding: 0.35rem 0.6rem; background: rgba(6, 12, 24, 0.8); border: 1px solid var(--border-color);
+                border-radius: var(--radius-sm); color: var(--text-primary); font-size: 0.8rem; outline: none;
+              ">
+                {% for r in roles %}
+                  <option value="{{ r.id }}" {% if u.has_role(r.name) %}selected{% endif %}>{{ r.name }}</option>
+                {% endfor %}
+              </select>
+              <button type="submit" class="tn-btn tn-btn-outline tn-btn-sm" style="padding: 0.25rem 0.5rem; font-size: 0.75rem;">Set</button>
+            </form>
+          </td>
+          <td>
+            {% if u.is_suspended %}
+              <span class="tn-badge" style="background: rgba(239, 68, 68, 0.2); color: var(--danger); border-color: var(--danger);">
+                Suspended
+              </span>
+            {% else %}
+              <span class="tn-badge" style="background: rgba(16, 185, 129, 0.2); color: var(--success); border-color: var(--success);">
+                Active
+              </span>
+            {% endif %}
+          </td>
+          <td style="font-size: 0.82rem; color: var(--text-muted);">{{ u.created_at.strftime('%Y-%m-%d') }}</td>
+          <td>
+            {% if u.id != current_user.id %}
+              <form method="POST" action="{{ url_for('admin.toggle_suspend_user', user_id=u.id) }}" onsubmit="return confirm('Confirm account suspension state change for {{ u.username }}?');" style="display: inline;">
+                <input type="hidden" name="reason" value="Administrative action from console">
+                {% if u.is_suspended %}
+                  <button type="submit" class="tn-btn tn-btn-outline tn-btn-sm" style="color: var(--success); border-color: var(--success);">
+                    Reactivate
+                  </button>
+                {% else %}
+                  <button type="submit" class="tn-btn tn-btn-outline tn-btn-sm" style="color: var(--danger); border-color: var(--danger);">
+                    Suspend
+                  </button>
+                {% endif %}
+              </form>
+            {% else %}
+              <span style="font-size: 0.8rem; color: var(--text-muted);">Current Admin</span>
+            {% endif %}
+          </td>
+        </tr>
+      {% else %}
+        <tr>
+          <td colspan="6" style="text-align: center; padding: 2rem; color: var(--text-muted);">
+            No user accounts matched the filter criteria.
+          </td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

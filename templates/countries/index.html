@@ -1,0 +1,112 @@
+{% extends "base.html" %}
+
+{% block title %}Countries of the World - {{ app_name }}{% endblock %}
+
+{% block content %}
+<div style="max-width: 1440px; margin: 2rem auto; padding: 0 1.5rem;">
+  <div style="margin-bottom: 2rem;">
+    <h1 style="font-size: 2.4rem; margin-bottom: 0.5rem;">Countries of the World</h1>
+    <p style="color: var(--text-secondary); font-size: 1rem; max-width: 800px;">
+      Explore sovereign nations and territories cataloged per ISO 3166-1 standards. Discover capitals, official languages, currencies, population statistics, and administrative subdivisions.
+    </p>
+  </div>
+
+  <!-- Filter & Search Controls Bar -->
+  <form method="GET" action="{{ url_for('countries.list_countries') }}" style="
+    background: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--radius-md);
+    padding: 1.25rem; margin-bottom: 2rem; display: flex; align-items: center; justify-content: space-between;
+    gap: 1rem; flex-wrap: wrap;
+  ">
+    <!-- Search Query Input -->
+    <div style="flex: 1; min-width: 240px;">
+      <input type="text" name="q" value="{{ search_query or '' }}" placeholder="Filter by country or capital..." style="
+        width: 100%; padding: 0.6rem 1rem; background: rgba(6, 12, 24, 0.7); border: 1px solid var(--border-color);
+        border-radius: var(--radius-sm); color: var(--text-primary); font-size: 0.9rem; outline: none;
+      ">
+    </div>
+
+    <!-- Continent Filter -->
+    <div>
+      <select name="continent" style="
+        padding: 0.6rem 1rem; background: rgba(6, 12, 24, 0.7); border: 1px solid var(--border-color);
+        border-radius: var(--radius-sm); color: var(--text-primary); font-size: 0.9rem; outline: none;
+      ">
+        <option value="">All Continents</option>
+        {% for cont in continents %}
+          <option value="{{ cont.slug }}" {% if selected_continent == cont.slug %}selected{% endif %}>{{ cont.name }}</option>
+        {% endfor %}
+      </select>
+    </div>
+
+    <!-- Sort Filter -->
+    <div>
+      <select name="sort" style="
+        padding: 0.6rem 1rem; background: rgba(6, 12, 24, 0.7); border: 1px solid var(--border-color);
+        border-radius: var(--radius-sm); color: var(--text-primary); font-size: 0.9rem; outline: none;
+      ">
+        <option value="name" {% if current_sort == 'name' %}selected{% endif %}>Sort by Name (A-Z)</option>
+        <option value="population" {% if current_sort == 'population' %}selected{% endif %}>Sort by Population (High-Low)</option>
+        <option value="area" {% if current_sort == 'area' %}selected{% endif %}>Sort by Area (Largest-Smallest)</option>
+      </select>
+    </div>
+
+    <div>
+      <button type="submit" class="tn-btn tn-btn-primary tn-btn-sm" style="padding: 0.6rem 1.2rem;">Apply Filters</button>
+      {% if search_query or selected_continent or current_sort != 'name' %}
+        <a href="{{ url_for('countries.list_countries') }}" class="tn-btn tn-btn-outline tn-btn-sm" style="padding: 0.6rem 1rem;">Reset</a>
+      {% endif %}
+    </div>
+  </form>
+
+  <!-- Total Result Count -->
+  <div style="margin-bottom: 1.25rem; font-size: 0.9rem; color: var(--text-secondary);">
+    Displaying <strong>{{ total_count }}</strong> countries
+    {% if selected_continent %} in <strong>{{ selected_continent | capitalize }}</strong>{% endif %}
+  </div>
+
+  <!-- Countries Grid -->
+  <div class="tn-grid">
+    {% for country in countries %}
+      <a href="{{ url_for('countries.country_detail', slug=country.slug) }}" class="tn-card">
+        <div class="tn-card-header">
+          <div>
+            <div class="tn-card-title">{{ country.common_name }}</div>
+            <div class="tn-card-subtitle">{{ country.continent_rel.name }} • {{ country.subregion or '' }}</div>
+          </div>
+          <div class="tn-card-flag">{{ country.flag_emoji or '🌐' }}</div>
+        </div>
+
+        <div class="tn-card-meta">
+          <div>
+            <span class="tn-card-meta-label">Capital</span>
+            <span class="tn-card-meta-val">{{ country.capital_name or 'N/A' }}</span>
+          </div>
+          <div>
+            <span class="tn-card-meta-label">Currency</span>
+            <span class="tn-card-meta-val">{{ country.currency_code }} ({{ country.currency_symbol }})</span>
+          </div>
+          <div>
+            <span class="tn-card-meta-label">Population</span>
+            <span class="tn-card-meta-val">{{ "{:,}".format(country.population) if country.population else 'N/A' }}</span>
+          </div>
+          <div>
+            <span class="tn-card-meta-label">Total Area</span>
+            <span class="tn-card-meta-val">{{ "{:,.0f}".format(country.area_km2) if country.area_km2 else 'N/A' }} km²</span>
+          </div>
+        </div>
+
+        <div style="margin-top: 1rem; display: flex; align-items: center; justify-content: space-between; font-size: 0.8rem; color: var(--text-muted);">
+          <span>ISO: <strong>{{ country.iso_a3 }}</strong></span>
+          <span style="color: var(--accent-cyan); font-weight: 600;">Explore &rarr;</span>
+        </div>
+      </a>
+    {% else %}
+      <div style="grid-column: 1 / -1; padding: 3rem; text-align: center; background: var(--bg-card); border-radius: var(--radius-md);">
+        <h3>No countries matched your search criteria</h3>
+        <p style="color: var(--text-secondary); margin-top: 0.5rem;">Try modifying your keyword or reset filters.</p>
+        <a href="{{ url_for('countries.list_countries') }}" class="tn-btn tn-btn-primary" style="margin-top: 1rem;">View All Countries</a>
+      </div>
+    {% endfor %}
+  </div>
+</div>
+{% endblock %}

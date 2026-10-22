@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+
+{% block title %}Interactive World Map - {{ app_name }}{% endblock %}
+
+{% block content %}
+<div style="max-width: 1560px; margin: 1.5rem auto; padding: 0 1.5rem;">
+  <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.25rem; flex-wrap: wrap; gap: 1rem;">
+    <div>
+      <h1 style="font-size: 2rem; margin-bottom: 0.25rem;">Global Interactive Geography Map</h1>
+      <p style="color: var(--text-secondary); font-size: 0.92rem;">
+        Click on any country boundary or marker to view key facts, capitals, demographics, and connected geography.
+      </p>
+    </div>
+    <div style="display: flex; align-items: center; gap: 0.75rem;">
+      <select id="tileLayerSelect" style="
+        background: var(--bg-card); color: var(--text-primary); border: 1px solid var(--border-color);
+        border-radius: var(--radius-sm); padding: 0.5rem 0.85rem; font-size: 0.88rem; outline: none;
+      ">
+        <option value="dark">CartoDB Dark Theme</option>
+        <option value="streets">OpenStreetMap Standard</option>
+      </select>
+      <button id="resetMapView" class="tn-btn tn-btn-outline tn-btn-sm">
+        ⟲ Reset World Center
+      </button>
+    </div>
+  </div>
+
+  <div class="tn-map-card" style="margin-bottom: 2rem;">
+    <div id="worldMap" class="tn-map-frame" style="height: 720px;" data-lat="20.0" data-lon="10.0" data-zoom="3">
+      <!-- Mouse Coordinates Pill -->
+      <div id="coordsDisplay" class="tn-coords-pill">0.0000° N, 0.0000° E</div>
+
+      <!-- Slideout Info Panel -->
+      <div id="mapInfoPanel" class="tn-map-panel">
+        <div class="tn-map-panel-header">
+          <h4 id="panelTitle" style="font-size: 1.2rem; font-weight: 700; color: var(--accent-cyan); margin: 0;">Country Info</h4>
+          <button class="tn-map-panel-close" onclick="closeMapPanel()">&times;</button>
+        </div>
+        <div id="panelBody" style="margin-bottom: 1rem;"></div>
+        <a id="panelLink" href="#" class="tn-btn tn-btn-primary tn-btn-sm" style="width: 100%;">
+          View Comprehensive Dossier &rarr;
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Map Legend & Instructions -->
+  <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 1.25rem; display: flex; align-items: center; justify-content: space-around; flex-wrap: wrap; gap: 1rem; font-size: 0.88rem;">
+    <div style="display: flex; align-items: center; gap: 0.5rem;">
+      <span style="font-size: 1.2rem;">🏛️</span>
+      <span><strong>Country Capitals</strong>: Administrative and national governance seats</span>
+    </div>
+    <div style="display: flex; align-items: center; gap: 0.5rem;">
+      <span style="font-size: 1.2rem;">⛵</span>
+      <span><strong>Seas & Gulfs</strong>: Hydrographic bodies and connecting straits</span>
+    </div>
+    <div style="display: flex; align-items: center; gap: 0.5rem;">
+      <span style="font-size: 1.2rem;">🏔️</span>
+      <span><strong>Mountain Peaks</strong>: High-altitude elevations and ranges</span>
+    </div>
+    <div style="display: flex; align-items: center; gap: 0.5rem;">
+      <span style="font-size: 1.2rem;">🌊</span>
+      <span><strong>Rivers & Waterways</strong>: Major continental drainage systems</span>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script src="/static/js/map.js"></script>
+{% endblock %}

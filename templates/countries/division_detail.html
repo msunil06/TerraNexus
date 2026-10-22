@@ -1,0 +1,104 @@
+{% extends "base.html" %}
+
+{% block title %}{{ division.name }} ({{ division.division_type }}) - {{ country.common_name }} - {{ app_name }}{% endblock %}
+
+{% block content %}
+<div style="max-width: 1200px; margin: 2rem auto 4rem; padding: 0 1.5rem;">
+  <!-- Breadcrumbs -->
+  <nav style="margin-bottom: 1.5rem; font-size: 0.9rem; color: var(--text-muted);" aria-label="Breadcrumb">
+    <a href="{{ url_for('countries.list_countries') }}">Countries</a> &rsaquo;
+    <a href="{{ url_for('countries.country_detail', slug=country.slug) }}">{{ country.common_name }}</a> &rsaquo;
+    <span style="color: var(--accent-cyan); font-weight: 600;">{{ division.name }}</span>
+  </nav>
+
+  <!-- Header Card -->
+  <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 2rem; margin-bottom: 2rem;">
+    <div style="display: flex; align-items: flex-start; justify-content: space-between; gap: 1.5rem; flex-wrap: wrap;">
+      <div>
+        <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.5rem;">
+          <h1 style="font-size: 2.2rem; margin: 0;">{{ division.name }}</h1>
+          <span class="tn-badge">{{ division.division_type }}</span>
+          {% if division.code %}<span class="tn-badge" style="background: rgba(0, 187, 249, 0.15); color: var(--accent-blue); border-color: rgba(0, 187, 249, 0.3);">{{ division.code }}</span>{% endif %}
+        </div>
+        <p style="color: var(--text-secondary); font-size: 1.05rem;">
+          Administrative Division of <a href="{{ url_for('countries.country_detail', slug=country.slug) }}"><strong>{{ country.common_name }}</strong></a>
+        </p>
+      </div>
+
+      <a href="{{ url_for('countries.country_detail', slug=country.slug) }}" class="tn-btn tn-btn-outline tn-btn-sm">
+        &larr; Back to {{ country.common_name }} Overview
+      </a>
+    </div>
+
+    <!-- Quick Stats Grid -->
+    <div class="tn-grid" style="grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); margin-top: 2rem;">
+      <div class="tn-stat-card" style="padding: 1.25rem;">
+        <span class="tn-card-meta-label">Administrative Center</span>
+        <div style="font-size: 1.2rem; font-weight: 700; color: var(--text-primary); margin-top: 4px;">
+          {{ division.capital_or_center or 'N/A' }}
+        </div>
+      </div>
+
+      <div class="tn-stat-card" style="padding: 1.25rem;">
+        <span class="tn-card-meta-label">Total Population</span>
+        <div style="font-size: 1.2rem; font-weight: 700; color: var(--text-primary); margin-top: 4px;">
+          {{ "{:,}".format(division.population) if division.population else 'N/A' }}
+        </div>
+      </div>
+
+      <div class="tn-stat-card" style="padding: 1.25rem;">
+        <span class="tn-card-meta-label">Total Area</span>
+        <div style="font-size: 1.2rem; font-weight: 700; color: var(--text-primary); margin-top: 4px;">
+          {{ "{:,.0f}".format(division.area_km2) if division.area_km2 else 'N/A' }} km²
+        </div>
+      </div>
+
+      <div class="tn-stat-card" style="padding: 1.25rem;">
+        <span class="tn-card-meta-label">Geographic Coordinates</span>
+        <div style="font-size: 1.1rem; font-weight: 600; color: var(--text-primary); margin-top: 4px;">
+          {{ division.latitude or '0' }}° N, {{ division.longitude or '0' }}° E
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Lower-level Subdivisions / Districts -->
+  <div style="margin-bottom: 3rem;">
+    <h2 style="font-size: 1.5rem; margin-bottom: 0.5rem;">Districts & Sub-Divisions ({{ subdivisions|length }})</h2>
+    <p style="color: var(--text-secondary); font-size: 0.92rem; margin-bottom: 1.5rem;">
+      Secondary administrative divisions cataloged within {{ division.name }}.
+    </p>
+
+    {% if subdivisions %}
+      <div class="tn-grid">
+        {% for sub in subdivisions %}
+          <div class="tn-card">
+            <div class="tn-card-header">
+              <div>
+                <span class="tn-badge" style="font-size: 0.65rem; margin-bottom: 4px;">{{ sub.division_type }}</span>
+                <h4 class="tn-card-title">{{ sub.name }}</h4>
+                <p class="tn-card-subtitle">Center: {{ sub.capital_or_center or 'N/A' }}</p>
+              </div>
+              <div style="font-size: 1.5rem;">📍</div>
+            </div>
+            <div class="tn-card-meta">
+              <div>
+                <span class="tn-card-meta-label">Population</span>
+                <span class="tn-card-meta-val">{{ "{:,}".format(sub.population) if sub.population else 'N/A' }}</span>
+              </div>
+              <div>
+                <span class="tn-card-meta-label">Area</span>
+                <span class="tn-card-meta-val">{{ "{:,.0f}".format(sub.area_km2) if sub.area_km2 else 'N/A' }} km²</span>
+              </div>
+            </div>
+          </div>
+        {% endfor %}
+      </div>
+    {% else %}
+      <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 2rem; text-align: center; color: var(--text-muted);">
+        Secondary district boundaries for {{ division.name }} are under editorial verification.
+      </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

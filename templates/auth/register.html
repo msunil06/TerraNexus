@@ -1,0 +1,75 @@
+{% extends "base.html" %}
+
+{% block title %}Create Account - {{ app_name }}{% endblock %}
+
+{% block content %}
+<div style="max-width: 480px; margin: 3.5rem auto; padding: 0 1.5rem;">
+  <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--radius-lg); padding: 2.25rem; box-shadow: var(--shadow-lg);">
+    <div style="text-align: center; margin-bottom: 2rem;">
+      <img src="/static/images/logo.png" alt="TerraNexus Logo" style="width: 48px; height: 48px; border-radius: 50%; margin-bottom: 0.75rem;">
+      <h1 style="font-size: 1.8rem; margin-bottom: 0.25rem;">Join TerraNexus</h1>
+      <p style="color: var(--text-secondary); font-size: 0.92rem;">Save favorites, bookmark map coordinates, and explore the planet.</p>
+    </div>
+
+    <form method="POST" action="{{ url_for('auth.register') }}">
+      <div style="margin-bottom: 1.15rem;">
+        <label style="display: block; font-weight: 600; font-size: 0.88rem; margin-bottom: 0.4rem; color: var(--text-secondary);">
+          Username
+        </label>
+        <input type="text" name="username" required style="
+          width: 100%; padding: 0.65rem 1rem; background: rgba(6, 12, 24, 0.7); border: 1px solid var(--border-color);
+          border-radius: var(--radius-sm); color: var(--text-primary); font-size: 0.95rem; outline: none;
+        " placeholder="e.g. explorer123">
+      </div>
+
+      <div style="margin-bottom: 1.15rem;">
+        <label style="display: block; font-weight: 600; font-size: 0.88rem; margin-bottom: 0.4rem; color: var(--text-secondary);">
+          Display Name (Optional)
+        </label>
+        <input type="text" name="display_name" style="
+          width: 100%; padding: 0.65rem 1rem; background: rgba(6, 12, 24, 0.7); border: 1px solid var(--border-color);
+          border-radius: var(--radius-sm); color: var(--text-primary); font-size: 0.95rem; outline: none;
+        " placeholder="e.g. Sunil Maurya">
+      </div>
+
+      <div style="margin-bottom: 1.15rem;">
+        <label style="display: block; font-weight: 600; font-size: 0.88rem; margin-bottom: 0.4rem; color: var(--text-secondary);">
+          Email Address
+        </label>
+        <input type="email" name="email" required style="
+          width: 100%; padding: 0.65rem 1rem; background: rgba(6, 12, 24, 0.7); border: 1px solid var(--border-color);
+          border-radius: var(--radius-sm); color: var(--text-primary); font-size: 0.95rem; outline: none;
+        " placeholder="you@example.com">
+      </div>
+
+      <div style="margin-bottom: 1.15rem;">
+        <label style="display: block; font-weight: 600; font-size: 0.88rem; margin-bottom: 0.4rem; color: var(--text-secondary);">
+          Password (min 8 characters)
+        </label>
+        <input type="password" name="password" minlength="8" required style="
+          width: 100%; padding: 0.65rem 1rem; background: rgba(6, 12, 24, 0.7); border: 1px solid var(--border-color);
+          border-radius: var(--radius-sm); color: var(--text-primary); font-size: 0.95rem; outline: none;
+        ">
+      </div>
+
+      <div style="margin-bottom: 1.5rem;">
+        <label style="display: block; font-weight: 600; font-size: 0.88rem; margin-bottom: 0.4rem; color: var(--text-secondary);">
+          Confirm Password
+        </label>
+        <input type="password" name="confirm_password" minlength="8" required style="
+          width: 100%; padding: 0.65rem 1rem; background: rgba(6, 12, 24, 0.7); border: 1px solid var(--border-color);
+          border-radius: var(--radius-sm); color: var(--text-primary); font-size: 0.95rem; outline: none;
+        ">
+      </div>
+
+      <button type="submit" class="tn-btn tn-btn-primary" style="width: 100%; padding: 0.75rem;">
+        Create TerraNexus Account
+      </button>
+    </form>
+
+    <div style="margin-top: 1.75rem; text-align: center; font-size: 0.88rem; color: var(--text-secondary);">
+      Already have an account? <a href="{{ url_for('auth.login') }}">Sign in here</a>
+    </div>
+  </div>
+</div>
+{% endblock %}

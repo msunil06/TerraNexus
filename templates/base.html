@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}{{ app_name }} - {{ tagline }}{% endblock %}</title>
+  <meta name="description" content="{% block meta_description %}TerraNexus is a global geography exploration platform. Discover countries, capitals, currencies, languages, oceans, seas, and geographical features through an interactive world map.{% endblock %}">
+  
+  <!-- Open Graph / SEO -->
+  <meta property="og:title" content="{% block og_title %}{{ app_name }}{% endblock %}">
+  <meta property="og:description" content="{{ tagline }}">
+  <meta property="og:type" content="website">
+  <meta property="og:image" content="/static/images/logo.png">
+
+  <!-- PWA Manifest & Mobile Icons -->
+  <link rel="manifest" href="/static/manifest.json">
+  <meta name="theme-color" content="#001f54">
+  <link rel="icon" type="image/png" href="/static/icons/icon-192.png">
+  <link rel="apple-touch-icon" href="/static/icons/icon-192.png">
+
+  <!-- Leaflet CSS -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+
+  <!-- TerraNexus Custom Stylesheets -->
+  <link rel="stylesheet" href="/static/css/style.css">
+  <link rel="stylesheet" href="/static/css/responsive.css">
+  
+  {% block extra_head %}{% endblock %}
+</head>
+<body>
+
+  <!-- Main Navigation Bar -->
+  <header class="tn-navbar">
+    <div class="tn-nav-container">
+      <a href="{{ url_for('main.index') }}" class="tn-brand" aria-label="TerraNexus Home">
+        <img src="/static/images/logo.png" alt="TerraNexus Logo" class="tn-brand-logo">
+        <span class="tn-brand-name">{{ app_name }}</span>
+      </a>
+
+      <!-- Global Live Search -->
+      <div class="tn-search-wrapper" role="search">
+        <div class="tn-search-input-group">
+          <span class="tn-search-icon" aria-hidden="true">🔍</span>
+          <input type="text" class="tn-search-input" placeholder="Search countries, capitals, seas..." autocomplete="off" aria-label="Global geography search">
+        </div>
+        <div class="tn-search-dropdown" role="listbox"></div>
+      </div>
+
+      <!-- Navigation Links -->
+      <nav>
+        <ul class="tn-nav-links" id="navLinks">
+          <li><a href="{{ url_for('main.index') }}" class="tn-nav-link">Home</a></li>
+          <li><a href="{{ url_for('main.explore_map') }}" class="tn-nav-link">Explore Map</a></li>
+          <li><a href="{{ url_for('countries.list_countries') }}" class="tn-nav-link">Countries</a></li>
+          <li><a href="{{ url_for('continents.list_continents') }}" class="tn-nav-link">Continents</a></li>
+          <li><a href="{{ url_for('oceans.list_oceans') }}" class="tn-nav-link">Oceans</a></li>
+          <li><a href="{{ url_for('seas.list_seas') }}" class="tn-nav-link">Seas</a></li>
+          <li><a href="{{ url_for('features.list_features') }}" class="tn-nav-link">Features</a></li>
+          <li><a href="{{ url_for('main.about') }}" class="tn-nav-link">About</a></li>
+
+          {% if current_user.is_authenticated %}
+            {% if current_user.is_admin %}
+              <li><a href="{{ url_for('admin.dashboard') }}" class="tn-nav-link" style="color: var(--warning); font-weight: 700;">Admin</a></li>
+            {% endif %}
+            <li><a href="{{ url_for('auth.favorites') }}" class="tn-nav-link">★ Favorites</a></li>
+            <li><a href="{{ url_for('auth.profile') }}" class="tn-nav-link">{{ current_user.display_name or current_user.username }}</a></li>
+            <li><a href="{{ url_for('auth.logout') }}" class="tn-nav-link" style="color: var(--danger);">Logout</a></li>
+          {% else %}
+            <li><a href="{{ url_for('auth.login') }}" class="tn-btn tn-btn-outline tn-btn-sm">Sign In</a></li>
+            <li><a href="{{ url_for('auth.register') }}" class="tn-btn tn-btn-primary tn-btn-sm">Join</a></li>
+          {% endif %}
+        </ul>
+      </nav>
+
+      <!-- Theme Switcher & Mobile Menu Button -->
+      <div style="display: flex; align-items: center; gap: 0.5rem;">
+        <button id="themeToggle" class="tn-btn-icon" aria-label="Toggle light and dark theme">
+          <span id="themeIcon">☀️</span>
+        </button>
+        <button id="mobileNavToggle" class="tn-btn-icon tn-mobile-menu-toggle" style="display: none;" aria-label="Toggle navigation menu" aria-expanded="false">
+          ☰
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Flash Messages -->
+  <div style="max-width: 1440px; margin: 1rem auto 0; padding: 0 1.5rem; width: 100%;">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        {% for category, message in messages %}
+          <div style="
+            padding: 0.85rem 1.25rem; margin-bottom: 1rem; border-radius: 8px; font-size: 0.92rem; font-weight: 500;
+            background: {% if category == 'danger' %}rgba(239, 68, 68, 0.15){% elif category == 'success' %}rgba(16, 185, 129, 0.15){% elif category == 'warning' %}rgba(245, 158, 11, 0.15){% else %}rgba(59, 130, 246, 0.15){% endif %};
+            border: 1px solid {% if category == 'danger' %}#ef4444{% elif category == 'success' %}#10b981{% elif category == 'warning' %}#f59e0b{% else %}#3b82f6{% endif %};
+            color: {% if category == 'danger' %}#ef4444{% elif category == 'success' %}#10b981{% elif category == 'warning' %}#f59e0b{% else %}#60a5fa{% endif %};
+          ">
+            {{ message }}
+          </div>
+        {% endfor %}
+      {% endif %}
+    {% endwith %}
+  </div>
+
+  <!-- Page Content -->
+  <main style="flex: 1;">
+    {% block content %}{% endblock %}
+  </main>
+
+  <!-- Footer -->
+  <footer class="tn-footer">
+    <div class="tn-footer-container">
+      <div>
+        <div style="display: flex; align-items: center; gap: 0.75rem;">
+          <img src="/static/images/logo.png" alt="TerraNexus Logo" style="width: 32px; height: 32px; border-radius: 50%;">
+          <span style="font-family: var(--font-heading); font-size: 1.25rem; font-weight: 800; color: #ffffff;">TerraNexus</span>
+        </div>
+        <p class="tn-footer-brand-desc">{{ tagline }}</p>
+        <p style="margin-top: 10px; font-size: 0.82rem; color: var(--text-muted);">
+          {{ secondary_tagline }}
+        </p>
+      </div>
+
+      <div class="tn-footer-col">
+        <h4>Exploration</h4>
+        <ul class="tn-footer-links">
+          <li><a href="{{ url_for('main.explore_map') }}" class="tn-footer-link">Interactive Map</a></li>
+          <li><a href="{{ url_for('countries.list_countries') }}" class="tn-footer-link">World Countries</a></li>
+          <li><a href="{{ url_for('continents.list_continents') }}" class="tn-footer-link">Continents</a></li>
+          <li><a href="{{ url_for('oceans.list_oceans') }}" class="tn-footer-link">Oceans</a></li>
+          <li><a href="{{ url_for('seas.list_seas') }}" class="tn-footer-link">Seas Catalog</a></li>
+          <li><a href="{{ url_for('features.list_features') }}" class="tn-footer-link">Geographic Features</a></li>
+        </ul>
+      </div>
+
+      <div class="tn-footer-col">
+        <h4>Platform & Sources</h4>
+        <ul class="tn-footer-links">
+          <li><a href="{{ url_for('main.sources') }}" class="tn-footer-link">Authoritative Data Sources</a></li>
+          <li><a href="{{ url_for('main.about') }}" class="tn-footer-link">About TerraNexus</a></li>
+          <li><a href="{{ url_for('main.submit_report') }}" class="tn-footer-link">Correction & Feedback</a></li>
+          <li><a href="{{ url_for('main.accessibility') }}" class="tn-footer-link">Accessibility Statement</a></li>
+          <li><a href="/api/countries" class="tn-footer-link">Open REST API</a></li>
+        </ul>
+      </div>
+
+      <div class="tn-footer-col">
+        <h4>Legal & Privacy</h4>
+        <ul class="tn-footer-links">
+          <li><a href="{{ url_for('main.privacy') }}" class="tn-footer-link">Privacy Policy</a></li>
+          <li><a href="{{ url_for('main.terms') }}" class="tn-footer-link">Terms of Service</a></li>
+          <li><a href="{{ url_for('main.sources') }}" class="tn-footer-link">Open Data Licenses</a></li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="tn-footer-bottom">
+      <div>
+        &copy; 2026 TerraNexus. All geographic data licensed under respective authoritative open standards (Natural Earth, GeoNames, IHO, World Bank).
+      </div>
+      <div>
+        Visual representations are for educational exploration and do not constitute legal boundaries.
+      </div>
+    </div>
+  </footer>
+
+  <!-- Leaflet JavaScript -->
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+
+  <!-- TerraNexus Scripts -->
+  <script src="/static/js/main.js"></script>
+  <script src="/static/js/search.js"></script>
+  {% block extra_scripts %}{% endblock %}
+
+</body>
+</html>

@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+
+{% block title %}Data Sources & Licensing - {{ app_name }}{% endblock %}
+
+{% block content %}
+<div style="max-width: 1200px; margin: 3rem auto 5rem; padding: 0 1.5rem;">
+  <div style="margin-bottom: 2.5rem;">
+    <h1 style="font-size: 2.4rem; margin-bottom: 0.5rem;">Authoritative Geographic Data Sources & Licenses</h1>
+    <p style="color: var(--text-secondary); font-size: 1rem; max-width: 800px;">
+      TerraNexus is built upon open datasets from world-renowned scientific, statistical, and hydrographic organizations. We honor all licensing covenants and provide complete attribution below.
+    </p>
+  </div>
+
+  <div class="tn-grid">
+    {% for src in data_sources %}
+      <div class="tn-card">
+        <div>
+          <span class="tn-badge" style="margin-bottom: 6px;">{{ src.category }}</span>
+          <h3 class="tn-card-title">{{ src.name }}</h3>
+          <p class="tn-card-subtitle">{{ src.organization }}</p>
+          <p style="font-size: 0.88rem; color: var(--text-secondary); margin: 0.75rem 0; line-height: 1.6;">
+            {{ src.description }}
+          </p>
+        </div>
+
+        <div class="tn-card-meta">
+          <div>
+            <span class="tn-card-meta-label">License Term</span>
+            <span class="tn-card-meta-val">{{ src.license }}</span>
+          </div>
+          <div>
+            <span class="tn-card-meta-label">Official Portal</span>
+            {% if src.url %}
+              <a href="{{ src.url }}" target="_blank" rel="noopener noreferrer" style="font-weight: 600; font-size: 0.82rem;">Visit Portal &nearr;</a>
+            {% else %}
+              <span class="tn-card-meta-val">Standard</span>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+    {% endfor %}
+  </div>
+
+  <div style="margin-top: 3rem; background: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 1.5rem;">
+    <h3 style="color: var(--accent-cyan); font-size: 1.2rem; margin-bottom: 0.5rem;">Data Veracity & Attribution Policy</h3>
+    <p style="color: var(--text-secondary); font-size: 0.92rem; line-height: 1.7;">
+      Any geographic record updated through administrative or automated ingestion pipelines preserves the associated primary source record and reference year. Found an outdated metric? You can submit a correction directly via our <a href="{{ url_for('main.submit_report') }}">Correction Report Form</a>.
+    </p>
+  </div>
+</div>
+{% endblock %}

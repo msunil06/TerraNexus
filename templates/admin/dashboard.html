@@ -1,0 +1,105 @@
+{% extends "admin/layout.html" %}
+
+{% block title %}Dashboard - Admin Console - {{ app_name }}{% endblock %}
+
+{% block admin_content %}
+<div style="margin-bottom: 2rem;">
+  <h1 style="font-size: 2rem; margin-bottom: 0.25rem;">Platform Operations Overview</h1>
+  <p style="color: var(--text-secondary); font-size: 0.95rem;">Real-time database records and health telemetry.</p>
+</div>
+
+<!-- Admin Stat Tiles -->
+<div class="tn-stats-grid" style="grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); margin-bottom: 2.5rem;">
+  <div class="tn-stat-card">
+    <span class="tn-stat-label">Registered Users</span>
+    <div class="tn-stat-num">{{ total_users }}</div>
+    <span style="font-size: 0.78rem; color: var(--success);">{{ active_users }} Active Accounts</span>
+  </div>
+
+  <div class="tn-stat-card">
+    <span class="tn-stat-label">Suspended Accounts</span>
+    <div class="tn-stat-num" style="color: {% if suspended_users > 0 %}var(--danger){% else %}var(--text-primary){% endif %};">
+      {{ suspended_users }}
+    </div>
+    <span style="font-size: 0.78rem; color: var(--text-muted);">Under administrative hold</span>
+  </div>
+
+  <div class="tn-stat-card">
+    <span class="tn-stat-label">Pending Reports</span>
+    <div class="tn-stat-num" style="color: {% if pending_reports > 0 %}var(--warning){% else %}var(--text-primary){% endif %};">
+      {{ pending_reports }}
+    </div>
+    <a href="{{ url_for('admin.reports') }}" style="font-size: 0.78rem; color: var(--accent-cyan);">Review Submissions &rarr;</a>
+  </div>
+
+  <div class="tn-stat-card">
+    <span class="tn-stat-label">Countries / Territories</span>
+    <div class="tn-stat-num">{{ total_countries }}</div>
+    <span style="font-size: 0.78rem; color: var(--text-muted);">{{ total_divisions }} Subdivisions</span>
+  </div>
+
+  <div class="tn-stat-card">
+    <span class="tn-stat-label">Marine Features</span>
+    <div class="tn-stat-num">{{ total_oceans + total_seas }}</div>
+    <span style="font-size: 0.78rem; color: var(--text-muted);">{{ total_oceans }} Oceans • {{ total_seas }} Seas</span>
+  </div>
+
+  <div class="tn-stat-card">
+    <span class="tn-stat-label">Physical Formations</span>
+    <div class="tn-stat-num">{{ total_features }}</div>
+    <span style="font-size: 0.78rem; color: var(--text-muted);">Peaks, Rivers, Deserts</span>
+  </div>
+</div>
+
+<div class="tn-grid" style="grid-template-columns: 1fr 1fr; gap: 2rem;">
+  <!-- Recent Audit Logs -->
+  <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 1.5rem;">
+    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem;">
+      <h3 style="font-size: 1.15rem; color: var(--accent-cyan);">Recent Security Audit Logs</h3>
+      <a href="{{ url_for('admin.audit_logs') }}" style="font-size: 0.82rem;">All Logs &rarr;</a>
+    </div>
+
+    {% if recent_logs %}
+      <div style="display: flex; flex-direction: column; gap: 0.75rem;">
+        {% for log in recent_logs %}
+          <div style="padding: 0.75rem; background: rgba(6, 12, 24, 0.5); border-radius: var(--radius-sm); font-size: 0.85rem; border: 1px solid rgba(255, 255, 255, 0.05);">
+            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 4px;">
+              <span class="tn-badge" style="font-size: 0.65rem;">{{ log.action }}</span>
+              <span style="color: var(--text-muted); font-size: 0.75rem;">{{ log.created_at.strftime('%H:%M • %b %d') }}</span>
+            </div>
+            <div style="color: var(--text-primary); font-weight: 500;">{{ log.details }}</div>
+            <div style="color: var(--text-muted); font-size: 0.75rem; margin-top: 4px;">Admin: <strong>{{ log.admin_username }}</strong> • IP: {{ log.ip_address or 'internal' }}</div>
+          </div>
+        {% endfor %}
+      </div>
+    {% else %}
+      <p style="color: var(--text-muted); font-size: 0.85rem;">No administrative audit events recorded yet.</p>
+    {% endif %}
+  </div>
+
+  <!-- Pending User Reports -->
+  <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 1.5rem;">
+    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem;">
+      <h3 style="font-size: 1.15rem; color: var(--warning);">Pending Correction Submissions</h3>
+      <a href="{{ url_for('admin.reports') }}" style="font-size: 0.82rem;">View All &rarr;</a>
+    </div>
+
+    {% if recent_reports %}
+      <div style="display: flex; flex-direction: column; gap: 0.75rem;">
+        {% for rep in recent_reports %}
+          <div style="padding: 0.75rem; background: rgba(6, 12, 24, 0.5); border-radius: var(--radius-sm); font-size: 0.85rem; border: 1px solid rgba(255, 255, 255, 0.05);">
+            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 4px;">
+              <span style="font-weight: 600; color: var(--text-primary);">{{ rep.subject_name or rep.subject_id }} ({{ rep.subject_type }})</span>
+              <span class="tn-badge" style="font-size: 0.65rem; background: rgba(245, 158, 11, 0.2); color: var(--warning); border-color: var(--warning);">{{ rep.status }}</span>
+            </div>
+            <p style="color: var(--text-secondary); margin: 4px 0;">{{ rep.description[:90] }}...</p>
+            <span style="color: var(--text-muted); font-size: 0.75rem;">Submitted on {{ rep.created_at.strftime('%b %d, %Y') }}</span>
+          </div>
+        {% endfor %}
+      </div>
+    {% else %}
+      <p style="color: var(--text-muted); font-size: 0.85rem;">All editorial correction reports are currently resolved.</p>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,85 @@
+{% extends "base.html" %}
+
+{% block title %}My Profile - {{ current_user.display_name or current_user.username }} - {{ app_name }}{% endblock %}
+
+{% block content %}
+<div style="max-width: 900px; margin: 3rem auto; padding: 0 1.5rem;">
+  <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--radius-lg); padding: 2.5rem; margin-bottom: 2rem;">
+    <div style="display: flex; align-items: center; justify-content: space-between; gap: 1.5rem; flex-wrap: wrap; margin-bottom: 2rem;">
+      <div style="display: flex; align-items: center; gap: 1.25rem;">
+        <div style="
+          width: 72px; height: 72px; border-radius: 50%; background: linear-gradient(135deg, var(--ocean-teal), var(--accent-cyan));
+          color: #060c18; font-size: 2rem; font-weight: 800; display: flex; align-items: center; justify-content: center;
+        ">
+          {{ (current_user.display_name or current_user.username)[0].upper() }}
+        </div>
+        <div>
+          <h1 style="font-size: 1.8rem; margin-bottom: 0.25rem;">{{ current_user.display_name or current_user.username }}</h1>
+          <p style="color: var(--text-secondary); font-size: 0.95rem;">@{{ current_user.username }} &bull; {{ current_user.email }}</p>
+          <div style="margin-top: 6px; display: flex; gap: 0.5rem;">
+            {% for r in current_user.roles %}
+              <span class="tn-badge">{{ r.role.name }}</span>
+            {% endfor %}
+          </div>
+        </div>
+      </div>
+
+      <div style="display: flex; gap: 0.75rem;">
+        <a href="{{ url_for('auth.favorites') }}" class="tn-btn tn-btn-outline tn-btn-sm">
+          ★ My Favorites ({{ favorites_count }})
+        </a>
+        <a href="{{ url_for('auth.settings') }}" class="tn-btn tn-btn-outline tn-btn-sm">
+          ⚙️ Settings
+        </a>
+      </div>
+    </div>
+
+    <!-- Edit Profile Form -->
+    <form method="POST" action="{{ url_for('auth.profile') }}">
+      <div class="tn-grid" style="grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); margin-bottom: 1.5rem;">
+        <div>
+          <label style="display: block; font-weight: 600; font-size: 0.88rem; margin-bottom: 0.4rem; color: var(--text-secondary);">
+            Display Name
+          </label>
+          <input type="text" name="display_name" value="{{ current_user.display_name or '' }}" style="
+            width: 100%; padding: 0.65rem 1rem; background: rgba(6, 12, 24, 0.7); border: 1px solid var(--border-color);
+            border-radius: var(--radius-sm); color: var(--text-primary); font-size: 0.95rem; outline: none;
+          ">
+        </div>
+
+        <div>
+          <label style="display: block; font-weight: 600; font-size: 0.88rem; margin-bottom: 0.4rem; color: var(--text-secondary);">
+            Preferred Language
+          </label>
+          <select name="preferred_language" style="
+            width: 100%; padding: 0.65rem 1rem; background: rgba(6, 12, 24, 0.7); border: 1px solid var(--border-color);
+            border-radius: var(--radius-sm); color: var(--text-primary); font-size: 0.95rem; outline: none;
+          ">
+            <option value="en" {% if current_user.preferred_language == 'en' %}selected{% endif %}>English (EN)</option>
+            <option value="es" {% if current_user.preferred_language == 'es' %}selected{% endif %}>Español (ES)</option>
+            <option value="fr" {% if current_user.preferred_language == 'fr' %}selected{% endif %}>Français (FR)</option>
+            <option value="hi" {% if current_user.preferred_language == 'hi' %}selected{% endif %}>हिन्दी (HI)</option>
+          </select>
+        </div>
+
+        <div>
+          <label style="display: block; font-weight: 600; font-size: 0.88rem; margin-bottom: 0.4rem; color: var(--text-secondary);">
+            Theme Preference
+          </label>
+          <select name="theme_preference" style="
+            width: 100%; padding: 0.65rem 1rem; background: rgba(6, 12, 24, 0.7); border: 1px solid var(--border-color);
+            border-radius: var(--radius-sm); color: var(--text-primary); font-size: 0.95rem; outline: none;
+          ">
+            <option value="dark" {% if current_user.theme_preference == 'dark' %}selected{% endif %}>Dark Cosmos (Navy / Cyan)</option>
+            <option value="light" {% if current_user.theme_preference == 'light' %}selected{% endif %}>Light Atlas</option>
+          </select>
+        </div>
+      </div>
+
+      <button type="submit" class="tn-btn tn-btn-primary">
+        Save Preferences
+      </button>
+    </form>
+  </div>
+</div>
+{% endblock %}

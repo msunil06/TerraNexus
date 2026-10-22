@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+
+{% block title %}Sign In - {{ app_name }}{% endblock %}
+
+{% block content %}
+<div style="max-width: 440px; margin: 4rem auto; padding: 0 1.5rem;">
+  <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--radius-lg); padding: 2.25rem; box-shadow: var(--shadow-lg);">
+    <div style="text-align: center; margin-bottom: 2rem;">
+      <img src="/static/images/logo.png" alt="TerraNexus Logo" style="width: 48px; height: 48px; border-radius: 50%; margin-bottom: 0.75rem;">
+      <h1 style="font-size: 1.8rem; margin-bottom: 0.25rem;">Sign In to TerraNexus</h1>
+      <p style="color: var(--text-secondary); font-size: 0.92rem;">Access your personal saved locations and favorite geography</p>
+    </div>
+
+    <form method="POST" action="{{ url_for('auth.login', next=request.args.get('next')) }}">
+      <div style="margin-bottom: 1.25rem;">
+        <label style="display: block; font-weight: 600; font-size: 0.88rem; margin-bottom: 0.4rem; color: var(--text-secondary);">
+          Username or Email Address
+        </label>
+        <input type="text" name="login_id" required autofocus style="
+          width: 100%; padding: 0.7rem 1rem; background: rgba(6, 12, 24, 0.7); border: 1px solid var(--border-color);
+          border-radius: var(--radius-sm); color: var(--text-primary); font-size: 0.95rem; outline: none;
+        ">
+      </div>
+
+      <div style="margin-bottom: 1.25rem;">
+        <label style="display: block; font-weight: 600; font-size: 0.88rem; margin-bottom: 0.4rem; color: var(--text-secondary);">
+          Password
+        </label>
+        <input type="password" name="password" required style="
+          width: 100%; padding: 0.7rem 1rem; background: rgba(6, 12, 24, 0.7); border: 1px solid var(--border-color);
+          border-radius: var(--radius-sm); color: var(--text-primary); font-size: 0.95rem; outline: none;
+        ">
+      </div>
+
+      <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.5rem; font-size: 0.85rem;">
+        <label style="display: flex; align-items: center; gap: 0.4rem; cursor: pointer; color: var(--text-secondary);">
+          <input type="checkbox" name="remember" value="1"> Remember me
+        </label>
+      </div>
+
+      <button type="submit" class="tn-btn tn-btn-primary" style="width: 100%; padding: 0.75rem;">
+        Sign In
+      </button>
+    </form>
+
+    <div style="margin-top: 1.75rem; text-align: center; font-size: 0.88rem; color: var(--text-secondary);">
+      Don't have an account yet? <a href="{{ url_for('auth.register') }}">Create an account</a>
+    </div>
+  </div>
+</div>
+{% endblock %}

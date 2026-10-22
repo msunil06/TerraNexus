@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+
+{% block title %}Oceans of the World - {{ app_name }}{% endblock %}
+
+{% block content %}
+<div style="max-width: 1440px; margin: 2rem auto 4rem; padding: 0 1.5rem;">
+  <div style="margin-bottom: 2rem;">
+    <h1 style="font-size: 2.4rem; margin-bottom: 0.5rem;">The World Oceans</h1>
+    <p style="color: var(--text-secondary); font-size: 1rem; max-width: 800px;">
+      Earth's continuous body of saline water divided into five principal oceanic basins. Explore verified bathymetric measurements, deepest trenches, and marine ecosystems.
+    </p>
+  </div>
+
+  <div class="tn-grid" style="grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));">
+    {% for ocean in oceans %}
+      <a href="{{ url_for('oceans.ocean_detail', slug=ocean.slug) }}" class="tn-card">
+        <div class="tn-card-header">
+          <div>
+            <h3 class="tn-card-title" style="font-size: 1.35rem;">{{ ocean.name }}</h3>
+            <p class="tn-card-subtitle">{{ ocean.surrounding_continents }}</p>
+          </div>
+          <div style="font-size: 2.2rem;">🌊</div>
+        </div>
+
+        <p style="font-size: 0.88rem; color: var(--text-secondary); margin: 0.75rem 0; line-height: 1.6;">
+          {{ ocean.overview[:150] }}...
+        </p>
+
+        <div class="tn-card-meta">
+          <div>
+            <span class="tn-card-meta-label">Surface Area</span>
+            <span class="tn-card-meta-val">{{ "{:,}".format(ocean.area_km2) }} km²</span>
+          </div>
+          <div>
+            <span class="tn-card-meta-label">Average Depth</span>
+            <span class="tn-card-meta-val">{{ "{:,}".format(ocean.avg_depth_m) if ocean.avg_depth_m else 'N/A' }} m</span>
+          </div>
+          <div>
+            <span class="tn-card-meta-label">Maximum Depth</span>
+            <span class="tn-card-meta-val">{{ "{:,}".format(ocean.max_depth_m) if ocean.max_depth_m else 'N/A' }} m</span>
+          </div>
+          <div>
+            <span class="tn-card-meta-label">Deepest Point</span>
+            <span class="tn-card-meta-val">{{ ocean.max_depth_location[:20] if ocean.max_depth_location else 'N/A' }}</span>
+          </div>
+        </div>
+
+        <div style="margin-top: 1rem; text-align: right; color: var(--accent-cyan); font-weight: 600; font-size: 0.85rem;">
+          Explore Bathymetry & Ecology &rarr;
+        </div>
+      </a>
+    {% endfor %}
+  </div>
+</div>
+{% endblock %}

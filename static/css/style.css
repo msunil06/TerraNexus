@@ -1,0 +1,862 @@
+/* ==========================================================================
+   TerraNexus Design System & Stylesheet
+   Tagline: "Explore the World. Discover Every Connection."
+   ========================================================================== */
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&display=swap');
+
+:root {
+  /* Dark Theme Palette (Default) */
+  --bg-primary: #060c18;
+  --bg-secondary: #0a1324;
+  --bg-card: rgba(14, 26, 49, 0.85);
+  --bg-card-hover: rgba(20, 36, 68, 0.95);
+  --bg-glass: rgba(10, 19, 36, 0.75);
+  
+  --border-color: rgba(0, 245, 212, 0.15);
+  --border-hover: rgba(0, 245, 212, 0.45);
+  
+  --text-primary: #f8fafc;
+  --text-secondary: #94a3b8;
+  --text-muted: #64748b;
+  
+  --navy-deep: #060c18;
+  --navy-mid: #001f54;
+  --ocean-blue: #034078;
+  --ocean-teal: #1282a2;
+  --accent-cyan: #00f5d4;
+  --accent-blue: #00bbf9;
+  --accent-glow: rgba(0, 245, 212, 0.25);
+  
+  --danger: #ef4444;
+  --success: #10b981;
+  --warning: #f59e0b;
+  --info: #3b82f6;
+
+  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.3);
+  --shadow-md: 0 4px 20px rgba(0, 0, 0, 0.4);
+  --shadow-lg: 0 10px 30px rgba(0, 0, 0, 0.6);
+  --shadow-cyan: 0 0 25px rgba(0, 245, 212, 0.15);
+
+  --radius-sm: 6px;
+  --radius-md: 12px;
+  --radius-lg: 18px;
+  --radius-full: 9999px;
+
+  --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-heading: 'Outfit', var(--font-sans);
+
+  --transition-fast: 0.15s ease;
+  --transition-normal: 0.25s ease;
+  --transition-slow: 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+[data-theme="light"] {
+  --bg-primary: #f8fafc;
+  --bg-secondary: #f1f5f9;
+  --bg-card: rgba(255, 255, 255, 0.9);
+  --bg-card-hover: rgba(255, 255, 255, 1);
+  --bg-glass: rgba(255, 255, 255, 0.85);
+
+  --border-color: rgba(3, 64, 120, 0.15);
+  --border-hover: rgba(3, 64, 120, 0.35);
+
+  --text-primary: #0f172a;
+  --text-secondary: #475569;
+  --text-muted: #64748b;
+
+  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.06);
+  --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.08);
+  --shadow-lg: 0 10px 30px rgba(0, 0, 0, 0.12);
+  --shadow-cyan: 0 0 20px rgba(18, 130, 162, 0.15);
+}
+
+/* ==========================================================================
+   Base & Reset
+   ========================================================================== */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: var(--font-sans);
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  line-height: 1.6;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  overflow-x: hidden;
+  transition: background-color var(--transition-normal), color var(--transition-normal);
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-heading);
+  font-weight: 700;
+  line-height: 1.25;
+  color: var(--text-primary);
+}
+
+a {
+  color: var(--accent-cyan);
+  text-decoration: none;
+  transition: color var(--transition-fast);
+}
+
+a:hover {
+  color: var(--accent-blue);
+}
+
+/* ==========================================================================
+   Navigation Bar
+   ========================================================================== */
+.tn-navbar {
+  position: sticky;
+  top: 0;
+  z-index: 1030;
+  background: var(--bg-glass);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-bottom: 1px solid var(--border-color);
+  padding: 0.75rem 1.5rem;
+  transition: all var(--transition-normal);
+}
+
+.tn-nav-container {
+  max-width: 1440px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.5rem;
+}
+
+.tn-brand {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  text-decoration: none;
+}
+
+.tn-brand-logo {
+  width: 38px;
+  height: 38px;
+  border-radius: var(--radius-full);
+  filter: drop-shadow(0 0 8px var(--accent-cyan));
+}
+
+.tn-brand-name {
+  font-family: var(--font-heading);
+  font-size: 1.4rem;
+  font-weight: 800;
+  letter-spacing: -0.5px;
+  background: linear-gradient(135deg, #ffffff 30%, var(--accent-cyan) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.tn-nav-links {
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+  list-style: none;
+}
+
+.tn-nav-link {
+  font-size: 0.92rem;
+  font-weight: 500;
+  color: var(--text-secondary);
+  padding: 0.4rem 0.6rem;
+  border-radius: var(--radius-sm);
+  transition: color var(--transition-fast), background var(--transition-fast);
+}
+
+.tn-nav-link:hover, .tn-nav-link.active {
+  color: var(--accent-cyan);
+  background: rgba(0, 245, 212, 0.08);
+}
+
+/* ==========================================================================
+   Search Bar (Nav & Hero)
+   ========================================================================== */
+.tn-search-wrapper {
+  position: relative;
+  flex: 1;
+  max-width: 360px;
+}
+
+.tn-search-input-group {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.tn-search-icon {
+  position: absolute;
+  left: 0.85rem;
+  color: var(--accent-cyan);
+  font-size: 1rem;
+  pointer-events: none;
+}
+
+.tn-search-input {
+  width: 100%;
+  padding: 0.55rem 2.5rem 0.55rem 2.4rem;
+  background: rgba(14, 26, 49, 0.6);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-full);
+  color: var(--text-primary);
+  font-size: 0.9rem;
+  transition: all var(--transition-fast);
+  outline: none;
+}
+
+.tn-search-input:focus {
+  border-color: var(--accent-cyan);
+  box-shadow: 0 0 15px var(--accent-glow);
+  background: rgba(14, 26, 49, 0.95);
+}
+
+.tn-search-dropdown {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 0;
+  right: 0;
+  background: var(--bg-card);
+  backdrop-filter: blur(20px);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-lg), var(--shadow-cyan);
+  max-height: 420px;
+  overflow-y: auto;
+  z-index: 1050;
+  display: none;
+}
+
+.tn-search-dropdown.active {
+  display: block;
+}
+
+.tn-search-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  cursor: pointer;
+  text-decoration: none;
+  transition: background var(--transition-fast);
+}
+
+.tn-search-item:hover, .tn-search-item.selected {
+  background: rgba(0, 245, 212, 0.12);
+}
+
+.tn-search-item-info {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.tn-search-item-flag {
+  font-size: 1.25rem;
+}
+
+.tn-search-item-title {
+  font-weight: 600;
+  font-size: 0.92rem;
+  color: var(--text-primary);
+}
+
+.tn-search-item-subtitle {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+}
+
+.tn-badge {
+  font-size: 0.7rem;
+  padding: 0.2rem 0.5rem;
+  border-radius: var(--radius-sm);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  background: rgba(0, 245, 212, 0.15);
+  color: var(--accent-cyan);
+  border: 1px solid rgba(0, 245, 212, 0.3);
+}
+
+/* ==========================================================================
+   Buttons & Controls
+   ========================================================================== */
+.tn-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.6rem 1.2rem;
+  border-radius: var(--radius-md);
+  font-size: 0.9rem;
+  font-weight: 600;
+  font-family: var(--font-heading);
+  cursor: pointer;
+  border: none;
+  transition: all var(--transition-fast);
+  text-decoration: none;
+}
+
+.tn-btn-primary {
+  background: linear-gradient(135deg, var(--ocean-teal), var(--accent-cyan));
+  color: #060c18;
+  box-shadow: 0 4px 15px rgba(0, 245, 212, 0.3);
+}
+
+.tn-btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(0, 245, 212, 0.5);
+  color: #060c18;
+}
+
+.tn-btn-outline {
+  background: transparent;
+  color: var(--accent-cyan);
+  border: 1px solid var(--accent-cyan);
+}
+
+.tn-btn-outline:hover {
+  background: rgba(0, 245, 212, 0.12);
+  color: #ffffff;
+  border-color: #ffffff;
+}
+
+.tn-btn-sm {
+  padding: 0.35rem 0.75rem;
+  font-size: 0.8rem;
+}
+
+.tn-btn-icon {
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  border-radius: var(--radius-full);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  color: var(--text-secondary);
+}
+
+.tn-btn-icon:hover {
+  color: var(--accent-cyan);
+  border-color: var(--accent-cyan);
+}
+
+/* ==========================================================================
+   Hero Section & Visual Earth
+   ========================================================================== */
+.tn-hero {
+  position: relative;
+  padding: 4.5rem 1.5rem 3rem;
+  text-align: center;
+  background: radial-gradient(circle at 50% 20%, rgba(3, 64, 120, 0.35) 0%, rgba(6, 12, 24, 0) 70%);
+}
+
+.tn-hero-container {
+  max-width: 960px;
+  margin: 0 auto;
+}
+
+.tn-hero-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.35rem 0.9rem;
+  border-radius: var(--radius-full);
+  background: rgba(0, 245, 212, 0.1);
+  border: 1px solid rgba(0, 245, 212, 0.3);
+  color: var(--accent-cyan);
+  font-size: 0.82rem;
+  font-weight: 600;
+  margin-bottom: 1.25rem;
+}
+
+.tn-hero-title {
+  font-size: 3.2rem;
+  font-weight: 800;
+  letter-spacing: -1px;
+  margin-bottom: 1.25rem;
+  background: linear-gradient(135deg, #ffffff 40%, var(--accent-cyan) 85%, var(--accent-blue) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.tn-hero-description {
+  font-size: 1.15rem;
+  color: var(--text-secondary);
+  max-width: 720px;
+  margin: 0 auto 2.25rem;
+  line-height: 1.7;
+}
+
+.tn-hero-cta {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+  margin-bottom: 3rem;
+}
+
+/* ==========================================================================
+   Interactive Map Container (Leaflet)
+   ========================================================================== */
+.tn-map-card {
+  position: relative;
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  box-shadow: var(--shadow-lg), var(--shadow-cyan);
+  margin-bottom: 3.5rem;
+}
+
+.tn-map-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.85rem 1.25rem;
+  background: rgba(10, 19, 36, 0.9);
+  border-bottom: 1px solid var(--border-color);
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.tn-map-title {
+  font-size: 1.05rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--accent-cyan);
+}
+
+.tn-map-controls {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.tn-map-frame {
+  height: 580px;
+  width: 100%;
+  position: relative;
+  background: #0a1128;
+}
+
+.tn-coords-pill {
+  position: absolute;
+  bottom: 15px;
+  left: 15px;
+  z-index: 1000;
+  background: rgba(6, 12, 24, 0.85);
+  backdrop-filter: blur(8px);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-full);
+  padding: 0.25rem 0.75rem;
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+  font-family: monospace;
+}
+
+/* Map Slideout Info Panel */
+.tn-map-panel {
+  position: absolute;
+  top: 15px;
+  right: 15px;
+  width: 340px;
+  max-width: calc(100% - 30px);
+  background: rgba(10, 19, 36, 0.92);
+  backdrop-filter: blur(16px);
+  border: 1px solid var(--border-hover);
+  border-radius: var(--radius-md);
+  padding: 1.25rem;
+  z-index: 1000;
+  box-shadow: var(--shadow-lg);
+  display: none;
+  animation: slideInRight 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes slideInRight {
+  from { opacity: 0; transform: translateX(20px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+.tn-map-panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.75rem;
+}
+
+.tn-map-panel-close {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  font-size: 1.25rem;
+}
+
+.tn-map-panel-close:hover {
+  color: var(--accent-cyan);
+}
+
+/* ==========================================================================
+   Statistics Grid
+   ========================================================================== */
+.tn-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1.25rem;
+  margin-bottom: 3.5rem;
+}
+
+.tn-stat-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  padding: 1.5rem;
+  text-align: center;
+  transition: all var(--transition-normal);
+  position: relative;
+  overflow: hidden;
+}
+
+.tn-stat-card:hover {
+  transform: translateY(-4px);
+  border-color: var(--accent-cyan);
+  box-shadow: var(--shadow-cyan);
+}
+
+.tn-stat-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, var(--ocean-teal), var(--accent-cyan));
+}
+
+.tn-stat-num {
+  font-family: var(--font-heading);
+  font-size: 2.4rem;
+  font-weight: 800;
+  color: var(--text-primary);
+  margin-bottom: 0.25rem;
+}
+
+.tn-stat-label {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* ==========================================================================
+   Cards & Grids (Countries, Continents, Oceans, Seas)
+   ========================================================================== */
+.tn-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 1.5rem;
+}
+
+.tn-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  padding: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  transition: all var(--transition-normal);
+  text-decoration: none;
+  position: relative;
+}
+
+.tn-card:hover {
+  transform: translateY(-4px);
+  background: var(--bg-card-hover);
+  border-color: var(--border-hover);
+  box-shadow: var(--shadow-md), var(--shadow-cyan);
+}
+
+.tn-card-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-bottom: 0.75rem;
+}
+
+.tn-card-flag {
+  font-size: 2rem;
+  line-height: 1;
+}
+
+.tn-card-title {
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 0.2rem;
+}
+
+.tn-card-subtitle {
+  font-size: 0.82rem;
+  color: var(--text-muted);
+}
+
+.tn-card-meta {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.5rem;
+  margin-top: 0.75rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  font-size: 0.8rem;
+}
+
+.tn-card-meta-label {
+  color: var(--text-muted);
+  display: block;
+}
+
+.tn-card-meta-val {
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+
+/* ==========================================================================
+   Detail Pages (Country, Ocean, Sea, Feature)
+   ========================================================================== */
+.tn-detail-hero {
+  padding: 3rem 1.5rem 2rem;
+  background: linear-gradient(180deg, rgba(3, 64, 120, 0.2) 0%, rgba(6, 12, 24, 0) 100%);
+  border-bottom: 1px solid var(--border-color);
+  margin-bottom: 2.5rem;
+}
+
+.tn-detail-header {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.5rem;
+  flex-wrap: wrap;
+}
+
+.tn-detail-title-group {
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+}
+
+.tn-detail-flag {
+  font-size: 3.5rem;
+}
+
+.tn-detail-title {
+  font-size: 2.5rem;
+  font-weight: 800;
+  margin-bottom: 0.25rem;
+}
+
+.tn-detail-tabs {
+  max-width: 1200px;
+  margin: 0 auto 2rem;
+  display: flex;
+  gap: 0.5rem;
+  border-bottom: 1px solid var(--border-color);
+  padding-bottom: 0.5rem;
+  overflow-x: auto;
+}
+
+.tn-tab-btn {
+  background: none;
+  border: none;
+  color: var(--text-secondary);
+  font-size: 0.95rem;
+  font-weight: 600;
+  padding: 0.5rem 1rem;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all var(--transition-fast);
+}
+
+.tn-tab-btn:hover, .tn-tab-btn.active {
+  color: var(--accent-cyan);
+  background: rgba(0, 245, 212, 0.1);
+}
+
+.tn-tab-content {
+  display: none;
+  animation: fadeIn 0.3s ease;
+}
+
+.tn-tab-content.active {
+  display: block;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* ==========================================================================
+   Tables & Data Presentation
+   ========================================================================== */
+.tn-table-responsive {
+  width: 100%;
+  overflow-x: auto;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-color);
+}
+
+.tn-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+  font-size: 0.9rem;
+}
+
+.tn-table th {
+  background: rgba(10, 19, 36, 0.9);
+  color: var(--text-secondary);
+  font-weight: 600;
+  padding: 0.85rem 1rem;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.tn-table td {
+  padding: 0.85rem 1rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  color: var(--text-primary);
+}
+
+.tn-table tr:hover td {
+  background: rgba(0, 245, 212, 0.04);
+}
+
+/* ==========================================================================
+   Admin Dashboard Styles
+   ========================================================================== */
+.tn-admin-layout {
+  display: grid;
+  grid-template-columns: 240px 1fr;
+  min-height: calc(100vh - 70px);
+}
+
+.tn-admin-sidebar {
+  background: var(--bg-secondary);
+  border-right: 1px solid var(--border-color);
+  padding: 1.5rem 1rem;
+}
+
+.tn-admin-nav {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.tn-admin-nav-item a {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.65rem 1rem;
+  color: var(--text-secondary);
+  border-radius: var(--radius-md);
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+.tn-admin-nav-item a:hover, .tn-admin-nav-item.active a {
+  background: rgba(0, 245, 212, 0.1);
+  color: var(--accent-cyan);
+}
+
+.tn-admin-content {
+  padding: 2rem;
+  overflow-y: auto;
+}
+
+/* ==========================================================================
+   Footer
+   ========================================================================== */
+.tn-footer {
+  margin-top: auto;
+  background: var(--bg-secondary);
+  border-top: 1px solid var(--border-color);
+  padding: 3.5rem 1.5rem 2rem;
+}
+
+.tn-footer-container {
+  max-width: 1440px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 2fr repeat(3, 1fr);
+  gap: 2.5rem;
+  margin-bottom: 2.5rem;
+}
+
+.tn-footer-brand-desc {
+  color: var(--text-secondary);
+  font-size: 0.92rem;
+  margin-top: 0.75rem;
+  max-width: 320px;
+}
+
+.tn-footer-col h4 {
+  font-size: 0.95rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--text-primary);
+  margin-bottom: 1rem;
+}
+
+.tn-footer-links {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.tn-footer-link {
+  color: var(--text-secondary);
+  font-size: 0.88rem;
+}
+
+.tn-footer-link:hover {
+  color: var(--accent-cyan);
+}
+
+.tn-footer-bottom {
+  max-width: 1440px;
+  margin: 0 auto;
+  padding-top: 1.5rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  color: var(--text-muted);
+  font-size: 0.85rem;
+  flex-wrap: wrap;
+  gap: 1rem;
+}

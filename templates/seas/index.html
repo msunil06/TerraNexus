@@ -1,0 +1,76 @@
+{% extends "base.html" %}
+
+{% block title %}Seas of the World - {{ app_name }}{% endblock %}
+
+{% block content %}
+<div style="max-width: 1440px; margin: 2rem auto 4rem; padding: 0 1.5rem;">
+  <div style="margin-bottom: 2rem;">
+    <h1 style="font-size: 2.4rem; margin-bottom: 0.5rem;">Catalog of Named Seas</h1>
+    <p style="color: var(--text-secondary); font-size: 1rem; max-width: 800px;">
+      Explore Earth's marginal, inland, and mediterranean seas categorized under International Hydrographic Organization (IHO S-23) standards.
+    </p>
+  </div>
+
+  <!-- Filter Bar -->
+  <form method="GET" action="{{ url_for('seas.list_seas') }}" style="
+    background: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--radius-md);
+    padding: 1.25rem; margin-bottom: 2rem; display: flex; align-items: center; gap: 1rem; flex-wrap: wrap;
+  ">
+    <label style="font-weight: 600; font-size: 0.9rem; color: var(--text-secondary);">Filter by Parent Ocean:</label>
+    <select name="ocean" style="
+      padding: 0.55rem 1rem; background: rgba(6, 12, 24, 0.7); border: 1px solid var(--border-color);
+      border-radius: var(--radius-sm); color: var(--text-primary); font-size: 0.9rem; outline: none;
+    ">
+      <option value="">All Oceanic Basins</option>
+      {% for o in oceans %}
+        <option value="{{ o.slug }}" {% if selected_ocean == o.slug %}selected{% endif %}>{{ o.name }}</option>
+      {% endfor %}
+    </select>
+    <button type="submit" class="tn-btn tn-btn-primary tn-btn-sm">Filter</button>
+    {% if selected_ocean %}
+      <a href="{{ url_for('seas.list_seas') }}" class="tn-btn tn-btn-outline tn-btn-sm">Reset</a>
+    {% endif %}
+  </form>
+
+  <div class="tn-grid">
+    {% for sea in seas %}
+      <a href="{{ url_for('seas.sea_detail', slug=sea.slug) }}" class="tn-card">
+        <div class="tn-card-header">
+          <div>
+            <h3 class="tn-card-title">{{ sea.name }}</h3>
+            <span class="tn-badge" style="font-size: 0.65rem;">{{ sea.sea_type | capitalize }} Sea</span>
+          </div>
+          <div style="font-size: 1.8rem;">⛵</div>
+        </div>
+
+        <p style="font-size: 0.85rem; color: var(--text-secondary); margin: 0.75rem 0; line-height: 1.6;">
+          {{ sea.overview[:120] }}...
+        </p>
+
+        <div class="tn-card-meta">
+          <div>
+            <span class="tn-card-meta-label">Parent Ocean</span>
+            <span class="tn-card-meta-val">{{ sea.ocean.name if sea.ocean else 'Inland / Endorheic' }}</span>
+          </div>
+          <div>
+            <span class="tn-card-meta-label">Max Depth</span>
+            <span class="tn-card-meta-val">{{ "{:,}".format(sea.max_depth_m) if sea.max_depth_m else 'N/A' }} m</span>
+          </div>
+          <div>
+            <span class="tn-card-meta-label">Surface Area</span>
+            <span class="tn-card-meta-val">{{ "{:,.0f}".format(sea.area_km2) if sea.area_km2 else 'N/A' }} km²</span>
+          </div>
+          <div>
+            <span class="tn-card-meta-label">Coordinates</span>
+            <span class="tn-card-meta-val">{{ sea.latitude }}°, {{ sea.longitude }}°</span>
+          </div>
+        </div>
+
+        <div style="margin-top: 1rem; text-align: right; color: var(--accent-cyan); font-weight: 600; font-size: 0.82rem;">
+          Explore Marine Profile &rarr;
+        </div>
+      </a>
+    {% endfor %}
+  </div>
+</div>
+{% endblock %}

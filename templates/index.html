@@ -1,0 +1,283 @@
+{% extends "base.html" %}
+
+{% block title %}TerraNexus - One Planet. Endless Discoveries.{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="tn-hero">
+  <div class="tn-hero-container">
+    <div class="tn-hero-badge">
+      <span>🌐</span> Global Geography Exploration Platform
+    </div>
+    <h1 class="tn-hero-title">One Planet. Endless Discoveries.</h1>
+    <p class="tn-hero-description">
+      Explore every corner of Earth. Discover countries, capitals, languages, currencies, oceans, seas, cities, and the geography that connects our world.
+    </p>
+
+    <!-- Global Hero Search -->
+    <div style="max-width: 580px; margin: 0 auto 2rem;" class="tn-search-wrapper">
+      <div class="tn-search-input-group">
+        <span class="tn-search-icon" style="font-size: 1.2rem; left: 1.1rem;">🔍</span>
+        <input type="text" class="tn-search-input" style="padding: 0.9rem 2.8rem 0.9rem 3.2rem; font-size: 1.05rem;" placeholder="Search any country, capital, ocean, sea, or mountain..." autocomplete="off">
+      </div>
+      <div class="tn-search-dropdown"></div>
+    </div>
+
+    <!-- Quick Action CTA Buttons -->
+    <div class="tn-hero-cta">
+      <a href="#mapSection" class="tn-btn tn-btn-primary">
+        <span>🗺️</span> Explore Interactive Map
+      </a>
+      <a href="{{ url_for('countries.list_countries') }}" class="tn-btn tn-btn-outline">
+        <span>🏛️</span> Browse Countries
+      </a>
+      <a href="{{ url_for('oceans.list_oceans') }}" class="tn-btn tn-btn-outline">
+        <span>🌊</span> Discover Oceans
+      </a>
+      <a href="{{ url_for('seas.list_seas') }}" class="tn-btn tn-btn-outline">
+        <span>⛵</span> Explore Seas
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- Central Interactive World Map Section -->
+<div style="max-width: 1440px; margin: 0 auto; padding: 0 1.5rem;" id="mapSection">
+  <div class="tn-map-card">
+    <div class="tn-map-header">
+      <div class="tn-map-title">
+        <span>🌍</span> Interactive World Map & Boundaries
+      </div>
+      <div class="tn-map-controls">
+        <select id="tileLayerSelect" style="
+          background: rgba(14, 26, 49, 0.8); color: var(--text-primary); border: 1px solid var(--border-color);
+          border-radius: var(--radius-sm); padding: 0.35rem 0.65rem; font-size: 0.82rem; outline: none;
+        ">
+          <option value="dark">CartoDB Dark Canvas</option>
+          <option value="streets">OpenStreetMap Standard</option>
+        </select>
+        <button id="resetMapView" class="tn-btn tn-btn-outline tn-btn-sm" title="Reset View to World Center">
+          ⟲ World View
+        </button>
+      </div>
+    </div>
+
+    <!-- Leaflet Frame Container -->
+    <div id="worldMap" class="tn-map-frame" data-lat="20.0" data-lon="10.0" data-zoom="2">
+      <!-- Mouse Coordinate Pill -->
+      <div id="coordsDisplay" class="tn-coords-pill">0.0000° N, 0.0000° E</div>
+
+      <!-- Slideout Info Panel for Map Interaction -->
+      <div id="mapInfoPanel" class="tn-map-panel">
+        <div class="tn-map-panel-header">
+          <h4 id="panelTitle" style="font-size: 1.15rem; font-weight: 700; color: var(--accent-cyan); margin: 0;">Selected Feature</h4>
+          <button class="tn-map-panel-close" onclick="closeMapPanel()">&times;</button>
+        </div>
+        <div id="panelBody" style="margin-bottom: 1rem;">
+          <!-- Dynamically populated -->
+        </div>
+        <a id="panelLink" href="#" class="tn-btn tn-btn-primary tn-btn-sm" style="width: 100%;">
+          View Full Information &rarr;
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Verified Quick Statistics (Calculated from real DB records) -->
+  <div style="margin-bottom: 1.25rem;">
+    <h2 style="font-size: 1.6rem; margin-bottom: 0.5rem;">Verified Global Registry</h2>
+    <p style="color: var(--text-muted); font-size: 0.88rem;">{{ stats.classification_notes }}</p>
+  </div>
+
+  <div class="tn-stats-grid">
+    <div class="tn-stat-card">
+      <div class="tn-stat-num">{{ stats.countries_count }}</div>
+      <div class="tn-stat-label">Cataloged Countries</div>
+    </div>
+    <div class="tn-stat-card">
+      <div class="tn-stat-num">{{ stats.continents_count }}</div>
+      <div class="tn-stat-label">Major Continents</div>
+    </div>
+    <div class="tn-stat-card">
+      <div class="tn-stat-num">{{ stats.oceans_count }}</div>
+      <div class="tn-stat-label">World Oceans</div>
+    </div>
+    <div class="tn-stat-card">
+      <div class="tn-stat-num">{{ stats.seas_count }}</div>
+      <div class="tn-stat-label">Named Seas</div>
+    </div>
+    <div class="tn-stat-card">
+      <div class="tn-stat-num">{{ stats.features_count }}</div>
+      <div class="tn-stat-label">Geographic Features</div>
+    </div>
+  </div>
+
+  <!-- Discovery Cards Grid -->
+  <div style="margin-bottom: 2rem;">
+    <h2 style="font-size: 1.6rem; margin-bottom: 0.5rem;">Geographic Discovery Sectors</h2>
+    <p style="color: var(--text-secondary); font-size: 0.95rem; margin-bottom: 1.5rem;">
+      Dive deep into Earth's geopolitical entities, hydrographic domains, and natural physical landmarks.
+    </p>
+
+    <div class="tn-grid">
+      <a href="{{ url_for('countries.list_countries') }}" class="tn-card">
+        <div>
+          <div style="font-size: 2.2rem; margin-bottom: 0.5rem;">🏛️</div>
+          <h3 class="tn-card-title">Explore All Countries</h3>
+          <p class="tn-card-subtitle">Comprehensive encyclopedic dossiers, capitals, currencies, demographics, and administrative hierarchies.</p>
+        </div>
+        <span style="color: var(--accent-cyan); font-size: 0.85rem; font-weight: 600; margin-top: 1rem;">Browse Countries &rarr;</span>
+      </a>
+
+      <a href="{{ url_for('continents.list_continents') }}" class="tn-card">
+        <div>
+          <div style="font-size: 2.2rem; margin-bottom: 0.5rem;">🌍</div>
+          <h3 class="tn-card-title">Discover Continents</h3>
+          <p class="tn-card-subtitle">Earth's 7 continents, continental areas, population distributions, and climate classifications.</p>
+        </div>
+        <span style="color: var(--accent-cyan); font-size: 0.85rem; font-weight: 600; margin-top: 1rem;">Explore Continents &rarr;</span>
+      </a>
+
+      <a href="{{ url_for('oceans.list_oceans') }}" class="tn-card">
+        <div>
+          <div style="font-size: 2.2rem; margin-bottom: 0.5rem;">🌊</div>
+          <h3 class="tn-card-title">Explore Oceans</h3>
+          <p class="tn-card-subtitle">The 5 great oceans: bathymetric depths, major trenches, oceanic ridges, currents, and marine ecosystems.</p>
+        </div>
+        <span style="color: var(--accent-cyan); font-size: 0.85rem; font-weight: 600; margin-top: 1rem;">Discover Oceans &rarr;</span>
+      </a>
+
+      <a href="{{ url_for('seas.list_seas') }}" class="tn-card">
+        <div>
+          <div style="font-size: 2.2rem; margin-bottom: 0.5rem;">⛵</div>
+          <h3 class="tn-card-title">Discover Seas</h3>
+          <p class="tn-card-subtitle">Arabian Sea, Mediterranean, Caribbean, and over 20 cataloged marginal and inland seas with key ports.</p>
+        </div>
+        <span style="color: var(--accent-cyan); font-size: 0.85rem; font-weight: 600; margin-top: 1rem;">Explore Seas &rarr;</span>
+      </a>
+
+      <a href="{{ url_for('features.list_features', type='mountain') }}" class="tn-card">
+        <div>
+          <div style="font-size: 2.2rem; margin-bottom: 0.5rem;">🏔️</div>
+          <h3 class="tn-card-title">Mountains & Ranges</h3>
+          <p class="tn-card-subtitle">Mount Everest, the Himalayas, Andes, Alps, Denali, and high-altitude tectonic landmarks.</p>
+        </div>
+        <span style="color: var(--accent-cyan); font-size: 0.85rem; font-weight: 600; margin-top: 1rem;">Explore Peaks &rarr;</span>
+      </a>
+
+      <a href="{{ url_for('features.list_features', type='river') }}" class="tn-card">
+        <div>
+          <div style="font-size: 2.2rem; margin-bottom: 0.5rem;">💧</div>
+          <h3 class="tn-card-title">Rivers & Waterways</h3>
+          <p class="tn-card-subtitle">The Nile, Amazon, Ganga, Yangtze, and global trans-boundary river systems.</p>
+        </div>
+        <span style="color: var(--accent-cyan); font-size: 0.85rem; font-weight: 600; margin-top: 1rem;">Explore Rivers &rarr;</span>
+      </a>
+    </div>
+  </div>
+
+  <!-- Featured Countries Section -->
+  <div style="margin-bottom: 3.5rem;">
+    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 1rem;">
+      <div>
+        <h2 style="font-size: 1.6rem; margin-bottom: 0.25rem;">Featured Countries</h2>
+        <p style="color: var(--text-secondary); font-size: 0.92rem;">Explore detailed geographical dossiers with verified demographics.</p>
+      </div>
+      <a href="{{ url_for('countries.list_countries') }}" class="tn-btn tn-btn-outline tn-btn-sm">View All {{ stats.countries_count }} Countries &rarr;</a>
+    </div>
+
+    <div class="tn-grid">
+      {% for country in featured_countries %}
+        <a href="{{ url_for('countries.country_detail', slug=country.slug) }}" class="tn-card">
+          <div class="tn-card-header">
+            <div>
+              <div class="tn-card-title">{{ country.common_name }}</div>
+              <div class="tn-card-subtitle">{{ country.continent_rel.name }} • {{ country.subregion or '' }}</div>
+            </div>
+            <div class="tn-card-flag">{{ country.flag_emoji or '🌐' }}</div>
+          </div>
+          <div class="tn-card-meta">
+            <div>
+              <span class="tn-card-meta-label">Capital</span>
+              <span class="tn-card-meta-val">{{ country.capital_name or 'N/A' }}</span>
+            </div>
+            <div>
+              <span class="tn-card-meta-label">Currency</span>
+              <span class="tn-card-meta-val">{{ country.currency_code }} ({{ country.currency_symbol }})</span>
+            </div>
+            <div>
+              <span class="tn-card-meta-label">Population</span>
+              <span class="tn-card-meta-val">{{ "{:,}".format(country.population) if country.population else 'N/A' }}</span>
+            </div>
+            <div>
+              <span class="tn-card-meta-label">Total Area</span>
+              <span class="tn-card-meta-val">{{ "{:,.0f}".format(country.area_km2) if country.area_km2 else 'N/A' }} km²</span>
+            </div>
+          </div>
+        </a>
+      {% endfor %}
+    </div>
+  </div>
+
+  <!-- Featured Oceans & Seas Section -->
+  <div style="margin-bottom: 3.5rem;">
+    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 1rem;">
+      <div>
+        <h2 style="font-size: 1.6rem; margin-bottom: 0.25rem;">Hydrographic Exploration: Oceans & Seas</h2>
+        <p style="color: var(--text-secondary); font-size: 0.92rem;">Bathymetric statistics and marine connection networks.</p>
+      </div>
+      <a href="{{ url_for('oceans.list_oceans') }}" class="tn-btn tn-btn-outline tn-btn-sm">View All Oceans & Seas &rarr;</a>
+    </div>
+
+    <div class="tn-grid">
+      {% for ocean in featured_oceans %}
+        <a href="{{ url_for('oceans.ocean_detail', slug=ocean.slug) }}" class="tn-card">
+          <div class="tn-card-header">
+            <div>
+              <div class="tn-card-title">{{ ocean.name }}</div>
+              <div class="tn-card-subtitle">World Ocean</div>
+            </div>
+            <div style="font-size: 2rem;">🌊</div>
+          </div>
+          <div class="tn-card-meta">
+            <div>
+              <span class="tn-card-meta-label">Surface Area</span>
+              <span class="tn-card-meta-val">{{ "{:,}".format(ocean.area_km2) }} km²</span>
+            </div>
+            <div>
+              <span class="tn-card-meta-label">Max Depth</span>
+              <span class="tn-card-meta-val">{{ "{:,}".format(ocean.max_depth_m) }} m</span>
+            </div>
+          </div>
+        </a>
+      {% endfor %}
+
+      {% for sea in featured_seas %}
+        <a href="{{ url_for('seas.sea_detail', slug=sea.slug) }}" class="tn-card">
+          <div class="tn-card-header">
+            <div>
+              <div class="tn-card-title">{{ sea.name }}</div>
+              <div class="tn-card-subtitle">{{ sea.sea_type.capitalize() }} Sea • {{ sea.ocean.name if sea.ocean else 'Inland Sea' }}</div>
+            </div>
+            <div style="font-size: 2rem;">⛵</div>
+          </div>
+          <div class="tn-card-meta">
+            <div>
+              <span class="tn-card-meta-label">Area</span>
+              <span class="tn-card-meta-val">{{ "{:,.0f}".format(sea.area_km2) if sea.area_km2 else 'N/A' }} km²</span>
+            </div>
+            <div>
+              <span class="tn-card-meta-label">Max Depth</span>
+              <span class="tn-card-meta-val">{{ "{:,}".format(sea.max_depth_m) if sea.max_depth_m else 'N/A' }} m</span>
+            </div>
+          </div>
+        </a>
+      {% endfor %}
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script src="/static/js/map.js"></script>
+{% endblock %}
