@@ -19,9 +19,18 @@
         <p style="color: var(--text-secondary); font-size: 1.1rem; margin-bottom: 0.25rem;">
           {{ country.official_name }}
         </p>
-        <p style="color: var(--text-muted); font-size: 0.9rem;">
+        <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 0.5rem;">
           {{ country.continent_rel.name }} &bull; {{ country.subregion or 'Global' }}
         </p>
+
+        {% if live_data and live_data.weather %}
+        <div style="display: inline-flex; align-items: center; gap: 0.6rem; background: rgba(56, 189, 248, 0.12); border: 1px solid rgba(56, 189, 248, 0.35); padding: 0.35rem 0.85rem; border-radius: 999px; font-size: 0.86rem; color: var(--accent-cyan);">
+          <span style="display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: #22c55e; box-shadow: 0 0 8px #22c55e; animation: pulse 2s infinite;"></span>
+          <strong>Live in {{ country.capital_name or country.common_name }}:</strong>
+          <span>{{ live_data.weather.icon }} {{ live_data.weather.temperature_c }}°C ({{ live_data.weather.condition }})</span>
+          <span style="color: var(--text-muted);">&bull; Humidity: {{ live_data.weather.humidity_pct }}% &bull; Wind: {{ live_data.weather.wind_speed_kmh }} km/h</span>
+        </div>
+        {% endif %}
       </div>
     </div>
 
@@ -49,6 +58,10 @@
   <!-- Navigation Tabs -->
   <div class="tn-detail-tabs" role="tablist">
     <button class="tn-tab-btn active" data-target="tab-overview" role="tab">Overview & Facts</button>
+    <button class="tn-tab-btn" data-target="tab-live" role="tab" style="color: var(--accent-cyan); font-weight: 600;">
+      <span style="display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: #22c55e; margin-right: 4px; box-shadow: 0 0 6px #22c55e;"></span>
+      🟢 Real-Time Live Data
+    </button>
     <button class="tn-tab-btn" data-target="tab-geography" role="tab">Geography & Terrain</button>
     <button class="tn-tab-btn" data-target="tab-divisions" role="tab">Administrative Divisions ({{ divisions|length }})</button>
     <button class="tn-tab-btn" data-target="tab-neighbors" role="tab">Neighbors & Borders ({{ neighbors|length }})</button>
@@ -97,6 +110,189 @@
           {{ country.currency_code }} ({{ country.currency_symbol }})
         </div>
         <span style="font-size: 0.78rem; color: var(--text-muted);">{{ country.currency_name }}</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tab: Real-Time Live Data (Inbuilt Free APIs) -->
+  <div id="tab-live" class="tn-tab-content" role="tabpanel">
+    <div style="background: linear-gradient(135deg, rgba(56, 189, 248, 0.08) 0%, rgba(30, 41, 59, 0.4) 100%); border: 1px solid rgba(56, 189, 248, 0.25); border-radius: var(--radius-md); padding: 1.5rem; margin-bottom: 2rem;">
+      <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem;">
+        <div>
+          <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.25rem;">
+            <span style="display: inline-block; width: 10px; height: 10px; border-radius: 50%; background: #22c55e; box-shadow: 0 0 10px #22c55e;"></span>
+            <h3 style="font-size: 1.3rem; margin: 0; color: var(--text-primary);">Automatic Real-Time Telemetry & Public Free APIs</h3>
+          </div>
+          <p style="color: var(--text-secondary); font-size: 0.95rem; margin: 0;">
+            Zero-key open public data feeds stream real-time meteorological conditions, currency exchange valuations, and sovereign status.
+          </p>
+        </div>
+        <a href="{{ url_for('api.get_country_live_data', identifier=country.slug) }}" target="_blank" class="tn-btn tn-btn-outline tn-btn-sm" style="border-color: var(--accent-cyan); color: var(--accent-cyan);">
+          ⚡ View Raw Inbuilt JSON API
+        </a>
+      </div>
+    </div>
+
+    <!-- Live Weather Section -->
+    <div style="margin-bottom: 2.5rem;">
+      <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem; flex-wrap: wrap; gap: 0.5rem;">
+        <h4 style="font-size: 1.15rem; color: var(--accent-cyan); display: flex; align-items: center; gap: 0.5rem; margin: 0;">
+          🌤️ Live Meteorological Conditions in {{ country.capital_name or country.common_name }}
+        </h4>
+        <span class="tn-badge" style="background: rgba(56, 189, 248, 0.15); border-color: rgba(56, 189, 248, 0.3); color: var(--accent-cyan);">
+          Open-Meteo Free API (Zero Key)
+        </span>
+      </div>
+
+      {% if live_data and live_data.weather %}
+      <div class="tn-grid" style="grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));">
+        <div class="tn-stat-card" style="border-left: 3px solid var(--accent-cyan);">
+          <div class="tn-card-meta-label">Current Temperature</div>
+          <div style="font-size: 1.8rem; font-weight: 700; color: var(--text-primary); margin-top: 4px; display: flex; align-items: center; gap: 0.5rem;">
+            <span>{{ live_data.weather.icon }}</span>
+            <span>{{ live_data.weather.temperature_c }}°C</span>
+          </div>
+          <span style="font-size: 0.8rem; color: var(--text-muted);">
+            Condition: <strong>{{ live_data.weather.condition }}</strong>
+          </span>
+        </div>
+
+        <div class="tn-stat-card">
+          <div class="tn-card-meta-label">Apparent "Feels Like"</div>
+          <div style="font-size: 1.6rem; font-weight: 700; color: var(--text-primary); margin-top: 4px;">
+            {{ live_data.weather.apparent_temperature_c }}°C
+          </div>
+          <span style="font-size: 0.8rem; color: var(--text-muted);">Thermal comfort index</span>
+        </div>
+
+        <div class="tn-stat-card">
+          <div class="tn-card-meta-label">Relative Humidity</div>
+          <div style="font-size: 1.6rem; font-weight: 700; color: var(--text-primary); margin-top: 4px;">
+            💧 {{ live_data.weather.humidity_pct }}%
+          </div>
+          <span style="font-size: 0.8rem; color: var(--text-muted);">Atmospheric moisture</span>
+        </div>
+
+        <div class="tn-stat-card">
+          <div class="tn-card-meta-label">Wind Velocity</div>
+          <div style="font-size: 1.6rem; font-weight: 700; color: var(--text-primary); margin-top: 4px;">
+            💨 {{ live_data.weather.wind_speed_kmh }} km/h
+          </div>
+          <span style="font-size: 0.8rem; color: var(--text-muted);">Surface velocity (10m)</span>
+        </div>
+      </div>
+      <p style="font-size: 0.8rem; color: var(--text-muted); margin-top: 0.75rem;">
+        * Meteorological observation timestamp: {{ live_data.weather.time or 'Live' }} &bull; Source: World Meteorological Organization (WMO) grid models via Open-Meteo.
+      </p>
+      {% else %}
+      <div style="padding: 1.5rem; background: var(--bg-card); border-radius: var(--radius-md); border: 1px dashed var(--border-color); text-align: center; color: var(--text-muted);">
+        Meteorological feed temporarily unavailable for coordinates ({{ country.latitude }}, {{ country.longitude }}).
+      </div>
+      {% endif %}
+    </div>
+
+    <!-- Live Forex Currency Rates Section -->
+    <div style="margin-bottom: 2.5rem;">
+      <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem; flex-wrap: wrap; gap: 0.5rem;">
+        <h4 style="font-size: 1.15rem; color: var(--accent-cyan); display: flex; align-items: center; gap: 0.5rem; margin: 0;">
+          💱 Real-Time Foreign Exchange Valuation (Base: 1 {{ country.currency_code }})
+        </h4>
+        <span class="tn-badge" style="background: rgba(34, 197, 94, 0.15); border-color: rgba(34, 197, 94, 0.3); color: #22c55e;">
+          Open Exchange Rates (Free Endpoint)
+        </span>
+      </div>
+
+      {% if live_data and live_data.forex and live_data.forex.rates %}
+      <div class="tn-grid" style="grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));">
+        {% for target_curr, rate in live_data.forex.rates.items() %}
+          {% if rate %}
+          <div class="tn-card" style="padding: 1rem; border-radius: var(--radius-sm);">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+              <span class="tn-card-meta-label">{{ target_curr }}</span>
+              <span class="tn-badge">{{ target_curr }}</span>
+            </div>
+            <div style="font-size: 1.35rem; font-weight: 700; color: var(--text-primary); margin-top: 4px;">
+              {% if rate < 0.01 %}
+                {{ "{:.6f}".format(rate) }}
+              {% elif rate < 1 %}
+                {{ "{:.4f}".format(rate) }}
+              {% else %}
+                {{ "{:,.2f}".format(rate) }}
+              {% endif %}
+            </div>
+            <span style="font-size: 0.75rem; color: var(--text-muted);">
+              1 {{ country.currency_code }} = {{ rate }} {{ target_curr }}
+            </span>
+          </div>
+          {% endif %}
+        {% endfor %}
+      </div>
+      <p style="font-size: 0.8rem; color: var(--text-muted); margin-top: 0.75rem;">
+        * Market benchmarks updated: {{ live_data.forex.last_updated or 'Live' }} &bull; Source: Open Exchange Rates Public Endpoint.
+      </p>
+      {% else %}
+      <div style="padding: 1.5rem; background: var(--bg-card); border-radius: var(--radius-md); border: 1px dashed var(--border-color); text-align: center; color: var(--text-muted);">
+        Live forex rates currently unavailable for {{ country.currency_code }}.
+      </div>
+      {% endif %}
+    </div>
+
+    <!-- Sovereign Insignia & International Status (REST Countries API) -->
+    <div style="margin-bottom: 2rem;">
+      <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem; flex-wrap: wrap; gap: 0.5rem;">
+        <h4 style="font-size: 1.15rem; color: var(--accent-cyan); display: flex; align-items: center; gap: 0.5rem; margin: 0;">
+          🏛️ Sovereign Insignia & International Status
+        </h4>
+        <span class="tn-badge" style="background: rgba(168, 85, 247, 0.15); border-color: rgba(168, 85, 247, 0.3); color: #c084fc;">
+          REST Countries v3.1 Free API
+        </span>
+      </div>
+
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.5rem;">
+        {% if live_data and live_data.telemetry and live_data.telemetry.coat_of_arms_url %}
+        <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 1.5rem; text-align: center; display: flex; flex-direction: column; align-items: center; justify-content: center;">
+          <div class="tn-card-meta-label" style="margin-bottom: 1rem;">Official Sovereign Coat of Arms</div>
+          <img src="{{ live_data.telemetry.coat_of_arms_url }}" alt="Coat of Arms of {{ country.common_name }}" style="max-height: 140px; max-width: 100%; object-fit: contain; filter: drop-shadow(0 4px 12px rgba(0,0,0,0.4));">
+          <p style="font-size: 0.8rem; color: var(--text-muted); margin-top: 0.75rem;">
+            Authoritative national crest rendered via REST Countries Open API
+          </p>
+        </div>
+        {% endif %}
+
+        <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 1.5rem; display: flex; flex-direction: column; justify-content: space-around;">
+          <div>
+            <div class="tn-card-meta-label">United Nations Recognition</div>
+            <div style="font-size: 1.15rem; font-weight: 600; color: var(--text-primary); margin-top: 4px; display: flex; align-items: center; gap: 0.5rem;">
+              {% if live_data and live_data.telemetry and live_data.telemetry.un_member %}
+                <span style="color: #22c55e;">🇺🇳 Full UN Member State</span>
+              {% else %}
+                <span style="color: var(--accent-amber);">🇺🇳 Observer / Specialized Territory</span>
+              {% endif %}
+            </div>
+          </div>
+
+          <div style="margin-top: 1rem;">
+            <div class="tn-card-meta-label">Gini Coefficient (Income Distribution)</div>
+            <div style="font-size: 1.15rem; font-weight: 600; color: var(--text-primary); margin-top: 4px;">
+              {{ live_data.telemetry.gini_index if live_data and live_data.telemetry and live_data.telemetry.gini_index else 'Not Reported / Census Survey' }}
+            </div>
+          </div>
+
+          <div style="margin-top: 1rem;">
+            <div class="tn-card-meta-label">Official Work Week Start</div>
+            <div style="font-size: 1.15rem; font-weight: 600; color: var(--text-primary); margin-top: 4px;">
+              {{ live_data.telemetry.start_of_week if live_data and live_data.telemetry and live_data.telemetry.start_of_week else 'Monday' }}
+            </div>
+          </div>
+
+          {% if live_data and live_data.telemetry and live_data.telemetry.google_maps_url %}
+          <div style="margin-top: 1rem;">
+            <a href="{{ live_data.telemetry.google_maps_url }}" target="_blank" rel="noopener noreferrer" class="tn-btn tn-btn-outline tn-btn-sm" style="width: 100%; text-align: center;">
+              📍 Open Satellite View on Google Maps &rarr;
+            </a>
+          </div>
+          {% endif %}
+        </div>
       </div>
     </div>
   </div>

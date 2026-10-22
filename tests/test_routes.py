@@ -67,6 +67,23 @@ class IntegrationRouteTestCase(unittest.TestCase):
         self.assertEqual(data["common_name"], "India")
         self.assertEqual(data["capital"], "New Delhi")
 
+    def test_live_country_api_and_page_telemetry(self):
+        # Test Live JSON API endpoint
+        res_live = self.client.get("/api/countries/india/live")
+        self.assertEqual(res_live.status_code, 200)
+        json_data = res_live.get_json()
+        self.assertEqual(json_data["status"], "success")
+        self.assertEqual(json_data["country"]["name"], "India")
+        self.assertIn("weather", json_data["live"])
+        self.assertIn("forex", json_data["live"])
+        self.assertIn("telemetry", json_data["live"])
+
+        # Test Country detail page renders live telemetry section
+        res_page = self.client.get("/countries/india")
+        self.assertEqual(res_page.status_code, 200)
+        self.assertIn(b"Real-Time Live Data", res_page.data)
+        self.assertIn(b"Open-Meteo", res_page.data)
+
     def test_unauthorized_admin_access_denied(self):
         # Guest accessing /admin/dashboard should be redirected to login
         res_guest = self.client.get("/admin/dashboard")

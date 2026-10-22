@@ -6,6 +6,7 @@ from models.geography import Country, Continent, AdministrativeDivision, Capital
 from models.marine_and_physical import Ocean, Sea, GeographicFeature
 from services.geographic_service import GeographicService
 from services.search_service import SearchService
+from services.live_data_service import LiveDataService
 
 api_bp = Blueprint("api", __name__, url_prefix="/api")
 
@@ -73,6 +74,26 @@ def get_country_detail(identifier):
             "data_source": country.data_source,
             "last_updated": country.last_updated.isoformat() if country.last_updated else None
         }
+    })
+
+@api_bp.route("/countries/<identifier>/live")
+def get_country_live_data(identifier):
+    country = GeographicService.get_country_by_slug(identifier)
+    if not country:
+        return jsonify({"status": "error", "message": f"Country '{identifier}' not found"}), 404
+
+    live_data = LiveDataService.get_composite_live_data(country)
+    return jsonify({
+        "status": "success",
+        "country": {
+            "name": country.common_name,
+            "slug": country.slug,
+            "iso_a2": country.iso_a2,
+            "iso_a3": country.iso_a3,
+            "capital": country.capital_name,
+            "currency_code": country.currency_code
+        },
+        "live": live_data
     })
 
 @api_bp.route("/countries/<identifier>/neighbors")

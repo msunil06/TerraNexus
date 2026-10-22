@@ -1,6 +1,7 @@
 from flask import Blueprint, render_template, request, abort
 from flask_login import current_user
 from services.geographic_service import GeographicService
+from services.live_data_service import LiveDataService
 from models.user import UserFavorite
 from models.geography import AdministrativeDivision, City
 
@@ -36,6 +37,9 @@ def country_detail(slug):
     capitals = country.capitals.all()
     cities = country.cities.limit(10).all()
 
+    # Automatic inbuilt free live data (weather, forex, UN telemetry)
+    live_data = LiveDataService.get_composite_live_data(country)
+
     # Check if user has favorited
     is_favorite = False
     if current_user.is_authenticated:
@@ -53,6 +57,7 @@ def country_detail(slug):
         divisions=divisions,
         capitals=capitals,
         cities=cities,
+        live_data=live_data,
         is_favorite=is_favorite
     )
 
