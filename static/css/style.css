@@ -860,3 +860,14 @@ a:hover {
   flex-wrap: wrap;
   gap: 1rem;
 }
+
+@keyframes pulseGlow {
+  0% {
+    box-shadow: 0 0 25px rgba(0, 245, 212, 0.4);
+    transform: scale(1);
+  }
+  100% {
+    box-shadow: 0 0 50px rgba(0, 245, 212, 0.75);
+    transform: scale(1.02);
+  }
+}
