@@ -1,0 +1,164 @@
+{% extends "admin/layout.html" %}
+
+{% block title %}System Settings & Map API Keys | Admin Command{% endblock %}
+
+{% block admin_content %}
+<div style="max-width: 900px; margin: 0 auto;">
+  <!-- Header -->
+  <div style="margin-bottom: 2rem;">
+    <span class="tn-badge" style="background: rgba(16, 185, 129, 0.15); color: #10b981; border-color: #10b981;">
+      Platform Governance
+    </span>
+    <h1 style="font-size: 1.85rem; font-weight: 800; margin: 0.5rem 0 0.25rem;">
+      ⚙️ System Settings & API Configuration
+    </h1>
+    <p style="color: var(--text-muted); margin: 0; font-size: 0.92rem;">
+      Configure global platform settings, map providers, external API keys, default themes, and system security controls.
+    </p>
+  </div>
+
+  <form method="POST" action="{{ url_for('admin.system_settings') }}">
+    
+    <!-- 1. Map & Geocartography Providers Configuration -->
+    <div class="tn-card" style="padding: 1.75rem; margin-bottom: 2rem; border-top: 3px solid var(--accent);">
+      <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.25rem;">
+        <div>
+          <h3 style="font-size: 1.2rem; font-weight: 700; color: var(--text-primary); margin: 0 0 0.25rem;">
+            🗺️ Map Tile Providers & API Keys
+          </h3>
+          <p style="font-size: 0.85rem; color: var(--text-muted); margin: 0;">
+            Configure optional premium Mapbox, Google Maps, and OpenCage API keys, or use built-in free public layers (CartoDB, ESRI Satellite, OpenStreetMap).
+          </p>
+        </div>
+        <span class="tn-badge" style="background: rgba(0, 245, 212, 0.1); color: var(--accent); border-color: var(--accent);">
+          Map Config
+        </span>
+      </div>
+
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.25rem; margin-bottom: 1.25rem;">
+        <div>
+          <label style="display: block; font-weight: 600; font-size: 0.88rem; margin-bottom: 0.4rem; color: var(--text-secondary);">
+            Default Map Style / Basemap
+          </label>
+          <select name="default_map_style" style="width: 100%; padding: 0.65rem 1rem; background: var(--bg-primary); border: 1px solid var(--border-color); border-radius: var(--radius-sm); color: var(--text-primary); font-size: 0.92rem; outline: none;">
+            <option value="satellite" {% if settings.get('default_map_style') == 'satellite' %}selected{% endif %}>🛰️ Satellite View (ESRI World Imagery - Free)</option>
+            <option value="dark" {% if settings.get('default_map_style') == 'dark' or not settings.get('default_map_style') %}selected{% endif %}>🌙 Dark Cosmos (CartoDB Dark Matter - Free)</option>
+            <option value="light" {% if settings.get('default_map_style') == 'light' %}selected{% endif %}>☀️ Light Atlas (CartoDB Positron - Free)</option>
+            <option value="streets" {% if settings.get('default_map_style') == 'streets' %}selected{% endif %}>🗺️ OpenStreetMap Standard (Free Public)</option>
+            <option value="topo" {% if settings.get('default_map_style') == 'topo' %}selected{% endif %}>🏔️ Topographical Relief (OpenTopoMap - Free)</option>
+            <option value="mapbox" {% if settings.get('default_map_style') == 'mapbox' %}selected{% endif %}>🌐 Mapbox Streets (Requires Access Token)</option>
+          </select>
+        </div>
+
+        <div>
+          <label style="display: block; font-weight: 600; font-size: 0.88rem; margin-bottom: 0.4rem; color: var(--text-secondary);">
+            Mapbox Access Token (Optional)
+          </label>
+          <input type="password" name="mapbox_access_token" value="{{ settings.get('mapbox_access_token') or '' }}" placeholder="pk.eyJ1Ijo..." style="width: 100%; padding: 0.65rem 1rem; background: var(--bg-primary); border: 1px solid var(--border-color); border-radius: var(--radius-sm); color: var(--text-primary); font-size: 0.92rem; outline: none;">
+          <span style="font-size: 0.75rem; color: var(--text-muted); display: block; margin-top: 4px;">
+            Optional Mapbox vector tiles access token for custom styling.
+          </span>
+        </div>
+      </div>
+
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.25rem; margin-bottom: 1.25rem;">
+        <div>
+          <label style="display: block; font-weight: 600; font-size: 0.88rem; margin-bottom: 0.4rem; color: var(--text-secondary);">
+            Google Maps API Key (Optional)
+          </label>
+          <input type="password" name="google_maps_api_key" value="{{ settings.get('google_maps_api_key') or '' }}" placeholder="AIzaSy..." style="width: 100%; padding: 0.65rem 1rem; background: var(--bg-primary); border: 1px solid var(--border-color); border-radius: var(--radius-sm); color: var(--text-primary); font-size: 0.92rem; outline: none;">
+          <span style="font-size: 0.75rem; color: var(--text-muted); display: block; margin-top: 4px;">
+            Enables optional Google Places Geocoding and Satellite Road overlays.
+          </span>
+        </div>
+
+        <div>
+          <label style="display: block; font-weight: 600; font-size: 0.88rem; margin-bottom: 0.4rem; color: var(--text-secondary);">
+            OpenCage Geocoder API Key (Optional)
+          </label>
+          <input type="password" name="opencage_api_key" value="{{ settings.get('opencage_api_key') or '' }}" placeholder="oc_..." style="width: 100%; padding: 0.65rem 1rem; background: var(--bg-primary); border: 1px solid var(--border-color); border-radius: var(--radius-sm); color: var(--text-primary); font-size: 0.92rem; outline: none;">
+          <span style="font-size: 0.75rem; color: var(--text-muted); display: block; margin-top: 4px;">
+            Forward and reverse geocoding fallback service.
+          </span>
+        </div>
+      </div>
+
+      <div>
+        <label style="display: block; font-weight: 600; font-size: 0.88rem; margin-bottom: 0.4rem; color: var(--text-secondary);">
+          Custom Tile Server URL Template (Optional)
+        </label>
+        <input type="text" name="custom_tile_url" value="{{ settings.get('custom_tile_url') or '' }}" placeholder="https://{s}.tile.yourdomain.com/{z}/{x}/{y}.png" style="width: 100%; padding: 0.65rem 1rem; background: var(--bg-primary); border: 1px solid var(--border-color); border-radius: var(--radius-sm); color: var(--text-primary); font-size: 0.92rem; outline: none; font-family: monospace;">
+        <span style="font-size: 0.75rem; color: var(--text-muted); display: block; margin-top: 4px;">
+          Self-hosted raster or vector tile server endpoint.
+        </span>
+      </div>
+    </div>
+
+    <!-- 2. Platform Identity & Appearance -->
+    <div class="tn-card" style="padding: 1.75rem; margin-bottom: 2rem; border-top: 3px solid #3b82f6;">
+      <h3 style="font-size: 1.2rem; font-weight: 700; color: var(--text-primary); margin: 0 0 1.25rem;">
+        🎨 Platform Identity & Appearance
+      </h3>
+
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.25rem; margin-bottom: 1.25rem;">
+        <div>
+          <label style="display: block; font-weight: 600; font-size: 0.88rem; margin-bottom: 0.4rem; color: var(--text-secondary);">
+            Application Name
+          </label>
+          <input type="text" name="app_name" value="{{ settings.get('app_name') or 'TerraNexus' }}" style="width: 100%; padding: 0.65rem 1rem; background: var(--bg-primary); border: 1px solid var(--border-color); border-radius: var(--radius-sm); color: var(--text-primary); font-size: 0.92rem; outline: none;">
+        </div>
+
+        <div>
+          <label style="display: block; font-weight: 600; font-size: 0.88rem; margin-bottom: 0.4rem; color: var(--text-secondary);">
+            Default Site Theme
+          </label>
+          <select name="default_theme" style="width: 100%; padding: 0.65rem 1rem; background: var(--bg-primary); border: 1px solid var(--border-color); border-radius: var(--radius-sm); color: var(--text-primary); font-size: 0.92rem; outline: none;">
+            <option value="dark" {% if settings.get('default_theme') == 'dark' or not settings.get('default_theme') %}selected{% endif %}>🌙 Dark Cosmos (Deep Navy / Neon Cyan)</option>
+            <option value="light" {% if settings.get('default_theme') == 'light' %}selected{% endif %}>☀️ Light Atlas (High-Contrast Clean White)</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <!-- 3. System Access & Security -->
+    <div class="tn-card" style="padding: 1.75rem; margin-bottom: 2rem; border-top: 3px solid #f59e0b;">
+      <h3 style="font-size: 1.2rem; font-weight: 700; color: var(--text-primary); margin: 0 0 1.25rem;">
+        🛡️ Security & Access Control
+      </h3>
+
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.25rem;">
+        <div>
+          <label style="display: block; font-weight: 600; font-size: 0.88rem; margin-bottom: 0.4rem; color: var(--text-secondary);">
+            User Registration State
+          </label>
+          <select name="allow_registration" style="width: 100%; padding: 0.65rem 1rem; background: var(--bg-primary); border: 1px solid var(--border-color); border-radius: var(--radius-sm); color: var(--text-primary); font-size: 0.92rem; outline: none;">
+            <option value="true" {% if settings.get('allow_registration') != 'false' %}selected{% endif %}>🟢 Open (Allow new user registrations)</option>
+            <option value="false" {% if settings.get('allow_registration') == 'false' %}selected{% endif %}>🔴 Closed (Only existing users can sign in)</option>
+          </select>
+        </div>
+
+        <div>
+          <label style="display: block; font-weight: 600; font-size: 0.88rem; margin-bottom: 0.4rem; color: var(--text-secondary);">
+            Maintenance Mode
+          </label>
+          <select name="maintenance_mode" style="width: 100%; padding: 0.65rem 1rem; background: var(--bg-primary); border: 1px solid var(--border-color); border-radius: var(--radius-sm); color: var(--text-primary); font-size: 0.92rem; outline: none;">
+            <option value="false" {% if settings.get('maintenance_mode') != 'true' %}selected{% endif %}>🟢 Operational (Normal public operations)</option>
+            <option value="true" {% if settings.get('maintenance_mode') == 'true' %}selected{% endif %}>⚠️ Active (Only administrators can access)</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <!-- Save Action -->
+    <div style="display: flex; gap: 1rem; align-items: center;">
+      <button type="submit" class="tn-btn tn-btn-primary" style="padding: 0.75rem 2rem; font-size: 1rem;">
+        💾 Save System Settings & API Keys
+      </button>
+      <a href="{{ url_for('admin.dashboard') }}" class="tn-btn tn-btn-outline">
+        Cancel
+      </a>
+    </div>
+
+  </form>
+</div>
+{% endblock %}

@@ -23,11 +23,100 @@ function initTerraNexusMap(container) {
     minZoom: 2,
     maxZoom: 18,
     zoomControl: false,
-    worldCopyJump: true
+    worldCopyJump: true,
+    scrollWheelZoom: false,
+    dragging: false,
+    touchZoom: false,
+    doubleClickZoom: false,
+    boxZoom: false,
+    keyboard: false
   });
 
   // Custom Zoom Control placed top-left
-  L.control.zoom({ position: "topleft" }).addTo(map);
+  const zoomControl = L.control.zoom({ position: "topleft" }).addTo(map);
+
+  // Full-Screen interactive lock logic (Requirement 8)
+  let isFullScreen = false;
+
+  function setInteractions(enabled) {
+    if (enabled) {
+      map.scrollWheelZoom.enable();
+      map.dragging.enable();
+      map.touchZoom.enable();
+      map.doubleClickZoom.enable();
+      map.boxZoom.enable();
+      map.keyboard.enable();
+    } else {
+      map.scrollWheelZoom.disable();
+      map.dragging.disable();
+      map.touchZoom.disable();
+      map.doubleClickZoom.disable();
+      map.boxZoom.disable();
+      map.keyboard.disable();
+    }
+  }
+
+  // Initially locked
+  setInteractions(false);
+
+  function toggleFullScreen() {
+    const mapCard = container.closest(".tn-map-card") || container;
+    const lockBanner = document.getElementById("mapFsLockBanner");
+    const exitBtn = document.getElementById("exitFsFloatingBtn");
+    const toggleBtn = document.getElementById("btnMapFullScreen");
+
+    isFullScreen = !isFullScreen;
+
+    if (isFullScreen) {
+      mapCard.classList.add("fullscreen-mode");
+      setInteractions(true);
+      if (lockBanner) lockBanner.classList.add("hidden");
+      if (exitBtn) exitBtn.style.display = "inline-flex";
+      if (toggleBtn) toggleBtn.innerHTML = "✕ Exit Full-Screen";
+      document.body.style.overflow = "hidden";
+    } else {
+      mapCard.classList.remove("fullscreen-mode");
+      setInteractions(false);
+      if (lockBanner) lockBanner.classList.remove("hidden");
+      if (exitBtn) exitBtn.style.display = "none";
+      if (toggleBtn) toggleBtn.innerHTML = "⛶ Enter Full-Screen";
+      document.body.style.overflow = "";
+    }
+
+    setTimeout(() => {
+      map.invalidateSize();
+    }, 200);
+  }
+
+  const fsBtn = document.getElementById("btnMapFullScreen");
+  if (fsBtn) fsBtn.addEventListener("click", toggleFullScreen);
+
+  const bannerBtn = document.getElementById("bannerEnterFsBtn");
+  if (bannerBtn) bannerBtn.addEventListener("click", toggleFullScreen);
+
+  const exitFloating = document.getElementById("exitFsFloatingBtn");
+  if (exitFloating) exitFloating.addEventListener("click", toggleFullScreen);
+
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape" && isFullScreen) {
+      toggleFullScreen();
+    }
+  });
+
+  // User feedback on clicking locked map
+  map.on("mousedown", () => {
+    if (!isFullScreen) {
+      const banner = document.getElementById("mapFsLockBanner");
+      if (banner) {
+        banner.style.boxShadow = "0 0 25px rgba(245, 158, 11, 0.9)";
+        banner.style.borderColor = "#f59e0b";
+        setTimeout(() => {
+          banner.style.boxShadow = "";
+          banner.style.borderColor = "";
+        }, 800);
+      }
+    }
+  });
 
   // Add scale bar
   L.control.scale({ imperial: true, metric: true, position: "bottomright" }).addTo(map);
@@ -38,15 +127,13 @@ function initTerraNexusMap(container) {
       attribution: 'Tiles &copy; Esri &mdash; High-Resolution Satellite & Aerial Imagery (Free Public)',
       maxZoom: 18
     }),
-    dark: L.tileLayer("https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png", {
-      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/attributions">CARTO</a>',
-      subdomains: "abcd",
-      maxZoom: 19
+    dark: L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Base/MapServer/tile/{z}/{y}/{x}", {
+      attribution: 'Tiles &copy; Esri &mdash; Esri Dark Canvas (Zero API Key)',
+      maxZoom: 16
     }),
-    light: L.tileLayer("https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png", {
-      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/attributions">CARTO</a>',
-      subdomains: "abcd",
-      maxZoom: 19
+    light: L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}", {
+      attribution: 'Tiles &copy; Esri &mdash; Esri World Street (Zero API Key)',
+      maxZoom: 18
     }),
     streets: L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
       attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',

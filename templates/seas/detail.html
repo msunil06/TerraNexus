@@ -60,6 +60,98 @@
     </div>
   </div>
 
+  <!-- Interactive Sea Hydrographic Map Card (Zero API Key Required) -->
+  <div style="margin-bottom: 2rem; background: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--radius-lg); overflow: hidden; box-shadow: var(--shadow-sm);">
+    <div style="padding: 1rem 1.5rem; background: rgba(255,255,255,0.03); border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.75rem;">
+      <div>
+        <h3 style="margin: 0; font-size: 1.15rem; color: var(--text-primary); display: flex; align-items: center; gap: 0.5rem;">
+          <span>🗺️</span> {{ sea.name }} Hydrographic Satellite & Marine Chart
+        </h3>
+        <p style="margin: 0.2rem 0 0; font-size: 0.8rem; color: var(--text-muted);">
+          Leaflet Vector & Satellite Cartography • 🔒 Zero API Key Required • Public Open Source Tiles
+        </p>
+      </div>
+      <div style="display: flex; gap: 0.5rem; align-items: center;">
+        <span class="tn-badge" style="background: rgba(0, 229, 255, 0.12); color: var(--accent-cyan); border-color: rgba(0, 229, 255, 0.3);">
+          {{ sea.sea_type | capitalize }}
+        </span>
+        <span class="tn-badge" style="background: rgba(16, 185, 129, 0.12); color: #10b981; border-color: rgba(16, 185, 129, 0.3);">
+          Live Telemetry Active
+        </span>
+      </div>
+    </div>
+    <div id="seaDetailMap" style="height: 380px; width: 100%; background: #0b1526;"></div>
+  </div>
+
+  <!-- Live Hydrographic & Marine Telemetry Card (Zero API Key Required) -->
+  {% if live_marine %}
+  <div style="margin-bottom: 2.5rem; background: linear-gradient(135deg, rgba(14, 165, 233, 0.08) 0%, rgba(6, 182, 212, 0.04) 100%); border: 1px solid rgba(14, 165, 233, 0.25); border-radius: var(--radius-lg); padding: 1.5rem; box-shadow: var(--shadow-sm);">
+    <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.75rem; margin-bottom: 1.25rem;">
+      <div>
+        <div style="display: flex; align-items: center; gap: 0.5rem;">
+          <span style="font-size: 1.4rem;">🌊</span>
+          <h3 style="margin: 0; font-size: 1.15rem; color: var(--text-primary);">Real-Time Marine & Swell Telemetry</h3>
+        </div>
+        <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 0.2rem;">
+          Current sea condition, significant wave height, and swell heading via Open-Meteo Marine API
+        </div>
+      </div>
+      <div style="font-size: 0.75rem; color: var(--accent-cyan); background: rgba(0, 229, 255, 0.1); border: 1px solid rgba(0, 229, 255, 0.25); padding: 0.3rem 0.65rem; border-radius: 999px; font-weight: 600;">
+        🔒 Zero API Key Required • 100% Free Public API
+      </div>
+    </div>
+
+    <div class="tn-stats-grid" style="grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 0;">
+      <div class="tn-stat-card" style="background: var(--bg-card); border-color: rgba(255,255,255,0.08);">
+        <span class="tn-stat-label">Significant Wave Height</span>
+        <div class="tn-stat-num" style="color: var(--accent-cyan); font-size: 1.7rem;">{{ live_marine.wave_height }} m</div>
+        <span style="font-size: 0.75rem; color: var(--text-muted);">{{ live_marine.condition }}</span>
+      </div>
+      <div class="tn-stat-card" style="background: var(--bg-card); border-color: rgba(255,255,255,0.08);">
+        <span class="tn-stat-label">Dominant Wave Period</span>
+        <div class="tn-stat-num" style="color: #38bdf8; font-size: 1.7rem;">{{ live_marine.wave_period }} s</div>
+        <span style="font-size: 0.75rem; color: var(--text-muted);">Swell cycle frequency</span>
+      </div>
+      <div class="tn-stat-card" style="background: var(--bg-card); border-color: rgba(255,255,255,0.08);">
+        <span class="tn-stat-label">Wave Heading Azimuth</span>
+        <div class="tn-stat-num" style="color: #a78bfa; font-size: 1.7rem;">{{ live_marine.wave_direction }}°</div>
+        <span style="font-size: 0.75rem; color: var(--text-muted);">Compass drift heading</span>
+      </div>
+      <div class="tn-stat-card" style="background: var(--bg-card); border-color: rgba(255,255,255,0.08);">
+        <span class="tn-stat-label">Wind-Wave Component</span>
+        <div class="tn-stat-num" style="color: #34d399; font-size: 1.7rem;">{{ live_marine.wind_wave_height }} m</div>
+        <span style="font-size: 0.75rem; color: var(--text-muted);">Local surface chop</span>
+      </div>
+    </div>
+  </div>
+  {% endif %}
+
+  <!-- Connected Littoral Countries Section -->
+  <div style="margin-bottom: 2.5rem; background: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 1.5rem;">
+    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem; flex-wrap: wrap; gap: 0.5rem;">
+      <h3 style="font-size: 1.25rem; font-weight: 700; color: var(--text-primary); margin: 0; display: flex; align-items: center; gap: 0.5rem;">
+        ⛵ Connected Littoral & Bordering Countries ({% if littoral_countries %}{{ littoral_countries|length }}{% else %}Co-Bordering States{% endif %})
+      </h3>
+      <span class="tn-badge" style="background: rgba(14, 165, 233, 0.15); color: #38bdf8;">Littoral Maritime Zone</span>
+    </div>
+
+    {% if littoral_countries %}
+      <div style="display: flex; flex-wrap: wrap; gap: 0.6rem;">
+        {% for lc in littoral_countries %}
+          <a href="{{ url_for('countries.country_detail', slug=lc.slug) }}" class="tn-card" style="padding: 0.5rem 0.85rem; text-decoration: none; display: inline-flex; align-items: center; gap: 0.5rem; border-radius: var(--radius-sm); border: 1px solid var(--border-color); background: var(--bg-surface);">
+            <span style="font-size: 1.3rem;">{{ lc.flag_emoji or '🌐' }}</span>
+            <strong style="font-size: 0.9rem; color: var(--text-primary);">{{ lc.common_name }}</strong>
+            <span style="font-size: 0.72rem; color: var(--text-muted); font-family: monospace;">{{ lc.iso_a3 }}</span>
+          </a>
+        {% endfor %}
+      </div>
+    {% else %}
+      <p style="color: var(--text-secondary); margin: 0; font-size: 0.95rem;">
+        Bordering nations: <strong>{{ sea.surrounding_countries or 'Littoral states border this marginal sea.' }}</strong>
+      </p>
+    {% endif %}
+  </div>
+
   <!-- Detailed Table -->
   <div class="tn-table-responsive" style="margin-bottom: 2.5rem;">
     <table class="tn-table">
@@ -112,3 +204,89 @@
   </div>
 </div>
 {% endblock %}
+
+{% block extra_scripts %}
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+  var lat = {{ sea.latitude or 20.0 }};
+  var lon = {{ sea.longitude or 0.0 }};
+  var seaName = {{ sea.name | tojson }};
+  var maxDepth = {{ (sea.max_depth_m or 0) | tojson }};
+  var seaType = {{ (sea.sea_type or 'Sea') | tojson }};
+
+  // Base Tile Layers (100% Free Public APIs - Zero API Key Required)
+  var esriSat = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+    attribution: 'Tiles &copy; Esri &mdash; Free Public Tiles (Zero Key)',
+    maxZoom: 17
+  });
+
+  var esriDark = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Base/MapServer/tile/{z}/{y}/{x}', {
+    attribution: 'Tiles &copy; Esri &mdash; Esri Dark Canvas (Zero API Key)',
+    maxZoom: 16
+  });
+
+  var osm = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '&copy; OpenStreetMap contributors',
+    maxZoom: 19
+  });
+
+  var openTopo = L.tileLayer('https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png', {
+    attribution: 'Map data: &copy; OpenStreetMap contributors, SRTM | Map style: &copy; OpenTopoMap',
+    maxZoom: 16
+  });
+
+  var map = L.map('seaDetailMap', {
+    center: [lat, lon],
+    zoom: 5,
+    layers: [esriSat]
+  });
+
+  var baseMaps = {
+    "ESRI Ocean Satellite": esriSat,
+    "ESRI Dark Canvas": esriDark,
+    "OpenStreetMap Standard": osm,
+    "OpenTopoMap Terrain": openTopo
+  };
+
+  L.control.layers(baseMaps, null, { position: 'topright' }).addTo(map);
+
+  // Sea Center Marker
+  var seaMarker = L.circleMarker([lat, lon], {
+    radius: 10,
+    fillColor: "#00e5ff",
+    color: "#ffffff",
+    weight: 2,
+    opacity: 1,
+    fillOpacity: 0.85
+  }).addTo(map);
+
+  seaMarker.bindPopup(`
+    <div style="font-family: var(--font-sans); color: #f8fafc; min-width: 200px;">
+      <h4 style="margin: 0 0 4px; font-size: 1rem; color: #00f5d4;">${seaName}</h4>
+      <p style="margin: 0 0 4px; font-size: 0.82rem; color: #94a3b8;">${seaType}</p>
+      <div style="font-size: 0.82rem; margin-top: 4px; border-top: 1px solid rgba(255,255,255,0.15); padding-top: 4px; color: #e2e8f0;">
+        <strong>Coordinates:</strong> ${lat.toFixed(2)}°, ${lon.toFixed(2)}°<br>
+        <strong>Max Depth:</strong> ${maxDepth ? maxDepth.toLocaleString() + ' m' : 'N/A'}
+      </div>
+    </div>
+  `).openPopup();
+
+  // Subtle pulsing sounder ring
+  L.circle([lat, lon], {
+    radius: 120000,
+    color: "#00e5ff",
+    fillColor: "#00e5ff",
+    fillOpacity: 0.1,
+    weight: 1.5,
+    dashArray: "4, 6"
+  }).addTo(map);
+
+  setTimeout(function() {
+    map.invalidateSize();
+  }, 300);
+});
+</script>
+{% endblock %}
+

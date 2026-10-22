@@ -17,11 +17,23 @@
       <li class="tn-admin-nav-item {% if request.endpoint == 'admin.dashboard' %}active{% endif %}">
         <a href="{{ url_for('admin.dashboard') }}">📊 Overview</a>
       </li>
-      <li class="tn-admin-nav-item {% if request.endpoint == 'admin.users' %}active{% endif %}">
-        <a href="{{ url_for('admin.users') }}">👥 User Accounts</a>
+      <li class="tn-admin-nav-item {% if request.endpoint in ('admin.users', 'admin.edit_user_profile') %}active{% endif %}">
+        <a href="{{ url_for('admin.users') }}">👥 User Accounts & Controls</a>
+      </li>
+      <li class="tn-admin-nav-item {% if request.endpoint and 'database' in request.endpoint %}active{% endif %}">
+        <a href="{{ url_for('admin.database_records', model_key='countries') }}">🗄️ Database Records</a>
       </li>
       <li class="tn-admin-nav-item {% if request.endpoint == 'admin.content_management' %}active{% endif %}">
-        <a href="{{ url_for('admin.content_management') }}">🗺️ Geographic Content</a>
+        <a href="{{ url_for('admin.content_management') }}">🗺️ Website Content</a>
+      </li>
+      <li class="tn-admin-nav-item {% if request.endpoint == 'admin.system_settings' %}active{% endif %}">
+        <a href="{{ url_for('admin.system_settings') }}">⚙️ System Settings</a>
+      </li>
+      <li class="tn-admin-nav-item {% if request.endpoint == 'admin.apis_hub' %}active{% endif %}">
+        <a href="{{ url_for('admin.apis_hub') }}">🌐 Centralized APIs</a>
+      </li>
+      <li class="tn-admin-nav-item {% if request.endpoint == 'admin.server_connections' %}active{% endif %}">
+        <a href="{{ url_for('admin.server_connections') }}">🔌 Server Connections</a>
       </li>
       <li class="tn-admin-nav-item {% if request.endpoint == 'admin.reports' %}active{% endif %}">
         <a href="{{ url_for('admin.reports') }}">📝 Reports & Feedback</a>
@@ -29,20 +41,17 @@
       <li class="tn-admin-nav-item {% if request.endpoint == 'admin.data_imports' %}active{% endif %}">
         <a href="{{ url_for('admin.data_imports') }}">📥 Dataset Importer</a>
       </li>
-      <li class="tn-admin-nav-item {% if request.endpoint == 'admin.server_connections' %}active{% endif %}">
-        <a href="{{ url_for('admin.server_connections') }}">🔌 Server Connections</a>
-      </li>
-      <li class="tn-admin-nav-item {% if request.endpoint == 'admin.apis_hub' %}active{% endif %}">
-        <a href="{{ url_for('admin.apis_hub') }}">🌐 Centralized APIs</a>
-      </li>
       <li class="tn-admin-nav-item {% if request.endpoint == 'admin.audit_logs' %}active{% endif %}">
         <a href="{{ url_for('admin.audit_logs') }}">🛡️ Security Audit Logs</a>
       </li>
-      <li class="tn-admin-nav-item" style="margin-top: 1.5rem;">
+      <li class="tn-admin-nav-item" style="margin-top: 1.5rem; padding-top: 1rem; border-top: 1px solid var(--border-color);">
         <a href="{{ url_for('maps.maps_hub') }}" style="color: var(--accent);">🗺️ View Map Hub</a>
       </li>
       <li class="tn-admin-nav-item">
         <a href="{{ url_for('main.index') }}" style="color: var(--text-muted);">&larr; Public Platform</a>
+      </li>
+      <li class="tn-admin-nav-item">
+        <a href="{{ url_for('admin.admin_logout') }}" style="color: var(--danger);">🚪 Admin Sign Out</a>
       </li>
     </ul>
   </aside>

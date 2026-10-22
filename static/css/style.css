@@ -17,8 +17,8 @@
   --border-hover: rgba(0, 245, 212, 0.45);
   
   --text-primary: #f8fafc;
-  --text-secondary: #94a3b8;
-  --text-muted: #64748b;
+  --text-secondary: #cbd5e1;
+  --text-muted: #94a3b8;
   
   --navy-deep: #060c18;
   --navy-mid: #001f54;
@@ -144,7 +144,7 @@ a:hover {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 1.5rem;
+  gap: 1rem;
 }
 
 .tn-brand {
@@ -152,6 +152,8 @@ a:hover {
   align-items: center;
   gap: 0.75rem;
   text-decoration: none;
+  flex-shrink: 0;
+  white-space: nowrap;
 }
 
 .tn-brand-logo {
@@ -171,20 +173,29 @@ a:hover {
   -webkit-text-fill-color: transparent;
 }
 
+.tn-core-nav {
+  flex-shrink: 0;
+}
+
 .tn-nav-links {
   display: flex;
   align-items: center;
-  gap: 1.25rem;
+  gap: 0.75rem;
   list-style: none;
+  margin: 0;
+  padding: 0;
 }
 
 .tn-nav-link {
   font-size: 0.92rem;
   font-weight: 500;
   color: var(--text-secondary);
-  padding: 0.4rem 0.6rem;
+  padding: 0.4rem 0.65rem;
   border-radius: var(--radius-sm);
   transition: color var(--transition-fast), background var(--transition-fast);
+  white-space: nowrap;
+  display: inline-flex;
+  align-items: center;
 }
 
 .tn-nav-link:hover, .tn-nav-link.active {
@@ -193,12 +204,120 @@ a:hover {
 }
 
 /* ==========================================================================
-   Search Bar (Nav & Hero)
+   Navigation Dropdown (More Menu)
+   ========================================================================== */
+.tn-nav-dropdown {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+}
+
+.tn-nav-dropdown-btn {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-family: inherit;
+  outline: none;
+}
+
+.tn-dropdown-caret {
+  font-size: 0.75rem;
+  transition: transform var(--transition-fast);
+  display: inline-block;
+  line-height: 1;
+}
+
+.tn-nav-dropdown:hover .tn-dropdown-caret,
+.tn-nav-dropdown:focus-within .tn-dropdown-caret,
+.tn-nav-dropdown.active .tn-dropdown-caret {
+  transform: rotate(180deg);
+}
+
+.tn-dropdown-menu {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 50%;
+  transform: translateX(-50%) translateY(8px);
+  background: var(--bg-card);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.45), 0 0 16px var(--accent-glow);
+  padding: 0.5rem;
+  min-width: 280px;
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+  z-index: 1060;
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  pointer-events: none;
+}
+
+.tn-nav-dropdown:hover .tn-dropdown-menu,
+.tn-nav-dropdown:focus-within .tn-dropdown-menu,
+.tn-nav-dropdown.active .tn-dropdown-menu {
+  opacity: 1;
+  visibility: visible;
+  transform: translateX(-50%) translateY(0);
+  pointer-events: auto;
+}
+
+.tn-dropdown-item {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.6rem 0.8rem;
+  border-radius: var(--radius-sm);
+  text-decoration: none;
+  color: var(--text-primary);
+  transition: background var(--transition-fast), color var(--transition-fast);
+}
+
+.tn-dropdown-item:hover,
+.tn-dropdown-item.active {
+  background: var(--accent-glow);
+  color: var(--accent-cyan);
+}
+
+.tn-dropdown-icon {
+  font-size: 1.35rem;
+  line-height: 1;
+  flex-shrink: 0;
+}
+
+.tn-dropdown-title {
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  line-height: 1.25;
+}
+
+.tn-dropdown-item:hover .tn-dropdown-title {
+  color: var(--accent-cyan);
+}
+
+.tn-dropdown-desc {
+  font-size: 0.72rem;
+  color: var(--text-muted);
+  line-height: 1.25;
+  margin-top: 2px;
+}
+
+/* ==========================================================================
+   Search Bar (Nav & Hero) - Minimum Width Guaranteed on PC / Laptops
    ========================================================================== */
 .tn-search-wrapper {
   position: relative;
-  flex: 1;
-  max-width: 360px;
+  flex: 1 1 200px;
+  min-width: 140px;
+  max-width: 290px;
+  margin: 0 0.5rem;
 }
 
 .tn-search-input-group {
@@ -211,20 +330,22 @@ a:hover {
   position: absolute;
   left: 0.85rem;
   color: var(--accent-cyan);
-  font-size: 1rem;
+  font-size: 0.95rem;
   pointer-events: none;
 }
 
 .tn-search-input {
   width: 100%;
-  padding: 0.55rem 2.5rem 0.55rem 2.4rem;
+  min-width: 0;
+  padding: 0.52rem 1rem 0.52rem 2.35rem;
   background: var(--bg-card);
   border: 1px solid var(--border-color);
   border-radius: var(--radius-full);
   color: var(--text-primary);
-  font-size: 0.9rem;
+  font-size: 0.88rem;
   transition: all var(--transition-fast);
   outline: none;
+  text-overflow: ellipsis;
 }
 
 .tn-search-input:focus {
@@ -906,3 +1027,659 @@ a:hover {
     transform: scale(1.02);
   }
 }
+
+/* ==========================================================================
+   Header, Core Navigation & Action Controls
+   ========================================================================== */
+.tn-core-nav {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.tn-core-nav .tn-nav-links {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.tn-core-nav .tn-nav-link {
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: var(--text-secondary);
+  padding: 0.38rem 0.65rem;
+  border-radius: var(--radius-sm);
+  transition: all var(--transition-fast);
+  white-space: nowrap;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+}
+
+.tn-core-nav .tn-nav-link:hover,
+.tn-core-nav .tn-nav-link.active {
+  color: var(--accent-cyan);
+  background: var(--accent-glow);
+}
+
+.tn-nav-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-shrink: 0;
+}
+
+.tn-user-avatar-btn {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--ocean-teal), var(--accent-cyan));
+  color: #060c18;
+  font-weight: 700;
+  font-size: 0.95rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+  box-shadow: 0 0 10px rgba(0, 245, 212, 0.3);
+  transition: transform 0.2s ease;
+  flex-shrink: 0;
+}
+
+.tn-user-avatar-btn:hover {
+  transform: scale(1.08);
+}
+
+.tn-badge-admin {
+  background: rgba(245, 158, 11, 0.15);
+  color: #f59e0b;
+  border: 1px solid #f59e0b;
+  font-size: 0.75rem;
+  font-weight: 700;
+  padding: 0.3rem 0.6rem;
+  border-radius: var(--radius-sm);
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  flex-shrink: 0;
+}
+
+.tn-sidebar-toggle-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  background: var(--bg-card);
+  color: var(--text-primary);
+  border: 1px solid var(--border-color);
+  padding: 0.38rem 0.75rem;
+  border-radius: var(--radius-sm);
+  font-size: 0.88rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  flex-shrink: 0;
+}
+
+.tn-sidebar-toggle-btn:hover {
+  border-color: var(--accent-cyan);
+  background: var(--accent-glow);
+  color: var(--accent-cyan);
+}
+
+/* ==========================================================================
+   Collapsible Sliding Sidebar Drawer
+   ========================================================================== */
+.tn-sidebar-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(6, 12, 24, 0.7);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  z-index: 1040;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.3s ease, visibility 0.3s ease;
+}
+
+.tn-sidebar-backdrop.active {
+  opacity: 1;
+  visibility: visible;
+}
+
+.tn-sidebar-drawer {
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: 360px;
+  max-width: 90vw;
+  background: var(--bg-card);
+  backdrop-filter: blur(25px);
+  -webkit-backdrop-filter: blur(25px);
+  border-left: 1px solid var(--border-color);
+  box-shadow: -10px 0 40px rgba(0, 0, 0, 0.5);
+  z-index: 1050;
+  display: flex;
+  flex-direction: column;
+  transform: translateX(100%);
+  transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.tn-sidebar-drawer.active {
+  transform: translateX(0);
+}
+
+.tn-sidebar-header {
+  padding: 1.25rem 1.5rem;
+  border-bottom: 1px solid var(--border-color);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: rgba(0, 0, 0, 0.15);
+}
+
+.tn-sidebar-brand {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.tn-sidebar-close-btn {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  font-size: 1.6rem;
+  cursor: pointer;
+  padding: 0.2rem 0.5rem;
+  border-radius: var(--radius-sm);
+  line-height: 1;
+  transition: color var(--transition-fast), background var(--transition-fast);
+}
+
+.tn-sidebar-close-btn:hover {
+  color: var(--accent-cyan);
+  background: var(--accent-glow);
+}
+
+.tn-sidebar-body {
+  padding: 1.25rem 1.5rem;
+  overflow-y: auto;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.tn-sidebar-group-title {
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  color: var(--text-muted);
+  margin-bottom: 0.6rem;
+}
+
+.tn-sidebar-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.tn-sidebar-link {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.6rem 0.85rem;
+  border-radius: var(--radius-sm);
+  color: var(--text-secondary);
+  font-size: 0.92rem;
+  font-weight: 500;
+  text-decoration: none;
+  transition: all var(--transition-fast);
+}
+
+.tn-sidebar-link:hover {
+  background: var(--accent-glow);
+  color: var(--accent-cyan);
+  transform: translateX(4px);
+}
+
+.tn-sidebar-icon {
+  font-size: 1.15rem;
+  width: 22px;
+  text-align: center;
+}
+
+.tn-sidebar-footer {
+  padding: 1rem 1.5rem;
+  border-top: 1px solid var(--border-color);
+  background: rgba(0, 0, 0, 0.15);
+}
+
+/* ==========================================================================
+   Full-Screen Interactive World Map Modes
+   ========================================================================== */
+.tn-map-card {
+  position: relative;
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+}
+
+.tn-map-card.fullscreen-mode {
+  position: fixed !important;
+  inset: 0 !important;
+  width: 100vw !important;
+  height: 100vh !important;
+  z-index: 999999 !important;
+  border-radius: 0 !important;
+  margin: 0 !important;
+  border: none !important;
+}
+
+.tn-map-card.fullscreen-mode .tn-map-frame {
+  height: 100vh !important;
+}
+
+.tn-map-fs-lock-banner {
+  position: absolute;
+  top: 1rem;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(6, 12, 24, 0.88);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid var(--accent);
+  padding: 0.5rem 1.25rem;
+  border-radius: var(--radius-full);
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  z-index: 999;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+  font-size: 0.85rem;
+  color: var(--text-primary);
+  pointer-events: auto;
+  transition: opacity 0.3s ease;
+}
+
+.tn-map-fs-lock-banner.hidden {
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* Fullscreen control button */
+.tn-btn-fs-toggle {
+  background: var(--accent);
+  color: #060c18;
+  font-weight: 700;
+  border: none;
+  padding: 0.35rem 0.85rem;
+  border-radius: var(--radius-full);
+  font-size: 0.82rem;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  box-shadow: 0 0 12px var(--accent-glow);
+  transition: transform 0.2s;
+}
+
+.tn-btn-fs-toggle:hover {
+  transform: scale(1.05);
+}
+
+.tn-fs-floating-close {
+  position: absolute;
+  top: 1.25rem;
+  right: 1.25rem;
+  z-index: 10001;
+  display: none;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.6rem 1.25rem;
+  background: rgba(10, 19, 36, 0.95);
+  backdrop-filter: blur(12px);
+  color: #fff;
+  border: 1.5px solid var(--accent);
+  border-radius: var(--radius-full);
+  font-weight: 700;
+  font-size: 0.88rem;
+  cursor: pointer;
+  box-shadow: 0 4px 25px rgba(0, 0, 0, 0.6), 0 0 15px var(--accent-glow);
+  transition: all 0.2s ease;
+}
+
+.tn-fs-floating-close:hover {
+  background: var(--accent);
+  color: #060c18;
+  transform: scale(1.04);
+}
+
+/* ==========================================================================
+   City & Capital Interactive Map Modal
+   ========================================================================== */
+.tn-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(6, 12, 24, 0.75);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  z-index: 1060;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.3s ease, visibility 0.3s ease;
+}
+
+.tn-modal-backdrop.active {
+  opacity: 1;
+  visibility: visible;
+}
+
+.tn-city-modal {
+  width: 100%;
+  max-width: 900px;
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg);
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6), 0 0 25px var(--accent-glow);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  transform: scale(0.95);
+  transition: transform 0.3s ease;
+}
+
+.tn-modal-backdrop.active .tn-city-modal {
+  transform: scale(1);
+}
+
+.tn-city-modal-header {
+  padding: 1.25rem 1.5rem;
+  border-bottom: 1px solid var(--border-color);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: rgba(0, 0, 0, 0.2);
+}
+
+.tn-city-modal-body {
+  height: 480px;
+  position: relative;
+}
+
+/* Full Mode (Full-Screen) styling for Modals and Maps */
+.tn-city-modal.full-mode {
+  max-width: 100vw !important;
+  width: 100vw !important;
+  height: 100vh !important;
+  border-radius: 0 !important;
+  border: none !important;
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  z-index: 100000 !important;
+}
+
+.tn-city-modal.full-mode .tn-city-modal-body {
+  height: calc(100vh - 65px) !important;
+  flex: 1;
+}
+
+.tn-continent-map-card.full-mode {
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  width: 100vw !important;
+  height: 100vh !important;
+  max-width: 100vw !important;
+  z-index: 99999 !important;
+  border-radius: 0 !important;
+  margin: 0 !important;
+  padding: 1rem 1.5rem !important;
+  background: var(--bg-card) !important;
+  display: flex !important;
+  flex-direction: column !important;
+}
+
+.tn-continent-map-card.full-mode #continentMap {
+  height: calc(100vh - 80px) !important;
+  flex: 1 !important;
+}
+
+/* ==========================================================================
+   Responsive Viewport Enhancements (Universal PC, Laptop & Mobile Fit)
+   ========================================================================== */
+/* Medium / Scaled Laptops (1080p with 125%/150% scaling, 1366px, 1440px) */
+@media (max-width: 1350px) {
+  .tn-nav-container {
+    gap: 0.75rem;
+  }
+  .tn-core-nav .tn-nav-links {
+    gap: 0.45rem;
+  }
+  .tn-core-nav .tn-nav-link {
+    padding: 0.35rem 0.5rem;
+    font-size: 0.88rem;
+  }
+  .tn-btn-label {
+    display: none !important;
+  }
+  .tn-theme-btn {
+    padding: 0.35rem;
+    width: 36px;
+    height: 36px;
+    justify-content: center;
+  }
+  .tn-sidebar-toggle-btn {
+    padding: 0.35rem;
+    width: 36px;
+    height: 36px;
+    justify-content: center;
+  }
+  .tn-badge-admin {
+    padding: 0.35rem 0.5rem;
+  }
+  .tn-search-wrapper {
+    min-width: 130px;
+    max-width: 240px;
+    margin: 0 0.35rem;
+  }
+}
+
+/* Compact Laptops, 1366px screens at scaling, and Tablets landscape */
+@media (max-width: 1120px) {
+  .tn-brand-name {
+    font-size: 1.25rem;
+  }
+  .tn-brand-logo {
+    width: 32px;
+    height: 32px;
+  }
+  .tn-core-nav .tn-nav-links {
+    gap: 0.3rem;
+  }
+  .tn-core-nav .tn-nav-link {
+    padding: 0.3rem 0.42rem;
+    font-size: 0.82rem;
+  }
+  .tn-search-wrapper {
+    min-width: 120px;
+    max-width: 190px;
+  }
+}
+
+/* Tablets portrait & Smaller Screens (< 900px) */
+@media (max-width: 900px) {
+  .tn-core-nav {
+    display: none;
+  }
+  .tn-hide-mobile {
+    display: none !important;
+  }
+  .tn-btn-label {
+    display: none !important;
+  }
+  .tn-search-wrapper {
+    max-width: 100%;
+    order: 3;
+    width: 100%;
+    margin: 0.35rem 0 0;
+  }
+  .tn-nav-container {
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+}
+
+/* ==========================================================================
+   Dark Mode High-Contrast Text Visibility Enhancements
+   ========================================================================== */
+/* Form Controls & Dropdown Select Options */
+select, option {
+  background-color: var(--bg-card);
+  color: var(--text-primary);
+}
+
+select:focus, input:focus, textarea:focus {
+  outline: none;
+  border-color: var(--accent-cyan) !important;
+}
+
+[data-theme="dark"] select,
+[data-theme="dark"] option,
+[data-theme="dark"] input,
+[data-theme="dark"] textarea {
+  background-color: #0d1a30 !important;
+  color: #f8fafc !important;
+  border-color: rgba(0, 245, 212, 0.25);
+}
+
+[data-theme="light"] select,
+[data-theme="light"] option,
+[data-theme="light"] input,
+[data-theme="light"] textarea {
+  background-color: #ffffff !important;
+  color: #0f172a !important;
+  border-color: #cbd5e1;
+}
+
+/* Leaflet Dark Mode Popup & Tooltip Overrides */
+[data-theme="dark"] .leaflet-popup-content-wrapper,
+[data-theme="dark"] .leaflet-popup-tip {
+  background: #0b1526 !important;
+  color: #f8fafc !important;
+  border: 1px solid rgba(0, 245, 212, 0.35) !important;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.7) !important;
+}
+
+[data-theme="dark"] .leaflet-popup-content {
+  color: #f8fafc !important;
+}
+
+[data-theme="dark"] .leaflet-popup-content h1,
+[data-theme="dark"] .leaflet-popup-content h2,
+[data-theme="dark"] .leaflet-popup-content h3,
+[data-theme="dark"] .leaflet-popup-content h4,
+[data-theme="dark"] .leaflet-popup-content strong {
+  color: #00f5d4 !important;
+}
+
+[data-theme="dark"] .leaflet-popup-content p,
+[data-theme="dark"] .leaflet-popup-content span,
+[data-theme="dark"] .leaflet-popup-content div {
+  color: #e2e8f0 !important;
+}
+
+[data-theme="dark"] .leaflet-container a.leaflet-popup-close-button {
+  color: #94a3b8 !important;
+}
+
+[data-theme="dark"] .leaflet-container a.leaflet-popup-close-button:hover {
+  color: #00f5d4 !important;
+}
+
+/* Ensure no text is obscured or muted to the point of invisibility */
+[data-theme="dark"] .tn-text-muted,
+[data-theme="dark"] .tn-card-subtitle,
+[data-theme="dark"] .tn-stat-label {
+  color: #94a3b8 !important;
+}
+
+[data-theme="dark"] .tn-card-meta-label {
+  color: #818cf8 !important;
+}
+
+[data-theme="dark"] .tn-card-meta-val {
+  color: #f8fafc !important;
+}
+
+/* High-contrast table data cells in dark mode */
+[data-theme="dark"] .tn-table th {
+  color: #38bdf8 !important;
+  background: rgba(10, 19, 36, 0.95) !important;
+}
+
+[data-theme="dark"] .tn-table td {
+  color: #f1f5f9 !important;
+}
+
+/* Comprehensive Dark Mode High-Contrast Overrides */
+[data-theme="dark"] .leaflet-popup-content * {
+  color: #f8fafc !important;
+}
+
+[data-theme="dark"] .tn-badge-admin {
+  color: #fbbf24 !important;
+  background: rgba(245, 158, 11, 0.2) !important;
+}
+
+[data-theme="dark"] .tn-card {
+  background: var(--bg-card);
+  color: var(--text-primary);
+  border-color: rgba(255, 255, 255, 0.08);
+}
+
+[data-theme="dark"] .tn-card-title,
+[data-theme="dark"] h1,
+[data-theme="dark"] h2,
+[data-theme="dark"] h3,
+[data-theme="dark"] h4,
+[data-theme="dark"] h5,
+[data-theme="dark"] h6 {
+  color: #f8fafc !important;
+}
+
+[data-theme="dark"] p,
+[data-theme="dark"] li {
+  color: #cbd5e1;
+}
+
+[data-theme="dark"] .tn-btn-outline {
+  border-color: rgba(0, 245, 212, 0.35);
+  color: #00f5d4;
+}
+
+[data-theme="dark"] .tn-btn-outline:hover {
+  background: rgba(0, 245, 212, 0.15);
+  color: #f8fafc;
+}
+
+[data-theme="dark"] .tn-modal-backdrop,
+[data-theme="dark"] .tn-city-modal {
+  color: #f8fafc;
+}
+
+

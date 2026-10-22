@@ -1,0 +1,205 @@
+{% extends "base.html" %}
+
+{% block title %}Popular World Alliances & Blocs - NATO, G7, BRICS, G20, EU, ASEAN & QUAD - {{ app_name }}{% endblock %}
+
+{% block meta_description %}Comprehensive student guide to world popular alliances and economic blocs: NATO (32 nations), G7, BRICS+, G20, European Union, ASEAN, and QUAD. Compare combined economies, member states, and military personnel.{% endblock %}
+
+{% block content %}
+<!-- Alliances Hero Header -->
+<section class="tn-hero" style="background: radial-gradient(circle at top right, rgba(245, 158, 11, 0.22), transparent 70%), var(--bg-surface); padding: 3.5rem 1.5rem 2.5rem; border-bottom: 1px solid var(--border-color);">
+  <div class="tn-hero-content" style="max-width: 1200px; margin: 0 auto; text-align: center;">
+    <div style="font-size: 3.2rem; margin-bottom: 0.5rem; filter: drop-shadow(0 4px 12px rgba(245, 158, 11, 0.4));">🌐</div>
+    <div style="display: inline-flex; align-items: center; gap: 0.5rem; background: rgba(245, 158, 11, 0.15); border: 1px solid rgba(245, 158, 11, 0.35); padding: 0.35rem 0.95rem; border-radius: 999px; font-size: 0.85rem; color: #fbbf24; margin-bottom: 1rem; font-weight: 600;">
+      <span>Multilateral Geopolitics & Global Economics</span> &bull; <span>Student Learning Hub</span>
+    </div>
+    <h1 style="font-family: var(--font-heading); font-size: 2.5rem; font-weight: 800; color: var(--text-primary); margin: 0 0 0.75rem;">
+      Popular World Alliances & Economic Blocs
+    </h1>
+    <p style="font-size: 1.1rem; color: var(--text-secondary); max-width: 840px; margin: 0 auto 1.5rem; line-height: 1.7;">
+      Interactive guide to major international organizations: <strong>NATO (32 nations)</strong>, <strong>G7</strong>, <strong>BRICS / BRICS+</strong>, <strong>G20</strong>, <strong>European Union</strong>, <strong>ASEAN</strong>, and <strong>QUAD</strong>. Easily compare combined economies, active armed forces, and global GDP shares.
+    </p>
+
+    <!-- Quick Navigation Jump Buttons -->
+    <div style="display: flex; justify-content: center; flex-wrap: wrap; gap: 0.6rem; margin-top: 1rem;">
+      {% for a in alliances %}
+      <a href="#alliance-{{ a.id }}" class="tn-btn tn-btn-outline tn-btn-sm" style="border-color: var(--border-color); font-size: 0.82rem; padding: 0.4rem 0.85rem;">
+        {{ a.name.split('(')[0].strip() }} ({{ a.member_count }})
+      </a>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+<!-- Main Dossier Container -->
+<div style="max-width: 1200px; margin: 2.5rem auto 5rem; padding: 0 1.5rem;">
+
+  <!-- Global Comparative Economic & Military Overview Table -->
+  <section style="margin-bottom: 3.5rem;">
+    <h2 style="font-size: 1.6rem; font-weight: 800; color: var(--text-primary); margin-bottom: 0.5rem; display: flex; align-items: center; gap: 0.5rem;">
+      📊 Global Alliances Comparison Matrix
+    </h2>
+    <p style="font-size: 0.95rem; color: var(--text-secondary); margin-bottom: 1.25rem;">
+      At-a-glance macroeconomic and defense power comparison across major world coalitions.
+    </p>
+
+    <div class="tn-table-responsive" style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--radius-md);">
+      <table class="tn-table">
+        <thead>
+          <tr>
+            <th>Alliance / Group</th>
+            <th>Type</th>
+            <th>Members</th>
+            <th>Combined GDP (Nominal)</th>
+            <th>Global GDP Share</th>
+            <th>Combined Active Military</th>
+            <th>Headquarters / Center</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for a in alliances %}
+          <tr>
+            <td>
+              <a href="#alliance-{{ a.id }}" style="color: var(--accent-cyan); font-weight: 700; text-decoration: none;">
+                {{ a.name }}
+              </a>
+            </td>
+            <td><span class="tn-badge" style="font-size: 0.72rem;">{{ a.type }}</span></td>
+            <td><strong>{{ a.member_count }}</strong></td>
+            <td><strong style="color: #10b981;">${{ a.combined_gdp_trillions }} Trillion</strong></td>
+            <td>
+              <div style="display: flex; align-items: center; gap: 0.5rem;">
+                <div style="flex: 1; height: 6px; background: rgba(255,255,255,0.1); border-radius: 999px; min-width: 50px;">
+                  <div style="height: 100%; width: {{ a.global_gdp_share_pct }}%; background: #f59e0b; border-radius: 999px;"></div>
+                </div>
+                <span>{{ a.global_gdp_share_pct }}%</span>
+              </div>
+            </td>
+            <td><strong>{{ "{:,}".format(a.combined_military_active) }}</strong></td>
+            <td style="font-size: 0.85rem; color: var(--text-secondary);">{{ a.headquarters }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- Detailed Profiles for each World Group -->
+  {% for a in alliances %}
+  <section id="alliance-{{ a.id }}" style="margin-bottom: 4rem; scroll-margin-top: 5rem;">
+    <div class="tn-card" style="padding: 2rem; background: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--radius-md); position: relative; overflow: hidden;">
+      
+      <!-- Top Glow Stripe -->
+      <div style="position: absolute; top: 0; left: 0; right: 0; height: 4px; background: linear-gradient(90deg, #f59e0b, #38bdf8);"></div>
+
+      <!-- Alliance Header -->
+      <div style="display: flex; align-items: flex-start; justify-content: space-between; gap: 1rem; margin-bottom: 1.5rem; flex-wrap: wrap;">
+        <div>
+          <div style="display: flex; align-items: center; gap: 0.75rem; flex-wrap: wrap;">
+            <h2 style="font-size: 1.85rem; font-weight: 800; color: var(--text-primary); margin: 0;">{{ a.name }}</h2>
+            <span class="tn-badge" style="background: rgba(245, 158, 11, 0.15); border-color: rgba(245, 158, 11, 0.35); color: #fbbf24; font-weight: 700;">
+              {{ a.member_count }} Member States
+            </span>
+          </div>
+          <p style="color: var(--text-secondary); font-size: 0.95rem; margin: 0.35rem 0 0;">
+            {{ a.type }} &bull; Founded {{ a.founded }} &bull; Headquarters: <strong>{{ a.headquarters }}</strong>
+          </p>
+        </div>
+
+        <a href="{{ url_for('alliances.detail', alliance_id=a.id) }}" class="tn-btn tn-btn-outline tn-btn-sm" style="border-color: var(--accent); color: var(--accent); font-weight: 600;">
+          Explore Dedicated Dossier &rarr;
+        </a>
+      </div>
+
+      <!-- Summary Paragraph -->
+      <p style="font-size: 1rem; line-height: 1.7; color: var(--text-secondary); margin-bottom: 1.5rem;">
+        {{ a.summary }}
+      </p>
+
+      <!-- 4 Vital Macro Statistics Cards -->
+      <div class="tn-grid" style="grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); margin-bottom: 1.75rem;">
+        <div class="tn-stat-card" style="border-left: 3px solid #10b981;">
+          <span class="tn-card-meta-label">Combined Economy (GDP)</span>
+          <div style="font-size: 1.6rem; font-weight: 800; color: #10b981; margin-top: 2px;">
+            ${{ a.combined_gdp_trillions }} Trillion
+          </div>
+          <span style="font-size: 0.75rem; color: var(--text-muted);">Nominal World Bank Metrics</span>
+        </div>
+
+        <div class="tn-stat-card" style="border-left: 3px solid #f59e0b;">
+          <span class="tn-card-meta-label">Global GDP Share</span>
+          <div style="font-size: 1.6rem; font-weight: 800; color: #f59e0b; margin-top: 2px;">
+            {{ a.global_gdp_share_pct }}%
+          </div>
+          <span style="font-size: 0.75rem; color: var(--text-muted);">Share of worldwide economy</span>
+        </div>
+
+        <div class="tn-stat-card" style="border-left: 3px solid #38bdf8;">
+          <span class="tn-card-meta-label">Combined Active Troops</span>
+          <div style="font-size: 1.6rem; font-weight: 800; color: var(--text-primary); margin-top: 2px;">
+            {{ "{:,}".format(a.combined_military_active) }}
+          </div>
+          <span style="font-size: 0.75rem; color: var(--text-muted);">Active duty military personnel</span>
+        </div>
+
+        <div class="tn-stat-card" style="border-left: 3px solid #a855f7;">
+          <span class="tn-card-meta-label">Core Treaty / Protocol</span>
+          <div style="font-size: 0.92rem; font-weight: 700; color: var(--text-primary); margin-top: 6px; line-height: 1.4;">
+            {{ a.core_treaty }}
+          </div>
+        </div>
+      </div>
+
+      <!-- Member Countries Grid -->
+      <div style="margin-bottom: 1.75rem;">
+        <h4 style="font-size: 1.1rem; font-weight: 700; color: var(--text-primary); margin-bottom: 0.75rem;">
+          🏛️ Key Member States & Economic Contributions
+        </h4>
+        <div class="tn-grid" style="grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));">
+          {% for m in a.members %}
+          <div class="tn-card" style="padding: 0.85rem 1rem; background: var(--bg-surface); border: 1px solid var(--border-color); border-radius: var(--radius-sm); display: flex; flex-direction: column; justify-content: space-between;">
+            <div>
+              <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 4px;">
+                <div style="display: flex; align-items: center; gap: 0.4rem;">
+                  <span style="font-size: 1.4rem;">{{ m.flag }}</span>
+                  <strong style="font-size: 0.92rem; color: var(--text-primary);">{{ m.name }}</strong>
+                </div>
+                {% if m.joined %}
+                  <span style="font-size: 0.7rem; color: var(--text-muted);">{{ m.joined }}</span>
+                {% endif %}
+              </div>
+              <div style="font-size: 0.78rem; color: var(--text-secondary); line-height: 1.5; margin-top: 0.35rem;">
+                {% if m.gdp_billions %}<div>GDP: <strong>${{ "{:,}".format(m.gdp_billions) }}B</strong></div>{% endif %}
+                {% if m.active_troops %}<div>Troops: <strong>{{ "{:,}".format(m.active_troops) }}</strong></div>{% endif %}
+              </div>
+            </div>
+
+            {% if m.slug %}
+            <div style="margin-top: 0.5rem; text-align: right;">
+              <a href="{{ url_for('countries.country_detail', slug=m.slug) }}" style="font-size: 0.75rem; color: var(--accent-cyan); font-weight: 600; text-decoration: none;">
+                Profile &rarr;
+              </a>
+            </div>
+            {% endif %}
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+
+      <!-- Student Learning Notes & Takeaways -->
+      <div style="background: rgba(15, 23, 42, 0.3); border: 1px dashed var(--border-color); border-radius: var(--radius-sm); padding: 1.25rem;">
+        <h5 style="font-size: 0.95rem; font-weight: 700; color: #fbbf24; margin: 0 0 0.5rem; display: flex; align-items: center; gap: 0.4rem;">
+          💡 What Every Student Must Know About {{ a.name.split('(')[0].strip() }}:
+        </h5>
+        <ul style="list-style: disc; margin-left: 1.25rem; font-size: 0.88rem; color: var(--text-secondary); line-height: 1.6; margin-bottom: 0;">
+          {% for takeaway in a.student_takeaways %}
+            <li>{{ takeaway }}</li>
+          {% endfor %}
+        </ul>
+      </div>
+
+    </div>
+  </section>
+  {% endfor %}
+
+</div>
+{% endblock %}

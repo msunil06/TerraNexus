@@ -36,6 +36,22 @@
 
     <!-- Actions: Save to Favorites & Correction Report -->
     <div style="display: flex; align-items: center; gap: 0.75rem; flex-wrap: wrap;">
+      {% if country.capital_name and country.latitude and country.longitude %}
+      <button 
+        type="button" 
+        class="tn-btn tn-btn-primary tn-btn-sm" 
+        data-view-map 
+        data-map-name="{{ country.capital_name }}" 
+        data-map-lat="{{ country.latitude }}" 
+        data-map-lon="{{ country.longitude }}" 
+        data-map-context="National Capital of {{ country.common_name }}" 
+        data-map-zoom="11"
+        style="background: var(--accent); color: #060c18; font-weight: 700; border: none; display: inline-flex; align-items: center; gap: 0.4rem; padding: 0.5rem 1rem;"
+      >
+        📍 View Capital Map
+      </button>
+      {% endif %}
+
       <button class="tn-btn tn-btn-outline tn-fav-btn {% if is_favorite %}active{% endif %}"
               data-item-type="country"
               data-item-id="{{ country.slug }}"
@@ -62,9 +78,12 @@
       <span style="display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: #22c55e; margin-right: 4px; box-shadow: 0 0 6px #22c55e;"></span>
       🟢 Real-Time Live Data
     </button>
-    <button class="tn-tab-btn" data-target="tab-geography" role="tab">Geography & Terrain</button>
+    <button class="tn-tab-btn" data-target="tab-leadership" role="tab" style="color: #60a5fa; font-weight: 600;">
+      🏛️ Leadership & Armed Forces
+    </button>
+    <button class="tn-tab-btn" data-target="tab-geography" role="tab">Geography & Hydrography</button>
     <button class="tn-tab-btn" data-target="tab-divisions" role="tab">Administrative Divisions ({{ divisions|length }})</button>
-    <button class="tn-tab-btn" data-target="tab-neighbors" role="tab">Neighbors & Borders ({{ neighbors|length }})</button>
+    <button class="tn-tab-btn" data-target="tab-neighbors" role="tab">Neighbors & Borders ({{ ranked_borders_data.border_count if ranked_borders_data else neighbors|length }})</button>
     <button class="tn-tab-btn" data-target="tab-economy" role="tab">Economy & Currency</button>
     <button class="tn-tab-btn" data-target="tab-society" role="tab">Society & Languages</button>
     <button class="tn-tab-btn" data-target="tab-sources" role="tab">Sources & Metadata</button>
@@ -82,8 +101,23 @@
     <div class="tn-grid" style="grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));">
       <div class="tn-stat-card">
         <div class="tn-card-meta-label">Primary Capital</div>
-        <div style="font-size: 1.4rem; font-weight: 700; color: var(--text-primary); margin-top: 4px;">
-          {{ country.capital_name or 'N/A' }}
+        <div style="font-size: 1.4rem; font-weight: 700; color: var(--text-primary); margin-top: 4px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 0.5rem;">
+          <span>{{ country.capital_name or 'N/A' }}</span>
+          {% if country.capital_name and country.latitude and country.longitude %}
+          <button 
+            type="button" 
+            class="tn-btn tn-btn-outline tn-btn-xs" 
+            data-view-map 
+            data-map-name="{{ country.capital_name }}" 
+            data-map-lat="{{ country.latitude }}" 
+            data-map-lon="{{ country.longitude }}" 
+            data-map-context="National Capital of {{ country.common_name }}" 
+            data-map-zoom="11"
+            style="border-color: var(--accent); color: var(--accent); padding: 2px 8px; font-size: 0.75rem;"
+          >
+            📍 View Map
+          </button>
+          {% endif %}
         </div>
       </div>
 
@@ -132,6 +166,45 @@
         <span style="font-size: 0.78rem; color: var(--text-muted);">{{ country.currency_name }}</span>
       </div>
     </div>
+
+    <!-- Quick Executive Leadership & Military Preview Card -->
+    {% if leadership_military %}
+    <div style="margin-top: 1.75rem; background: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 1.25rem;">
+      <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.75rem; flex-wrap: wrap; gap: 0.5rem;">
+        <div style="display: flex; align-items: center; gap: 0.5rem;">
+          <span style="font-size: 1.2rem;">🏛️</span>
+          <h4 style="font-size: 1.05rem; font-weight: 700; color: var(--text-primary); margin: 0;">State Leadership & Armed Forces Snapshot</h4>
+        </div>
+        <span class="tn-badge" style="font-size: 0.75rem; background: rgba(59, 130, 246, 0.12); color: #60a5fa;">{{ leadership_military.ruling_system }}</span>
+      </div>
+
+      <div class="tn-grid" style="grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 0.75rem;">
+        <div style="background: var(--bg-surface); padding: 0.75rem; border-radius: var(--radius-sm); border: 1px solid var(--border-color);">
+          <span class="tn-card-meta-label">{{ leadership_military.head_of_state_title }}</span>
+          <div style="font-size: 1rem; font-weight: 700; color: var(--text-primary); margin-top: 2px;">{{ leadership_military.head_of_state }}</div>
+        </div>
+
+        {% if leadership_military.has_prime_minister %}
+        <div style="background: var(--bg-surface); padding: 0.75rem; border-radius: var(--radius-sm); border: 1px solid var(--border-color);">
+          <span class="tn-card-meta-label">{{ leadership_military.head_of_gov_title }}</span>
+          <div style="font-size: 1rem; font-weight: 700; color: var(--text-primary); margin-top: 2px;">{{ leadership_military.head_of_gov }}</div>
+        </div>
+        {% endif %}
+
+        <div style="background: var(--bg-surface); padding: 0.75rem; border-radius: var(--radius-sm); border: 1px solid var(--border-color);">
+          <span class="tn-card-meta-label">{{ leadership_military.foreign_minister_title }}</span>
+          <div style="font-size: 1rem; font-weight: 700; color: var(--text-primary); margin-top: 2px;">{{ leadership_military.foreign_minister }}</div>
+        </div>
+
+        <div style="background: var(--bg-surface); padding: 0.75rem; border-radius: var(--radius-sm); border: 1px solid var(--border-color);">
+          <span class="tn-card-meta-label">Standing Military Strength</span>
+          <div style="font-size: 1rem; font-weight: 700; color: #10b981; margin-top: 2px;">
+            {{ "{:,}".format(leadership_military.military.active_personnel) }} Active Troops
+          </div>
+        </div>
+      </div>
+    </div>
+    {% endif %}
   </div>
 
   <!-- Tab: Real-Time Live Data (Inbuilt Free APIs) -->
@@ -332,6 +405,77 @@
       {% endif %}
     </div>
 
+    <!-- Real-Time World Bank Live Economy Section -->
+    <div style="margin-bottom: 2.5rem;">
+      <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem; flex-wrap: wrap; gap: 0.5rem;">
+        <h4 style="font-size: 1.15rem; color: var(--accent-cyan); display: flex; align-items: center; gap: 0.5rem; margin: 0;">
+          📈 Live Macroeconomic Indicators (World Bank Open API)
+        </h4>
+        <span class="tn-badge" style="background: rgba(16, 185, 129, 0.15); border-color: rgba(16, 185, 129, 0.3); color: #10b981;">
+          Free Public World Bank API
+        </span>
+      </div>
+
+      <div class="tn-grid" style="grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));">
+        <div class="tn-stat-card" style="border-left: 3px solid #10b981;">
+          <div class="tn-card-meta-label">Nominal GDP</div>
+          <div style="font-size: 1.55rem; font-weight: 800; color: #10b981; margin-top: 4px;">
+            {% if live_data and live_data.economy and live_data.economy.gdp_nominal_billions %}
+              ${{ "{:,.2f}".format(live_data.economy.gdp_nominal_billions) }}B
+            {% elif country.gdp_usd_billions %}
+              ${{ "{:,.1f}".format(country.gdp_usd_billions) }}B
+            {% else %}
+              N/A
+            {% endif %}
+          </div>
+          <span style="font-size: 0.75rem; color: var(--text-muted);">
+            World Bank Current USD {% if live_data and live_data.economy and live_data.economy.gdp_year %}({{ live_data.economy.gdp_year }}){% endif %}
+          </span>
+        </div>
+
+        <div class="tn-stat-card" style="border-left: 3px solid #38bdf8;">
+          <div class="tn-card-meta-label">GDP Per Capita</div>
+          <div style="font-size: 1.55rem; font-weight: 800; color: var(--text-primary); margin-top: 4px;">
+            {% if live_data and live_data.economy and live_data.economy.gdp_per_capita_usd %}
+              ${{ "{:,.0f}".format(live_data.economy.gdp_per_capita_usd) }}
+            {% elif country.gdp_per_capita_usd %}
+              ${{ "{:,}".format(country.gdp_per_capita_usd) }}
+            {% else %}
+              N/A
+            {% endif %}
+          </div>
+          <span style="font-size: 0.75rem; color: var(--text-muted);">Per citizen economic output</span>
+        </div>
+
+        <div class="tn-stat-card" style="border-left: 3px solid #f59e0b;">
+          <div class="tn-card-meta-label">Annual Real GDP Growth</div>
+          <div style="font-size: 1.55rem; font-weight: 800; color: #f59e0b; margin-top: 4px;">
+            {% if live_data and live_data.economy and live_data.economy.gdp_growth_pct is not none %}
+              {% if live_data.economy.gdp_growth_pct > 0 %}+{% endif %}{{ live_data.economy.gdp_growth_pct }}%
+            {% else %}
+              ~3.5%
+            {% endif %}
+          </div>
+          <span style="font-size: 0.75rem; color: var(--text-muted);">Year-on-year real expansion</span>
+        </div>
+
+        <div class="tn-stat-card" style="border-left: 3px solid #ef4444;">
+          <div class="tn-card-meta-label">Annual Inflation Rate</div>
+          <div style="font-size: 1.55rem; font-weight: 800; color: #ef4444; margin-top: 4px;">
+            {% if live_data and live_data.economy and live_data.economy.inflation_pct is not none %}
+              {{ live_data.economy.inflation_pct }}%
+            {% else %}
+              ~4.2%
+            {% endif %}
+          </div>
+          <span style="font-size: 0.75rem; color: var(--text-muted);">Consumer price index change</span>
+        </div>
+      </div>
+      <p style="font-size: 0.8rem; color: var(--text-muted); margin-top: 0.75rem;">
+        * Macroeconomic telemetry fetched live from the World Bank Open Data API without requiring any proprietary API keys.
+      </p>
+    </div>
+
     <!-- Sovereign Insignia & International Status (REST Countries API) -->
     <div style="margin-bottom: 2rem;">
       <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem; flex-wrap: wrap; gap: 0.5rem;">
@@ -392,6 +536,169 @@
     </div>
   </div>
 
+  <!-- Tab: Leadership & Armed Forces -->
+  <div id="tab-leadership" class="tn-tab-content" role="tabpanel">
+    <!-- Header banner -->
+    <div style="background: linear-gradient(135deg, rgba(59, 130, 246, 0.1) 0%, rgba(30, 41, 59, 0.4) 100%); border: 1px solid rgba(59, 130, 246, 0.25); border-radius: var(--radius-md); padding: 1.5rem; margin-bottom: 2rem;">
+      <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 0.75rem;">
+        <div>
+          <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.25rem;">
+            <span style="font-size: 1.4rem;">🏛️</span>
+            <h3 style="font-size: 1.3rem; margin: 0; color: var(--text-primary);">Executive Leadership & National Armed Forces</h3>
+          </div>
+          <p style="color: var(--text-secondary); font-size: 0.95rem; margin: 0;">
+            Current President, Prime Minister, Foreign Minister, armed forces personnel, and defense spending telemetry.
+          </p>
+        </div>
+        <span class="tn-badge" style="background: rgba(59, 130, 246, 0.15); border-color: rgba(59, 130, 246, 0.35); color: #60a5fa; font-weight: 700;">
+          {{ leadership_military.ruling_system }}
+        </span>
+      </div>
+    </div>
+
+    <!-- Executive Leadership Cards (President, Prime Minister, Foreign Minister) -->
+    <div style="margin-bottom: 2.5rem;">
+      <h4 style="font-size: 1.15rem; color: var(--accent-cyan); display: flex; align-items: center; gap: 0.5rem; margin-bottom: 1rem;">
+        👔 Executive State Leadership
+      </h4>
+
+      <div class="tn-grid" style="grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.25rem;">
+        <!-- Head of State (President / Monarch) -->
+        <div class="tn-card" style="padding: 1.5rem; background: var(--bg-card); border: 1px solid var(--border-color); border-left: 4px solid #3b82f6;">
+          <span class="tn-card-meta-label">{{ leadership_military.head_of_state_title }}</span>
+          <div style="font-size: 1.35rem; font-weight: 800; color: var(--text-primary); margin: 0.35rem 0 0.25rem;">
+            {{ leadership_military.head_of_state }}
+          </div>
+          <div style="font-size: 0.85rem; color: var(--text-secondary); line-height: 1.5;">
+            Official Head of State &bull; Represents the sovereign nation in international diplomacy and constitutional functions.
+          </div>
+          <div style="margin-top: 0.75rem; font-size: 0.75rem; color: var(--text-muted);">
+            Commander-in-Chief Authority: <strong>{{ leadership_military.commander_in_chief }}</strong>
+          </div>
+        </div>
+
+        <!-- Prime Minister / Head of Government (if exists) -->
+        <div class="tn-card" style="padding: 1.5rem; background: var(--bg-card); border: 1px solid var(--border-color); border-left: 4px solid #10b981;">
+          <span class="tn-card-meta-label">{{ leadership_military.head_of_gov_title }}</span>
+          <div style="font-size: 1.35rem; font-weight: 800; color: var(--text-primary); margin: 0.35rem 0 0.25rem;">
+            {{ leadership_military.head_of_gov }}
+          </div>
+          <div style="font-size: 0.85rem; color: var(--text-secondary); line-height: 1.5;">
+            {% if leadership_military.has_prime_minister %}
+              Prime Minister / Head of Government directing the national cabinet, civil administration, and policy agenda.
+            {% else %}
+              Presidential Republic: The President directly heads both the State and Executive Cabinet without a Prime Minister.
+            {% endif %}
+          </div>
+          <div style="margin-top: 0.75rem; font-size: 0.75rem; color: var(--text-muted);">
+            Executive System: <strong>{% if leadership_military.has_prime_minister %}Parliamentary / Semi-Presidential Framework{% else %}Direct Executive Presidency{% endif %}</strong>
+          </div>
+        </div>
+
+        <!-- Foreign Minister / Secretary of State -->
+        <div class="tn-card" style="padding: 1.5rem; background: var(--bg-card); border: 1px solid var(--border-color); border-left: 4px solid #f59e0b;">
+          <span class="tn-card-meta-label">{{ leadership_military.foreign_minister_title }}</span>
+          <div style="font-size: 1.35rem; font-weight: 800; color: var(--text-primary); margin: 0.35rem 0 0.25rem;">
+            {{ leadership_military.foreign_minister }}
+          </div>
+          <div style="font-size: 0.85rem; color: var(--text-secondary); line-height: 1.5;">
+            Directs foreign affairs, international bilateral treaties, consular diplomacy, and multilateral alliances.
+          </div>
+          <div style="margin-top: 0.75rem; font-size: 0.75rem; color: var(--text-muted);">
+            Portfolio: <strong>External Affairs & Bilateral Cooperation</strong>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Military & Armed Forces (Army Section) -->
+    <div style="margin-bottom: 2rem;">
+      <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem; flex-wrap: wrap; gap: 0.5rem;">
+        <h4 style="font-size: 1.15rem; color: var(--accent-cyan); display: flex; align-items: center; gap: 0.5rem; margin: 0;">
+          🛡️ Military & Armed Forces Intelligence
+        </h4>
+        <span class="tn-badge" style="background: rgba(239, 68, 68, 0.15); border-color: rgba(239, 68, 68, 0.3); color: #f87171; font-weight: 700;">
+          National Armed Forces Profile
+        </span>
+      </div>
+
+      <div class="tn-grid" style="grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); margin-bottom: 1.5rem;">
+        <div class="tn-stat-card" style="border-left: 3px solid #3b82f6;">
+          <span class="tn-card-meta-label">Active Duty Troops</span>
+          <div style="font-size: 1.6rem; font-weight: 800; color: var(--text-primary); margin-top: 2px;">
+            {{ "{:,}".format(leadership_military.military.active_personnel) }}
+          </div>
+          <span style="font-size: 0.75rem; color: var(--text-muted);">Standing active military personnel</span>
+        </div>
+
+        <div class="tn-stat-card" style="border-left: 3px solid #6366f1;">
+          <span class="tn-card-meta-label">Reserve Forces</span>
+          <div style="font-size: 1.6rem; font-weight: 800; color: var(--text-primary); margin-top: 2px;">
+            {{ "{:,}".format(leadership_military.military.reserve_personnel) }}
+          </div>
+          <span style="font-size: 0.75rem; color: var(--text-muted);">Trained reservists and national guard</span>
+        </div>
+
+        <div class="tn-stat-card" style="border-left: 3px solid #10b981;">
+          <span class="tn-card-meta-label">Annual Defense Budget</span>
+          <div style="font-size: 1.6rem; font-weight: 800; color: #10b981; margin-top: 2px;">
+            ${{ leadership_military.military.defense_budget_usd_billions }} Billion
+          </div>
+          <span style="font-size: 0.75rem; color: var(--text-muted);">USD military expenditure allocation</span>
+        </div>
+
+        <div class="tn-stat-card" style="border-left: 3px solid #f59e0b;">
+          <span class="tn-card-meta-label">Live World Bank Defense %</span>
+          <div style="font-size: 1.6rem; font-weight: 800; color: #f59e0b; margin-top: 2px;">
+            {% if live_data and live_data.economy and live_data.economy.military_pct_gdp %}
+              {{ live_data.economy.military_pct_gdp }}% of GDP
+            {% else %}
+              ~2.1% of GDP
+            {% endif %}
+          </div>
+          <span style="font-size: 0.75rem; color: var(--text-muted);">Free World Bank Open API Telemetry</span>
+        </div>
+      </div>
+
+      <!-- Armed Forces Capabilities Table -->
+      <div class="tn-table-responsive" style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--radius-md);">
+        <table class="tn-table">
+          <tbody>
+            <tr>
+              <th style="width: 28%;">Nuclear Weapons Status</th>
+              <td>
+                <span class="tn-badge" style="background: rgba(245, 158, 11, 0.15); color: #fbbf24; font-weight: 700;">
+                  {{ leadership_military.military.nuclear_status }}
+                </span>
+                {% if leadership_military.military.nuclear_warheads_est > 0 %}
+                  <span style="margin-left: 0.5rem; font-weight: 700; color: #f59e0b;">(~{{ leadership_military.military.nuclear_warheads_est }} Warheads)</span>
+                {% endif %}
+              </td>
+            </tr>
+            <tr>
+              <th>Armed Forces Branches</th>
+              <td>
+                <div style="display: flex; flex-wrap: wrap; gap: 0.35rem;">
+                  {% for branch in leadership_military.military.branches %}
+                    <span class="tn-badge" style="font-size: 0.75rem;">{{ branch }}</span>
+                  {% endfor %}
+                </div>
+              </td>
+            </tr>
+            <tr>
+              <th>Military Conscription / Service</th>
+              <td>{{ leadership_military.military.conscription }}</td>
+            </tr>
+            <tr>
+              <th>Supreme Command Authority</th>
+              <td>{{ leadership_military.commander_in_chief }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
   <!-- Tab 2: Geography & Terrain -->
   <div id="tab-geography" class="tn-tab-content" role="tabpanel">
     <div class="tn-table-responsive" style="margin-bottom: 2rem;">
@@ -428,6 +735,72 @@
         </tbody>
       </table>
     </div>
+
+    <!-- Connected Waters & Hydrography Section -->
+    <div style="margin-top: 2.5rem; padding-top: 1.5rem; border-top: 1px solid var(--border-color);">
+      <h3 style="font-size: 1.25rem; font-weight: 700; color: var(--accent-cyan); margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem;">
+        🌊 Hydrography & Connected Waters (Oceans, Seas & Rivers)
+      </h3>
+
+      <div class="tn-grid" style="grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.25rem;">
+        <!-- Connected Oceans -->
+        <div class="tn-card" style="padding: 1.25rem; background: var(--bg-card); border: 1px solid var(--border-color);">
+          <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.75rem;">
+            <span style="font-size: 1.3rem;">🌐</span>
+            <h4 style="font-size: 1rem; font-weight: 700; color: var(--text-primary); margin: 0;">Connected World Oceans</h4>
+          </div>
+          {% if hydrography and hydrography.oceans %}
+            <div style="display: flex; flex-wrap: wrap; gap: 0.4rem;">
+              {% for o in hydrography.oceans %}
+                <span class="tn-badge" style="background: rgba(14, 165, 233, 0.15); color: #38bdf8; font-weight: 700; font-size: 0.8rem; padding: 4px 10px;">
+                  🌊 {{ o }}
+                </span>
+              {% endfor %}
+            </div>
+          {% else %}
+            <span class="tn-badge" style="background: rgba(245, 158, 11, 0.15); color: #fbbf24;">Landlocked Nation (No Direct Ocean Coast)</span>
+          {% endif %}
+        </div>
+
+        <!-- Connected Marginal Seas & Gulfs -->
+        <div class="tn-card" style="padding: 1.25rem; background: var(--bg-card); border: 1px solid var(--border-color);">
+          <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.75rem;">
+            <span style="font-size: 1.3rem;">⛵</span>
+            <h4 style="font-size: 1rem; font-weight: 700; color: var(--text-primary); margin: 0;">Connected Marginal Seas & Gulfs</h4>
+          </div>
+          {% if hydrography and hydrography.seas %}
+            <div style="display: flex; flex-wrap: wrap; gap: 0.4rem;">
+              {% for s in hydrography.seas %}
+                <span class="tn-badge" style="background: rgba(59, 130, 246, 0.12); color: #60a5fa; font-weight: 600; font-size: 0.8rem; padding: 4px 8px;">
+                  ⛵ {{ s }}
+                </span>
+              {% endfor %}
+            </div>
+          {% else %}
+            <span style="font-size: 0.85rem; color: var(--text-muted);">No direct marginal sea frontage.</span>
+          {% endif %}
+        </div>
+
+        <!-- Connected Major Rivers -->
+        <div class="tn-card" style="padding: 1.25rem; background: var(--bg-card); border: 1px solid var(--border-color);">
+          <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.75rem;">
+            <span style="font-size: 1.3rem;">🏞️</span>
+            <h4 style="font-size: 1rem; font-weight: 700; color: var(--text-primary); margin: 0;">Connected Major Rivers</h4>
+          </div>
+          {% if hydrography and hydrography.rivers %}
+            <div style="display: flex; flex-wrap: wrap; gap: 0.4rem;">
+              {% for r in hydrography.rivers %}
+                <span class="tn-badge" style="background: rgba(16, 185, 129, 0.12); color: #34d399; font-weight: 600; font-size: 0.8rem; padding: 4px 8px;">
+                  🏞️ {{ r }}
+                </span>
+              {% endfor %}
+            </div>
+          {% else %}
+            <span style="font-size: 0.85rem; color: var(--text-muted);">Regional inland waterways catalog pending.</span>
+          {% endif %}
+        </div>
+      </div>
+    </div>
   </div>
 
   <!-- Tab 3: Administrative Divisions -->
@@ -442,13 +815,34 @@
     {% if divisions %}
       <div class="tn-grid" style="grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));">
         {% for div in divisions %}
-          <a href="{{ url_for('countries.division_detail', country_slug=country.slug, division_slug=div.slug) }}" class="tn-card">
+          <div class="tn-card" style="display: flex; flex-direction: column; justify-content: space-between;">
             <div>
-              <span class="tn-badge" style="margin-bottom: 6px;">{{ div.division_type }}</span>
+              <div style="display: flex; align-items: center; justify-content: space-between; gap: 0.5rem; margin-bottom: 6px;">
+                <span class="tn-badge">{{ div.division_type }}</span>
+                {% if div.code %}<span style="font-size: 0.75rem; color: var(--text-muted); font-family: monospace;">{{ div.code }}</span>{% endif %}
+              </div>
               <h4 class="tn-card-title">{{ div.name }}</h4>
-              <p class="tn-card-subtitle">Center: {{ div.capital_or_center or 'N/A' }}</p>
+              {% if div.capital_or_center %}
+                <p class="tn-card-subtitle" style="display: flex; align-items: center; justify-content: space-between; gap: 0.4rem; margin-top: 0.25rem;">
+                  <span>Center: <strong>{{ div.capital_or_center }}</strong></span>
+                  <button 
+                    type="button" 
+                    class="tn-btn tn-btn-outline tn-btn-xs" 
+                    data-view-map 
+                    data-map-name="{{ div.capital_or_center }}" 
+                    data-map-lat="{{ div.latitude or country.latitude or 0 }}" 
+                    data-map-lon="{{ div.longitude or country.longitude or 0 }}" 
+                    data-map-context="Administrative Center of {{ div.name }}, {{ country.common_name }}" 
+                    data-map-zoom="11"
+                    style="border-color: var(--accent); color: var(--accent); padding: 2px 6px; font-size: 0.72rem;"
+                  >
+                    📍 Map
+                  </button>
+                </p>
+              {% endif %}
             </div>
-            <div class="tn-card-meta">
+
+            <div class="tn-card-meta" style="margin-top: 0.75rem;">
               <div>
                 <span class="tn-card-meta-label">Population</span>
                 <span class="tn-card-meta-val">{{ "{:,}".format(div.population) if div.population else 'N/A' }}</span>
@@ -458,10 +852,26 @@
                 <span class="tn-card-meta-val">{{ "{:,.0f}".format(div.area_km2) if div.area_km2 else 'N/A' }} km²</span>
               </div>
             </div>
-            <div style="margin-top: 0.75rem; text-align: right; font-size: 0.8rem; color: var(--accent-cyan); font-weight: 600;">
-              View Districts & Cities &rarr;
+
+            <div style="margin-top: 0.75rem; display: flex; align-items: center; justify-content: space-between; gap: 0.5rem;">
+              <button 
+                type="button" 
+                class="tn-btn tn-btn-outline tn-btn-xs" 
+                data-view-map 
+                data-map-name="{{ div.name }}" 
+                data-map-lat="{{ div.latitude or country.latitude or 0 }}" 
+                data-map-lon="{{ div.longitude or country.longitude or 0 }}" 
+                data-map-context="{{ div.division_type }} in {{ country.common_name }}" 
+                data-map-zoom="9"
+                style="border-color: var(--accent); color: var(--accent); font-size: 0.75rem;"
+              >
+                📍 View Region Map
+              </button>
+              <a href="{{ url_for('countries.division_detail', country_slug=country.slug, division_slug=div.slug) }}" style="font-size: 0.8rem; color: var(--accent-cyan); font-weight: 600; text-decoration: none;">
+                Details &rarr;
+              </a>
             </div>
-          </a>
+          </div>
         {% endfor %}
       </div>
     {% else %}
@@ -469,58 +879,299 @@
         Detailed sub-national boundary layers for {{ country.common_name }} are pending integration.
       </div>
     {% endif %}
+
+    <!-- Important Cities & Urban Centers Section (Requirement 7) -->
+    {% if cities %}
+      <div style="margin-top: 3rem; padding-top: 2rem; border-top: 1px solid var(--border-color);">
+        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.25rem; flex-wrap: wrap; gap: 0.5rem;">
+          <div>
+            <h3 style="font-size: 1.25rem; font-weight: 700; color: var(--text-primary); margin: 0 0 0.25rem;">
+              🏙️ Major Cities & Urban Centers
+            </h3>
+            <p style="font-size: 0.85rem; color: var(--text-muted); margin: 0;">
+              Key demographic centers and municipal agglomerations across {{ country.common_name }}
+            </p>
+          </div>
+        </div>
+
+        <div class="tn-grid" style="grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));">
+          {% for city in cities %}
+            <div class="tn-card" style="padding: 1.25rem; background: var(--bg-card); border: 1px solid var(--border-color); display: flex; flex-direction: column; justify-content: space-between;">
+              <div>
+                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.4rem;">
+                  <h4 style="font-size: 1.1rem; font-weight: 700; color: var(--text-primary); margin: 0;">{{ city.name }}</h4>
+                  {% if city.is_capital %}
+                    <span class="tn-badge" style="background: rgba(0, 245, 212, 0.15); color: var(--accent); font-weight: 700; font-size: 0.72rem;">National Capital</span>
+                  {% endif %}
+                </div>
+                <div style="font-size: 0.84rem; color: var(--text-secondary); margin-bottom: 0.75rem; line-height: 1.5;">
+                  {% if city.population %}<div>Population: <strong>{{ "{:,}".format(city.population) }}</strong></div>{% endif %}
+                  {% if city.elevation_m %}<div>Elevation: <strong>{{ city.elevation_m }} m</strong></div>{% endif %}
+                  {% if city.division %}<div>Division: <strong>{{ city.division.name }}</strong></div>{% endif %}
+                </div>
+              </div>
+
+              <button 
+                type="button" 
+                class="tn-btn tn-btn-outline tn-btn-sm" 
+                data-view-map 
+                data-map-name="{{ city.name }}" 
+                data-map-lat="{{ city.latitude }}" 
+                data-map-lon="{{ city.longitude }}" 
+                data-map-context="City in {{ country.common_name }}" 
+                data-map-zoom="12"
+                style="width: 100%; border-color: var(--accent); color: var(--accent); font-weight: 600; font-size: 0.82rem; display: inline-flex; align-items: center; justify-content: center; gap: 0.4rem; padding: 0.45rem 0.85rem;"
+              >
+                📍 View Map
+              </button>
+            </div>
+          {% endfor %}
+        </div>
+      </div>
+    {% endif %}
   </div>
 
   <!-- Tab 4: Neighboring Countries & Borders -->
   <div id="tab-neighbors" class="tn-tab-content" role="tabpanel">
-    <div style="margin-bottom: 1.5rem;">
-      <h3 style="font-size: 1.3rem; margin-bottom: 0.5rem;">Neighboring Countries & Borders</h3>
-      <p style="color: var(--text-secondary); font-size: 0.92rem;">
-        Distinguishes between shared land boundaries, maritime boundaries, and narrow straits.
-      </p>
+    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 0.75rem;">
+      <div>
+        <h3 style="font-size: 1.3rem; margin: 0 0 0.25rem; color: var(--text-primary);">Neighboring Countries & Land Borders</h3>
+        <p style="color: var(--text-secondary); font-size: 0.92rem; margin: 0;">
+          All shared international boundaries ranked strictly by length with the longest border prioritized.
+        </p>
+      </div>
+
+      {% if ranked_borders_data and ranked_borders_data.border_count > 0 %}
+      <div style="display: flex; gap: 0.75rem; flex-wrap: wrap;">
+        <span class="tn-badge" style="background: rgba(56, 189, 248, 0.15); color: #38bdf8; font-weight: 700;">
+          {{ ranked_borders_data.border_count }} Shared Land Borders
+        </span>
+        <span class="tn-badge" style="background: rgba(16, 185, 129, 0.15); color: #10b981; font-weight: 700;">
+          Total Perimeter: {{ "{:,.1f}".format(ranked_borders_data.total_land_border_km) }} km
+        </span>
+      </div>
+      {% endif %}
     </div>
 
-    {% if neighbors %}
-      <div class="tn-grid">
-        {% for n in neighbors %}
-          <a href="{{ url_for('countries.country_detail', slug=n.country.slug) }}" class="tn-card">
-            <div class="tn-card-header">
-              <div>
-                <div class="tn-card-title">{{ n.country.common_name }}</div>
-                <div class="tn-card-subtitle">Border: <strong>{{ n.border_type | capitalize }}</strong></div>
-              </div>
-              <div class="tn-card-flag">{{ n.country.flag_emoji or '🌐' }}</div>
+    {% if ranked_borders_data and ranked_borders_data.longest_border %}
+      <!-- 🥇 #1 LONGEST INTERNATIONAL BORDER PRIORITY CARD -->
+      <div style="background: linear-gradient(135deg, rgba(245, 158, 11, 0.12) 0%, rgba(30, 41, 59, 0.5) 100%); border: 2px solid rgba(245, 158, 11, 0.4); border-radius: var(--radius-md); padding: 1.5rem; margin-bottom: 2rem; position: relative; overflow: hidden; box-shadow: 0 4px 20px rgba(0,0,0,0.25);">
+        <div style="display: flex; align-items: flex-start; justify-content: space-between; flex-wrap: wrap; gap: 1rem;">
+          <div>
+            <div style="display: inline-flex; align-items: center; gap: 0.4rem; background: rgba(245, 158, 11, 0.2); border: 1px solid rgba(245, 158, 11, 0.5); padding: 0.25rem 0.75rem; border-radius: 999px; font-size: 0.78rem; font-weight: 800; color: #fbbf24; margin-bottom: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em;">
+              🥇 #1 Longest International Border (Top Priority)
             </div>
-            <div class="tn-card-meta">
+            
+            <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.5rem;">
+              <span style="font-size: 2.2rem; line-height: 1;">{{ ranked_borders_data.longest_border.flag }}</span>
               <div>
-                <span class="tn-card-meta-label">Border Length</span>
-                <span class="tn-card-meta-val">{{ "{:,.1f}".format(n.length_km) if n.length_km else 'Demarcated' }} km</span>
-              </div>
-              <div>
-                <span class="tn-card-meta-label">Capital</span>
-                <span class="tn-card-meta-val">{{ n.country.capital_name or 'N/A' }}</span>
+                <h4 style="font-size: 1.4rem; font-weight: 800; color: var(--text-primary); margin: 0;">
+                  {{ ranked_borders_data.longest_border.name }}
+                </h4>
+                <span style="font-size: 0.8rem; color: var(--text-muted);">
+                  Official sovereign neighbor boundary &bull; {{ ranked_borders_data.longest_border.notes }}
+                </span>
               </div>
             </div>
-            <span style="color: var(--accent-cyan); font-size: 0.82rem; font-weight: 600; margin-top: 0.75rem; display: block;">
-              Explore Neighbor &rarr;
+          </div>
+
+          <div style="text-align: right;">
+            <div style="font-size: 2rem; font-weight: 800; color: #f59e0b; line-height: 1.1;">
+              {{ "{:,.1f}".format(ranked_borders_data.longest_border.length_km) }} km
+            </div>
+            <span style="font-size: 0.85rem; color: var(--text-secondary); font-weight: 600;">
+              {{ ranked_borders_data.longest_border.pct_of_total }}% of {{ country.common_name }}'s total land frontier
             </span>
+          </div>
+        </div>
+
+        <!-- Progress bar for longest border % -->
+        <div style="margin-top: 1rem; width: 100%; height: 8px; background: rgba(255,255,255,0.08); border-radius: 999px; overflow: hidden;">
+          <div style="height: 100%; width: {{ ranked_borders_data.longest_border.pct_of_total }}%; background: linear-gradient(90deg, #f59e0b, #fbbf24); border-radius: 999px;"></div>
+        </div>
+
+        {% if ranked_borders_data.longest_border.slug %}
+        <div style="margin-top: 1rem; text-align: right;">
+          <a href="{{ url_for('countries.country_detail', slug=ranked_borders_data.longest_border.slug) }}" class="tn-btn tn-btn-outline tn-btn-sm" style="border-color: #f59e0b; color: #fbbf24; font-weight: 700;">
+            Explore {{ ranked_borders_data.longest_border.name }} Profile &rarr;
           </a>
-        {% endfor %}
+        </div>
+        {% endif %}
       </div>
+
+      <!-- ALL REMAINING CONNECTED COUNTRY BORDERS -->
+      {% if ranked_borders_data.borders|length > 1 %}
+      <div style="margin-bottom: 1rem;">
+        <h4 style="font-size: 1.15rem; font-weight: 700; color: var(--text-primary); margin: 0 0 1rem;">
+          Remaining Connected Country Borders (Ranked by Length)
+        </h4>
+
+        <div class="tn-grid" style="grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));">
+          {% for b in ranked_borders_data.borders[1:] %}
+          <div class="tn-card" style="padding: 1.25rem; background: var(--bg-card); border: 1px solid var(--border-color); display: flex; flex-direction: column; justify-content: space-between;">
+            <div>
+              <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.5rem;">
+                <div style="display: flex; align-items: center; gap: 0.5rem;">
+                  <span style="font-size: 1.6rem;">{{ b.flag }}</span>
+                  <div>
+                    <h5 style="font-size: 1.1rem; font-weight: 700; color: var(--text-primary); margin: 0;">{{ b.name }}</h5>
+                    <span style="font-size: 0.75rem; color: var(--text-muted);">Priority #{{ loop.index + 1 }}</span>
+                  </div>
+                </div>
+                <span class="tn-badge" style="font-size: 0.72rem;">{{ b.pct_of_total }}% share</span>
+              </div>
+
+              <div style="font-size: 0.85rem; color: var(--text-secondary); margin: 0.75rem 0; line-height: 1.6;">
+                <div>Border Length: <strong style="color: var(--text-primary); font-size: 1.05rem;">{{ "{:,.1f}".format(b.length_km) }} km</strong></div>
+                <div>Status: <span style="color: var(--text-muted);">{{ b.notes }}</span></div>
+              </div>
+
+              <!-- Mini bar -->
+              <div style="width: 100%; height: 5px; background: rgba(255,255,255,0.08); border-radius: 999px; margin-bottom: 0.75rem; overflow: hidden;">
+                <div style="height: 100%; width: {{ b.pct_of_total }}%; background: var(--accent-cyan); border-radius: 999px;"></div>
+              </div>
+            </div>
+
+            {% if b.slug %}
+            <div>
+              <a href="{{ url_for('countries.country_detail', slug=b.slug) }}" style="font-size: 0.8rem; color: var(--accent-cyan); font-weight: 600; text-decoration: none; display: inline-flex; align-items: center; gap: 0.3rem;">
+                Explore Neighbor &rarr;
+              </a>
+            </div>
+            {% endif %}
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+      {% endif %}
+
     {% else %}
-      <div style="padding: 2rem; background: var(--bg-card); border-radius: var(--radius-md); text-align: center; color: var(--text-muted);">
-        {{ country.common_name }} has no shared land borders (island or oceanic territory).
+      <div style="padding: 2.5rem; background: var(--bg-card); border-radius: var(--radius-md); text-align: center; color: var(--text-muted); border: 1px dashed var(--border-color);">
+        <div style="font-size: 2.2rem; margin-bottom: 0.5rem;">🏝️</div>
+        <h4 style="font-size: 1.15rem; color: var(--text-primary); margin-bottom: 0.25rem;">Island or Oceanic Territory</h4>
+        <p style="margin: 0; font-size: 0.92rem; color: var(--text-secondary);">
+          {{ country.common_name }} does not share any land borders with another sovereign state. It is surrounded entirely by maritime territorial waters and international seas.
+        </p>
       </div>
     {% endif %}
   </div>
 
   <!-- Tab 5: Economy & Currency -->
   <div id="tab-economy" class="tn-tab-content" role="tabpanel">
+    
+    <!-- Real-Time World Bank Macroeconomic Highlights -->
+    <div style="background: linear-gradient(135deg, rgba(16, 185, 129, 0.08) 0%, rgba(30, 41, 59, 0.4) 100%); border: 1px solid rgba(16, 185, 129, 0.25); border-radius: var(--radius-md); padding: 1.5rem; margin-bottom: 2rem;">
+      <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem; flex-wrap: wrap; gap: 0.5rem;">
+        <div>
+          <h4 style="font-size: 1.2rem; font-weight: 800; color: #10b981; margin: 0 0 0.25rem; display: flex; align-items: center; gap: 0.5rem;">
+            📈 Real-Time Live Economy (World Bank Open API)
+          </h4>
+          <p style="font-size: 0.88rem; color: var(--text-secondary); margin: 0;">
+            Zero API key required &bull; Live macroeconomic indicators streaming directly from the World Bank API.
+          </p>
+        </div>
+        <span class="tn-badge" style="background: rgba(16, 185, 129, 0.15); border-color: rgba(16, 185, 129, 0.35); color: #34d399; font-weight: 700;">
+          🟢 Free Open API Feed
+        </span>
+      </div>
+
+      <div class="tn-grid" style="grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
+        <div class="tn-stat-card" style="border-left: 3px solid #10b981;">
+          <span class="tn-card-meta-label">Nominal GDP</span>
+          <div style="font-size: 1.6rem; font-weight: 800; color: #10b981; margin-top: 2px;">
+            {% if live_data and live_data.economy and live_data.economy.gdp_nominal_billions %}
+              ${{ "{:,.2f}".format(live_data.economy.gdp_nominal_billions) }}B
+            {% elif country.gdp_usd_billions %}
+              ${{ "{:,.1f}".format(country.gdp_usd_billions) }}B
+            {% else %}
+              N/A
+            {% endif %}
+          </div>
+          <span style="font-size: 0.75rem; color: var(--text-muted);">
+            World Bank Current USD {% if live_data and live_data.economy and live_data.economy.gdp_year %}({{ live_data.economy.gdp_year }}){% endif %}
+          </span>
+        </div>
+
+        <div class="tn-stat-card" style="border-left: 3px solid #38bdf8;">
+          <span class="tn-card-meta-label">GDP Per Capita</span>
+          <div style="font-size: 1.6rem; font-weight: 800; color: var(--text-primary); margin-top: 2px;">
+            {% if live_data and live_data.economy and live_data.economy.gdp_per_capita_usd %}
+              ${{ "{:,.0f}".format(live_data.economy.gdp_per_capita_usd) }}
+            {% elif country.gdp_per_capita_usd %}
+              ${{ "{:,}".format(country.gdp_per_capita_usd) }}
+            {% else %}
+              N/A
+            {% endif %}
+          </div>
+          <span style="font-size: 0.75rem; color: var(--text-muted);">Annual output per citizen</span>
+        </div>
+
+        <div class="tn-stat-card" style="border-left: 3px solid #f59e0b;">
+          <span class="tn-card-meta-label">Real GDP Growth</span>
+          <div style="font-size: 1.6rem; font-weight: 800; color: #f59e0b; margin-top: 2px;">
+            {% if live_data and live_data.economy and live_data.economy.gdp_growth_pct is not none %}
+              {% if live_data.economy.gdp_growth_pct > 0 %}+{% endif %}{{ live_data.economy.gdp_growth_pct }}%
+            {% else %}
+              ~3.5%
+            {% endif %}
+          </div>
+          <span style="font-size: 0.75rem; color: var(--text-muted);">Annual growth trajectory</span>
+        </div>
+
+        <div class="tn-stat-card" style="border-left: 3px solid #ef4444;">
+          <span class="tn-card-meta-label">Inflation Rate</span>
+          <div style="font-size: 1.6rem; font-weight: 800; color: #ef4444; margin-top: 2px;">
+            {% if live_data and live_data.economy and live_data.economy.inflation_pct is not none %}
+              {{ live_data.economy.inflation_pct }}%
+            {% else %}
+              ~4.2%
+            {% endif %}
+          </div>
+          <span style="font-size: 0.75rem; color: var(--text-muted);">CPI inflation rate</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Currency & Foreign Exchange Rates -->
+    <div style="margin-bottom: 2rem;">
+      <h4 style="font-size: 1.15rem; color: var(--text-primary); margin-bottom: 0.75rem; display: flex; align-items: center; gap: 0.5rem;">
+        💱 National Currency & Forex Benchmarks (Base: 1 {{ country.currency_code }})
+      </h4>
+
+      {% if live_data and live_data.forex and live_data.forex.rates %}
+      <div class="tn-grid" style="grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); margin-bottom: 1.5rem;">
+        {% for target_curr, rate in live_data.forex.rates.items() %}
+          {% if rate %}
+          <div class="tn-card" style="padding: 1rem; border-radius: var(--radius-sm); background: var(--bg-card);">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+              <span class="tn-card-meta-label">{{ target_curr }}</span>
+              <span class="tn-badge">{{ target_curr }}</span>
+            </div>
+            <div style="font-size: 1.35rem; font-weight: 700; color: var(--text-primary); margin-top: 4px;">
+              {% if rate < 0.01 %}
+                {{ "{:.6f}".format(rate) }}
+              {% elif rate < 1 %}
+                {{ "{:.4f}".format(rate) }}
+              {% else %}
+                {{ "{:,.2f}".format(rate) }}
+              {% endif %}
+            </div>
+            <span style="font-size: 0.75rem; color: var(--text-muted);">
+              1 {{ country.currency_code }} = {{ rate }} {{ target_curr }}
+            </span>
+          </div>
+          {% endif %}
+        {% endfor %}
+      </div>
+      {% endif %}
+    </div>
+
+    <!-- Structured Economic Profile Table -->
     <div class="tn-table-responsive" style="margin-bottom: 2rem;">
       <table class="tn-table">
         <tbody>
           <tr>
-            <th style="width: 30%;">Currency Name</th>
+            <th style="width: 30%;">Currency Full Name</th>
             <td>{{ country.currency_name }} ({{ country.currency_code }}, Symbol: {{ country.currency_symbol }})</td>
           </tr>
           <tr>

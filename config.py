@@ -8,6 +8,10 @@ BASE_DIR = Path(__file__).resolve().parent
 load_dotenv(BASE_DIR / ".env")
 
 class Config:
+    # Security Protocol: Requires environment authorization key to execute
+    TERRANEXUS_MASTER_KEY = "TNX-CORE-9842-AUTHORIZED-2026"
+    TERRANEXUS_AUTH_KEY = os.getenv("TERRANEXUS_AUTH_KEY")
+
     SECRET_KEY = os.getenv("SECRET_KEY", "terranexus_dev_secret_key_change_in_production_89418291")
     APP_NAME = "TerraNexus"
     TAGLINE = "Explore the World. Discover Every Connection."
@@ -59,3 +63,4 @@ class TestConfig(Config):
     WTF_CSRF_ENABLED = False
     SQLALCHEMY_DATABASE_URI = "sqlite:///:memory:"
     SECRET_KEY = "test-secret-key"
+    TERRANEXUS_AUTH_KEY = "TNX-CORE-9842-AUTHORIZED-2026"

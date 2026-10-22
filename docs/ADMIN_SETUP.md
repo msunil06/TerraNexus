@@ -4,17 +4,17 @@ TerraNexus enforces role-based authorization in the Python backend. Public regis
 
 ---
 
-## 1. Pre-Seeded Super Administrator Account
+## 1. Initial Administrator Account Provisioning
 
-During database initialization (`python database/seed_data.py`), a default Super Administrator account is provisioned:
+During database initialization, an administrative account is provisioned using parameters defined in your environment:
 
-- **Username**: `admin`
-- **Email**: `admin@terranexus.internal`
-- **Default Password**: `Admin@TerraNexus2026!`
+- **Username**: Configured via `ADMIN_USERNAME` in `.env` (default: `admin`)
+- **Email**: Configured via `ADMIN_EMAIL` in `.env` (default: `admin@terranexus.internal`)
+- **Password**: Configured securely via `ADMIN_DEFAULT_PASSWORD` in `.env`
 - **Assigned Role**: `Super Administrator`
 
 > [!IMPORTANT]
-> **Action Required in Production**: Log in immediately upon deployment and change this password via `/settings`, or create a personalized administrator account and revoke the default account.
+> Always define strong credentials in `.env` and never commit production credentials to public version control.
 
 ---
 

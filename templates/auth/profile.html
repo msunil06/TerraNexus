@@ -66,8 +66,8 @@
           <label style="display: block; font-weight: 600; font-size: 0.88rem; margin-bottom: 0.4rem; color: var(--text-secondary);">
             Theme Preference
           </label>
-          <select name="theme_preference" style="
-            width: 100%; padding: 0.65rem 1rem; background: rgba(6, 12, 24, 0.7); border: 1px solid var(--border-color);
+          <select id="profileThemeSelect" name="theme_preference" onchange="applyTheme(this.value)" style="
+            width: 100%; padding: 0.65rem 1rem; background: var(--bg-primary); border: 1px solid var(--border-color);
             border-radius: var(--radius-sm); color: var(--text-primary); font-size: 0.95rem; outline: none;
           ">
             <option value="dark" {% if current_user.theme_preference == 'dark' %}selected{% endif %}>Dark Cosmos (Navy / Cyan)</option>

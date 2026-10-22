@@ -92,6 +92,7 @@ class GeographicFeature(db.Model):
     area_km2 = db.Column(db.Float, nullable=True)
     
     connected_features = db.Column(db.String(255), nullable=True)
+    administrative_center = db.Column(db.String(120), nullable=True) # e.g. 'Nuuk', 'Antananarivo', 'Honolulu'
     overview = db.Column(db.Text, nullable=False)
     data_source = db.Column(db.String(150), default="GeoNames / USGS / UNESCO")
     created_at = db.Column(db.DateTime, default=datetime.utcnow)

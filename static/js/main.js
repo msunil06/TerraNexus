@@ -1,6 +1,9 @@
 // TerraNexus Main Client Logic
 document.addEventListener("DOMContentLoaded", () => {
   initTheme();
+  initSidebarDrawer();
+  initNavDropdown();
+  initCityMapModal();
   initMobileNav();
   initPWA();
   initFavoriteButtons();
@@ -38,9 +41,229 @@ function applyTheme(theme) {
     themeText.textContent = theme === "dark" ? "Dark Cosmos" : "Light Atlas";
   }
 
+  // Update profile select if present
+  const profileSelect = document.getElementById("profileThemeSelect");
+  if (profileSelect && profileSelect.value !== theme) {
+    profileSelect.value = theme;
+  }
+
+  // Update settings badge if present
+  const currentBadge = document.getElementById("currentThemeBadge");
+  if (currentBadge) {
+    currentBadge.textContent = theme === "dark" ? "🌙 Dark Cosmos" : "☀️ Light Atlas";
+  }
+
+  // Persist to user account if authenticated
+  try {
+    fetch("/api/theme", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ theme: theme })
+    }).catch(() => {});
+  } catch (e) {}
+
   // Dispatch global event for interactive components (e.g. Leaflet map)
   window.dispatchEvent(new CustomEvent("themeChanged", { detail: { theme } }));
 }
+window.applyTheme = applyTheme;
+
+// 1b. Collapsible Sliding Sidebar Drawer
+function initSidebarDrawer() {
+  const toggleBtn = document.getElementById("sidebarToggleBtn");
+  const closeBtn = document.getElementById("closeSidebarBtn");
+  const backdrop = document.getElementById("tnSidebarBackdrop");
+  const sidebar = document.getElementById("tnSidebar");
+
+  function openSidebar() {
+    if (sidebar) sidebar.classList.add("active");
+    if (backdrop) backdrop.classList.add("active");
+    document.body.style.overflow = "hidden";
+  }
+
+  function closeSidebar() {
+    if (sidebar) sidebar.classList.remove("active");
+    if (backdrop) backdrop.classList.remove("active");
+    document.body.style.overflow = "";
+  }
+
+  if (toggleBtn) toggleBtn.addEventListener("click", openSidebar);
+  if (closeBtn) closeBtn.addEventListener("click", closeSidebar);
+  if (backdrop) backdrop.addEventListener("click", closeSidebar);
+
+  // Close on ESC key
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape") {
+      closeSidebar();
+      closeCityMapModal();
+    }
+  });
+}
+
+// 1b-2. Navigation Dropdown Toggle (More Menu)
+function initNavDropdown() {
+  const dropdown = document.getElementById("navMoreDropdown");
+  const btn = document.getElementById("navMoreDropdownBtn");
+  if (!dropdown || !btn) return;
+
+  btn.addEventListener("click", (e) => {
+    e.stopPropagation();
+    const isOpen = dropdown.classList.toggle("active");
+    btn.setAttribute("aria-expanded", isOpen ? "true" : "false");
+  });
+
+  // Close when clicking outside
+  document.addEventListener("click", (e) => {
+    if (!dropdown.contains(e.target)) {
+      dropdown.classList.remove("active");
+      btn.setAttribute("aria-expanded", "false");
+    }
+  });
+
+  // Close on ESC key
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape") {
+      dropdown.classList.remove("active");
+      btn.setAttribute("aria-expanded", "false");
+    }
+  });
+}
+
+// 1c. Universal City, Capital, and Island Map Modal
+let cityModalMap = null;
+let cityModalMarker = null;
+
+function initCityMapModal() {
+  // Delegate clicks on any button with data-view-map
+  document.addEventListener("click", (e) => {
+    const btn = e.target.closest("[data-view-map]");
+    if (!btn) return;
+    e.preventDefault();
+
+    const name = btn.dataset.mapName || "Location";
+    const lat = parseFloat(btn.dataset.mapLat);
+    const lon = parseFloat(btn.dataset.mapLon);
+    const context = btn.dataset.mapContext || "";
+    const zoom = btn.dataset.mapZoom ? parseInt(btn.dataset.mapZoom) : 10;
+
+    if (!isNaN(lat) && !isNaN(lon)) {
+      openCityMapModal(name, lat, lon, context, zoom);
+    }
+  });
+
+  const closeBtn = document.getElementById("closeCityModalBtn");
+  const backdrop = document.getElementById("cityMapModalBackdrop");
+  if (closeBtn) closeBtn.addEventListener("click", closeCityMapModal);
+  if (backdrop) backdrop.addEventListener("click", (e) => {
+    if (e.target === backdrop) closeCityMapModal();
+  });
+}
+
+function openCityMapModal(name, lat, lon, context = "", zoom = 10) {
+  const backdrop = document.getElementById("cityMapModalBackdrop");
+  const titleEl = document.getElementById("cityModalTitle");
+  const subEl = document.getElementById("cityModalSubtitle");
+  const container = document.getElementById("cityModalMapFrame");
+  const modalElem = document.getElementById("cityModalCard");
+  const fullIcon = document.getElementById("fullScreenBtnIcon");
+  const fullText = document.getElementById("fullScreenBtnText");
+
+  if (!backdrop || !container) return;
+
+  if (titleEl) titleEl.textContent = name;
+  if (subEl) subEl.textContent = context ? `${context} • Coordinates: ${lat.toFixed(4)}° N, ${lon.toFixed(4)}° E` : `${lat.toFixed(4)}° N, ${lon.toFixed(4)}° E`;
+
+  backdrop.classList.add("active");
+  document.body.style.overflow = "hidden";
+
+  // Setup full mode toggle
+  const fullScreenBtn = document.getElementById("toggleModalFullScreenBtn");
+  if (fullScreenBtn && modalElem) {
+    fullScreenBtn.onclick = function(e) {
+      e.stopPropagation();
+      const isFull = modalElem.classList.toggle("full-mode");
+      if (fullIcon) fullIcon.textContent = isFull ? "🗗" : "⛶";
+      if (fullText) fullText.textContent = isFull ? "Normal Mode" : "Full Mode";
+      setTimeout(() => {
+        if (cityModalMap) cityModalMap.invalidateSize();
+      }, 150);
+    };
+  }
+
+  setTimeout(() => {
+    if (!cityModalMap && typeof L !== "undefined") {
+      cityModalMap = L.map(container, {
+        center: [lat, lon],
+        zoom: zoom,
+        zoomControl: true
+      });
+
+      // 100% Free Public Tiles - Zero Watermarks & Zero API Key Required
+      const satLayer = L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}", {
+        attribution: 'Tiles &copy; Esri &mdash; High-Res Satellite (Free Public)',
+        maxZoom: 18
+      }).addTo(cityModalMap);
+
+      const darkLayer = L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Base/MapServer/tile/{z}/{y}/{x}", {
+        attribution: 'Tiles &copy; Esri Dark Canvas (Zero API Key)',
+        maxZoom: 16
+      });
+
+      const streetLayer = L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}", {
+        attribution: 'Tiles &copy; Esri World Street (Zero API Key)',
+        maxZoom: 18
+      });
+
+      const osmLayer = L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+        attribution: '&copy; OpenStreetMap contributors',
+        maxZoom: 19
+      });
+
+      L.control.layers({
+        "ESRI Satellite": satLayer,
+        "ESRI Dark Canvas": darkLayer,
+        "ESRI Street Map": streetLayer,
+        "OpenStreetMap": osmLayer
+      }, null, { position: "topright" }).addTo(cityModalMap);
+
+      cityModalMarker = L.marker([lat, lon]).addTo(cityModalMap);
+    } else if (cityModalMap) {
+      cityModalMap.setView([lat, lon], zoom);
+      if (cityModalMarker) {
+        cityModalMarker.setLatLng([lat, lon]);
+      } else {
+        cityModalMarker = L.marker([lat, lon]).addTo(cityModalMap);
+      }
+    }
+
+    if (cityModalMarker) {
+      cityModalMarker.bindPopup(`<strong>${name}</strong><br>${context}`).openPopup();
+    }
+
+    if (cityModalMap) {
+      cityModalMap.invalidateSize();
+    }
+  }, 200);
+}
+
+function closeCityMapModal() {
+  const backdrop = document.getElementById("cityMapModalBackdrop");
+  const modalElem = document.getElementById("cityModalCard");
+  const fullIcon = document.getElementById("fullScreenBtnIcon");
+  const fullText = document.getElementById("fullScreenBtnText");
+
+  if (modalElem && modalElem.classList.contains("full-mode")) {
+    modalElem.classList.remove("full-mode");
+    if (fullIcon) fullIcon.textContent = "⛶";
+    if (fullText) fullText.textContent = "Full Mode";
+  }
+
+  if (backdrop) {
+    backdrop.classList.remove("active");
+    document.body.style.overflow = "";
+  }
+}
+window.openCityMapModal = openCityMapModal;
+window.closeCityMapModal = closeCityMapModal;
 
 // 2. Real-Time Live Population Ticker (Worldometer-style)
 function initLivePopulationTickers() {

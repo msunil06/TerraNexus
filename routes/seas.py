@@ -1,6 +1,8 @@
 from flask import Blueprint, render_template, request, abort
 from flask_login import current_user
 from services.geographic_service import GeographicService
+from services.live_data_service import LiveDataService
+from services.hydrography_service import HydrographyService
 from models.user import UserFavorite
 
 seas_bp = Blueprint("seas", __name__, url_prefix="/seas")
@@ -27,4 +29,19 @@ def sea_detail(slug):
         ).first()
         is_favorite = bool(fav)
 
-    return render_template("seas/detail.html", sea=sea, is_favorite=is_favorite)
+    live_marine = LiveDataService.get_live_ocean_marine(
+        ocean_name=sea.ocean.name if sea.ocean else sea.name,
+        lat=sea.latitude,
+        lon=sea.longitude
+    )
+
+    littoral_countries = HydrographyService.get_sea_littoral_countries(sea.name)
+
+    return render_template(
+        "seas/detail.html",
+        sea=sea,
+        is_favorite=is_favorite,
+        live_marine=live_marine,
+        littoral_countries=littoral_countries
+    )
+

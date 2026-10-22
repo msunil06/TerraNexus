@@ -1,12 +1,76 @@
 {% extends "base.html" %}
 
-{% block title %}Account Settings - {{ app_name }}{% endblock %}
+{% block title %}Account Settings & Theme - {{ app_name }}{% endblock %}
 
 {% block content %}
-<div style="max-width: 700px; margin: 3rem auto 4rem; padding: 0 1.5rem;">
+<div style="max-width: 760px; margin: 3rem auto 4rem; padding: 0 1.5rem;">
   <div style="margin-bottom: 2rem;">
-    <h1 style="font-size: 2.2rem; margin-bottom: 0.25rem;">Account Settings</h1>
-    <p style="color: var(--text-secondary); font-size: 0.95rem;">Manage your password security and account lifecycle.</p>
+    <h1 style="font-size: 2.2rem; margin-bottom: 0.25rem;">Account & Appearance Settings</h1>
+    <p style="color: var(--text-secondary); font-size: 0.95rem;">
+      Customize your website theme, manage security credentials, and configure account preferences.
+    </p>
+  </div>
+
+  <!-- Appearance & Theme Selector -->
+  <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 2rem; margin-bottom: 2rem;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem;">
+      <div>
+        <h3 style="font-size: 1.25rem; margin: 0 0 0.25rem; color: var(--accent-cyan);">🎨 Appearance & Theme</h3>
+        <p style="color: var(--text-muted); font-size: 0.88rem; margin: 0;">
+          Select your visual theme. Changes apply immediately across all pages and maps.
+        </p>
+      </div>
+      <span id="currentThemeBadge" class="tn-badge" style="background: rgba(0, 245, 212, 0.15); color: var(--accent);">
+        {{ '🌙 Dark Cosmos' if current_user.theme_preference == 'dark' else '☀️ Light Atlas' }}
+      </span>
+    </div>
+
+    <form id="themeForm" method="POST" action="{{ url_for('auth.settings') }}">
+      <input type="hidden" name="action" value="update_appearance">
+      <input type="hidden" name="theme_preference" id="themeInput" value="{{ current_user.theme_preference or 'dark' }}">
+
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.25rem; margin-bottom: 1.5rem;">
+        <!-- Dark Cosmos Card -->
+        <div id="cardDarkTheme" onclick="selectThemeOption('dark')" style="
+          padding: 1.25rem; border-radius: var(--radius-md); cursor: pointer; transition: all 0.2s ease;
+          background: #0a1324; border: 2px solid {% if current_user.theme_preference == 'dark' or not current_user.theme_preference %}#00f5d4{% else %}rgba(255, 255, 255, 0.1){% endif %};
+          box-shadow: {% if current_user.theme_preference == 'dark' or not current_user.theme_preference %}0 0 20px rgba(0, 245, 212, 0.2){% else %}none{% endif %};
+        ">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem;">
+            <span style="font-size: 1.8rem;">🌙</span>
+            <span style="font-size: 0.75rem; text-transform: uppercase; font-weight: 700; color: #00f5d4;">
+              {% if current_user.theme_preference == 'dark' or not current_user.theme_preference %}✓ Active{% endif %}
+            </span>
+          </div>
+          <div style="font-weight: 700; color: #f8fafc; font-size: 1.05rem; margin-bottom: 0.35rem;">Dark Cosmos</div>
+          <p style="font-size: 0.82rem; color: #94a3b8; margin: 0; line-height: 1.4;">
+            Deep navy cosmos background with luminous cyan accents and glow indicators.
+          </p>
+        </div>
+
+        <!-- Light Atlas Card -->
+        <div id="cardLightTheme" onclick="selectThemeOption('light')" style="
+          padding: 1.25rem; border-radius: var(--radius-md); cursor: pointer; transition: all 0.2s ease;
+          background: #ffffff; border: 2px solid {% if current_user.theme_preference == 'light' %}#0284c7{% else %}rgba(0, 0, 0, 0.15){% endif %};
+          box-shadow: {% if current_user.theme_preference == 'light' %}0 0 20px rgba(2, 132, 199, 0.25){% else %}none{% endif %};
+        ">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem;">
+            <span style="font-size: 1.8rem;">☀️</span>
+            <span style="font-size: 0.75rem; text-transform: uppercase; font-weight: 700; color: #0284c7;">
+              {% if current_user.theme_preference == 'light' %}✓ Active{% endif %}
+            </span>
+          </div>
+          <div style="font-weight: 700; color: #0f172a; font-size: 1.05rem; margin-bottom: 0.35rem;">Light Atlas</div>
+          <p style="font-size: 0.82rem; color: #475569; margin: 0; line-height: 1.4;">
+            High-contrast crisp white background with royal azure blue elements.
+          </p>
+        </div>
+      </div>
+
+      <button type="submit" class="tn-btn tn-btn-primary" style="font-size: 0.9rem;">
+        💾 Save Theme Preference
+      </button>
+    </form>
   </div>
 
   <!-- Change Password Form -->
@@ -21,7 +85,7 @@
           Current Password
         </label>
         <input type="password" name="current_password" required style="
-          width: 100%; padding: 0.65rem 1rem; background: rgba(6, 12, 24, 0.7); border: 1px solid var(--border-color);
+          width: 100%; padding: 0.65rem 1rem; background: var(--bg-primary); border: 1px solid var(--border-color);
           border-radius: var(--radius-sm); color: var(--text-primary); font-size: 0.95rem; outline: none;
         ">
       </div>
@@ -31,7 +95,7 @@
           New Password (min 8 characters)
         </label>
         <input type="password" name="new_password" minlength="8" required style="
-          width: 100%; padding: 0.65rem 1rem; background: rgba(6, 12, 24, 0.7); border: 1px solid var(--border-color);
+          width: 100%; padding: 0.65rem 1rem; background: var(--bg-primary); border: 1px solid var(--border-color);
           border-radius: var(--radius-sm); color: var(--text-primary); font-size: 0.95rem; outline: none;
         ">
       </div>
@@ -41,7 +105,7 @@
           Confirm New Password
         </label>
         <input type="password" name="confirm_new_password" minlength="8" required style="
-          width: 100%; padding: 0.65rem 1rem; background: rgba(6, 12, 24, 0.7); border: 1px solid var(--border-color);
+          width: 100%; padding: 0.65rem 1rem; background: var(--bg-primary); border: 1px solid var(--border-color);
           border-radius: var(--radius-sm); color: var(--text-primary); font-size: 0.95rem; outline: none;
         ">
       </div>
@@ -71,4 +135,60 @@
     {% endif %}
   </div>
 </div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+function selectThemeOption(theme) {
+  // 1. Immediately apply to page DOM & localStorage
+  if (typeof applyTheme === "function") {
+    applyTheme(theme);
+  } else {
+    document.documentElement.setAttribute("data-theme", theme);
+    localStorage.setItem("tn_theme", theme);
+  }
+
+  // 2. Update form input
+  const input = document.getElementById("themeInput");
+  if (input) input.value = theme;
+
+  // 3. Update Visual styles on cards
+  const darkCard = document.getElementById("cardDarkTheme");
+  const lightCard = document.getElementById("cardLightTheme");
+  const badge = document.getElementById("currentThemeBadge");
+
+  if (theme === "dark") {
+    if (darkCard) {
+      darkCard.style.border = "2px solid #00f5d4";
+      darkCard.style.boxShadow = "0 0 20px rgba(0, 245, 212, 0.2)";
+    }
+    if (lightCard) {
+      lightCard.style.border = "2px solid rgba(0, 0, 0, 0.15)";
+      lightCard.style.boxShadow = "none";
+    }
+    if (badge) {
+      badge.textContent = "🌙 Dark Cosmos";
+      badge.style.color = "var(--accent)";
+    }
+  } else {
+    if (lightCard) {
+      lightCard.style.border = "2px solid #0284c7";
+      lightCard.style.boxShadow = "0 0 20px rgba(2, 132, 199, 0.25)";
+    }
+    if (darkCard) {
+      darkCard.style.border = "2px solid rgba(255, 255, 255, 0.1)";
+      darkCard.style.boxShadow = "none";
+    }
+    if (badge) {
+      badge.textContent = "☀️ Light Atlas";
+      badge.style.color = "#0284c7";
+    }
+  }
+}
+
+document.addEventListener("DOMContentLoaded", function() {
+  const currentTheme = document.documentElement.getAttribute("data-theme") || "dark";
+  selectThemeOption(currentTheme);
+});
+</script>
 {% endblock %}

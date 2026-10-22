@@ -167,6 +167,11 @@ def settings():
                 current_user.set_password(new_pw)
                 db.session.commit()
                 flash("Password updated successfully.", "success")
+        elif action == "update_appearance":
+            theme = request.form.get("theme_preference", "dark")
+            current_user.theme_preference = theme
+            db.session.commit()
+            flash(f"Appearance theme switched to {'Dark Cosmos' if theme == 'dark' else 'Light Atlas'}.", "success")
         elif action == "delete_account_request":
             current_user.deletion_requested = True
             db.session.commit()
@@ -175,3 +180,13 @@ def settings():
         return redirect(url_for("auth.settings"))
 
     return render_template("auth/settings.html")
+
+@auth_bp.route("/api/theme", methods=["POST"])
+def update_theme_api():
+    data = request.get_json(silent=True) or request.form
+    theme = data.get("theme", "dark")
+    if theme in ("dark", "light") and current_user.is_authenticated:
+        current_user.theme_preference = theme
+        db.session.commit()
+        return {"status": "success", "theme": theme}
+    return {"status": "ok", "theme": theme}

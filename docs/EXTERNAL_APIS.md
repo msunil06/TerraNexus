@@ -6,11 +6,14 @@ TerraNexus is designed to operate autonomously without mandatory paid external A
 
 ## 1. Map Tiles Providers (Zero Key Required)
 
-1. **CartoDB Dark Matter / Positron Tiles**:
-   - URL: `https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png`
-   - Key: None required for educational and standard exploration use.
-2. **OpenStreetMap Standard Tile Layer**:
-   - URL: `https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png`
+1. **ESRI Canvas Dark Gray Base**:
+   - URL: `https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Base/MapServer/tile/{z}/{y}/{x}`
+   - Key: 100% Free Public GIS Tiles, Zero Watermarks, Zero API Key.
+2. **ESRI World Imagery (Satellite)**:
+   - URL: `https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}`
+   - Key: 100% Free Public Satellite Tiles, Zero Watermarks.
+3. **OpenStreetMap Standard Tile Layer**:
+   - URL: `https://tile.openstreetmap.org/{z}/{x}/{y}.png`
    - Key: None required under standard OSM usage policy with proper attribution.
 
 ---

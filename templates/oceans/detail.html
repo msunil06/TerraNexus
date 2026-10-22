@@ -28,6 +28,86 @@
 </section>
 
 <div style="max-width: 1200px; margin: 0 auto 4rem; padding: 0 1.5rem;">
+  
+  <!-- Interactive Ocean Hydrographic Map Card (Zero API Key Required) -->
+  <div class="tn-map-card" style="margin-bottom: 2rem;">
+    <div class="tn-map-header" style="padding: 1rem 1.25rem; background: var(--bg-card); border-bottom: 1px solid var(--border-color); display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 0.75rem;">
+      <div style="display: flex; align-items: center; gap: 0.5rem; font-weight: 700; font-size: 1.1rem; color: var(--text-primary);">
+        <span>🌊</span> {{ ocean.name }} Interactive Hydrographic Map
+      </div>
+      <div style="display: flex; align-items: center; gap: 0.5rem;">
+        <select id="oceanDetailMapLayerSelect" style="
+          background: var(--bg-card); color: var(--text-primary); border: 1px solid var(--border-color);
+          border-radius: var(--radius-sm); padding: 0.4rem 0.75rem; font-size: 0.84rem; outline: none; cursor: pointer;
+        ">
+          <option value="satellite">🛰️ Satellite View (ESRI)</option>
+          <option value="dark">🌙 Dark Cosmos (CartoDB)</option>
+          <option value="light">☀️ Light Atlas (CartoDB)</option>
+          <option value="topo">🏔️ Bathymetry / Relief (OpenTopoMap)</option>
+          <option value="streets">🗺️ Street Map (OpenStreetMap)</option>
+        </select>
+        <button id="resetOceanDetailView" class="tn-btn tn-btn-outline tn-btn-sm" style="font-size: 0.8rem; padding: 0.4rem 0.75rem;">⟲ Center Ocean</button>
+      </div>
+    </div>
+    <div id="oceanDetailMap" style="height: 480px; width: 100%; position: relative;"></div>
+  </div>
+
+  <!-- Live Hydrographic & Marine Telemetry Card (Zero API Key Required) -->
+  {% if live_marine %}
+  <div style="background: linear-gradient(135deg, rgba(6, 182, 212, 0.12) 0%, rgba(15, 23, 42, 0.8) 100%); border: 1px solid rgba(6, 182, 212, 0.35); border-radius: var(--radius-md); padding: 1.5rem; margin-bottom: 2.5rem;">
+    <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 0.75rem; margin-bottom: 1rem;">
+      <div style="display: flex; align-items: center; gap: 0.6rem;">
+        <span style="font-size: 1.6rem;">🌊</span>
+        <div>
+          <h3 style="font-size: 1.25rem; font-weight: 700; color: var(--text-primary); margin: 0;">
+            Live Ocean Hydrographic Telemetry
+          </h3>
+          <p style="font-size: 0.82rem; color: var(--text-muted); margin: 0;">
+            Real-time wave modeling, swell heights, and surface conditions via Open-Meteo Free Marine API
+          </p>
+        </div>
+      </div>
+      <span class="tn-badge" style="background: rgba(16, 185, 129, 0.15); color: #10b981; border: 1px solid rgba(16, 185, 129, 0.3); font-weight: 700; font-size: 0.78rem;">
+        🔒 Zero API Key Required &bull; 100% Free Public API
+      </span>
+    </div>
+
+    <div class="tn-grid" style="grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
+      <div class="tn-stat-card" style="border-left: 3px solid var(--accent);">
+        <div class="tn-card-meta-label">Significant Wave Height</div>
+        <div style="font-size: 1.8rem; font-weight: 800; color: var(--text-primary); margin-top: 4px;">
+          {{ live_marine.wave_height }} m
+        </div>
+        <span style="font-size: 0.78rem; color: var(--accent-cyan); font-weight: 600;">{{ live_marine.condition }}</span>
+      </div>
+
+      <div class="tn-stat-card">
+        <div class="tn-card-meta-label">Wave Dominant Period</div>
+        <div style="font-size: 1.6rem; font-weight: 700; color: var(--text-primary); margin-top: 4px;">
+          {{ live_marine.wave_period }}s
+        </div>
+        <span style="font-size: 0.78rem; color: var(--text-muted);">Swell frequency interval</span>
+      </div>
+
+      <div class="tn-stat-card">
+        <div class="tn-card-meta-label">Wave Heading Direction</div>
+        <div style="font-size: 1.6rem; font-weight: 700; color: var(--text-primary); margin-top: 4px;">
+          {{ live_marine.wave_direction }}°
+        </div>
+        <span style="font-size: 0.78rem; color: var(--text-muted);">Azimuth propagation</span>
+      </div>
+
+      <div class="tn-stat-card">
+        <div class="tn-card-meta-label">Wind Wave Component</div>
+        <div style="font-size: 1.6rem; font-weight: 700; color: var(--text-primary); margin-top: 4px;">
+          {{ live_marine.wind_wave_height }} m
+        </div>
+        <span style="font-size: 0.78rem; color: var(--text-muted);">Surface wind induced</span>
+      </div>
+    </div>
+  </div>
+  {% endif %}
+
   <!-- Bathymetric Stats -->
   <div class="tn-stats-grid" style="margin-bottom: 2.5rem;">
     <div class="tn-stat-card">
@@ -112,4 +192,87 @@
     {% endif %}
   </div>
 </div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+  let centerLat = 0.0;
+  let centerLon = 0.0;
+  let initialZoom = 3;
+
+  {% if 'Pacific' in ocean.name %}
+    centerLat = 0.0; centerLon = -160.0; initialZoom = 3;
+  {% elif 'Atlantic' in ocean.name %}
+    centerLat = 10.0; centerLon = -30.0; initialZoom = 3;
+  {% elif 'Indian' in ocean.name %}
+    centerLat = -20.0; centerLon = 80.0; initialZoom = 3;
+  {% elif 'Arctic' in ocean.name %}
+    centerLat = 85.0; centerLon = 0.0; initialZoom = 3;
+  {% elif 'Southern' in ocean.name %}
+    centerLat = -65.0; centerLon = 0.0; initialZoom = 3;
+  {% endif %}
+
+  const map = L.map("oceanDetailMap", {
+    center: [centerLat, centerLon],
+    zoom: initialZoom,
+    minZoom: 2,
+    maxZoom: 18,
+    zoomControl: true,
+    worldCopyJump: true
+  });
+
+  const tileLayers = {
+    satellite: L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}", {
+      attribution: 'Tiles &copy; Esri &mdash; High-Resolution Satellite (Free Public)',
+      maxZoom: 18
+    }),
+    dark: L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Base/MapServer/tile/{z}/{y}/{x}", {
+      attribution: 'Tiles &copy; Esri &mdash; Esri Dark Canvas (Zero API Key)', maxZoom: 16
+    }),
+    light: L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}", {
+      attribution: 'Tiles &copy; Esri &mdash; Esri World Street (Zero API Key)', maxZoom: 18
+    }),
+    topo: L.tileLayer("https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png", {
+      attribution: '&copy; OpenTopoMap', maxZoom: 17
+    }),
+    streets: L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+      attribution: '&copy; OpenStreetMap contributors', maxZoom: 19
+    })
+  };
+
+  tileLayers.satellite.addTo(map);
+
+  const select = document.getElementById("oceanDetailMapLayerSelect");
+  let activeKey = "satellite";
+  if (select) {
+    select.value = "satellite";
+    select.addEventListener("change", (e) => {
+      map.removeLayer(tileLayers[activeKey]);
+      tileLayers[e.target.value].addTo(map);
+      activeKey = e.target.value;
+    });
+  }
+
+  const resetBtn = document.getElementById("resetOceanDetailView");
+  if (resetBtn) {
+    resetBtn.addEventListener("click", () => map.setView([centerLat, centerLon], initialZoom));
+  }
+
+  // Plot Marginal Seas Markers
+  {% for sea in seas %}
+    {% if sea.latitude and sea.longitude %}
+      const seaIcon = L.divIcon({
+        className: "tn-sea-marker",
+        html: `<div style="background: rgba(6,182,212,0.85); border: 1.5px solid #ffffff; border-radius: 50%; width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; font-size: 13px; box-shadow: 0 0 10px #06b6d4;">⛵</div>`,
+        iconSize: [28, 28], iconAnchor: [14, 14]
+      });
+
+      L.marker([{{ sea.latitude }}, {{ sea.longitude }}], { icon: seaIcon })
+        .addTo(map)
+        .bindPopup(`<strong>{{ sea.name }}</strong><br>Type: {{ sea.sea_type | capitalize }}<br><a href="/seas/{{ sea.slug }}">View Sea Profile &rarr;</a>`);
+    {% endif %}
+  {% endfor %}
+});
+</script>
 {% endblock %}

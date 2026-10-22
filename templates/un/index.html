@@ -1,0 +1,301 @@
+{% extends "base.html" %}
+
+{% block title %}United Nations (UN) & Security Council - Structure, P5, Agencies & Military Telemetry - {{ app_name }}{% endblock %}
+
+{% block meta_description %}Explore complete United Nations intelligence: General Assembly, P5 Permanent Members with veto power and nuclear status, 10 temporary Security Council members, specialized agencies (WHO, UNESCO, UNICEF, WTO, IMF), and live defense telemetry.{% endblock %}
+
+{% block content %}
+<!-- UN Hero Header -->
+<section class="tn-hero" style="background: radial-gradient(circle at top right, rgba(59, 130, 246, 0.25), transparent 70%), var(--bg-surface); padding: 3.5rem 1.5rem 2.5rem; border-bottom: 1px solid var(--border-color);">
+  <div class="tn-hero-content" style="max-width: 1200px; margin: 0 auto; text-align: center;">
+    <div style="font-size: 3.2rem; margin-bottom: 0.5rem; filter: drop-shadow(0 4px 12px rgba(59, 130, 246, 0.4));">🇺🇳</div>
+    <div style="display: inline-flex; align-items: center; gap: 0.5rem; background: rgba(59, 130, 246, 0.15); border: 1px solid rgba(59, 130, 246, 0.35); padding: 0.35rem 0.95rem; border-radius: 999px; font-size: 0.85rem; color: #60a5fa; margin-bottom: 1rem; font-weight: 600;">
+      <span>Charter of the United Nations (1945)</span> &bull; <span>193 Sovereign Member States</span>
+    </div>
+    <h1 style="font-family: var(--font-heading); font-size: 2.5rem; font-weight: 800; color: var(--text-primary); margin: 0 0 0.75rem;">
+      United Nations (UN) Intelligence Hub
+    </h1>
+    <p style="font-size: 1.1rem; color: var(--text-secondary); max-width: 820px; margin: 0 auto 1.5rem; line-height: 1.7;">
+      Comprehensive student dossier detailing the General Assembly, the P5 Permanent Members with veto power, 10 elected non-permanent Security Council members, specialized international agencies (WHO, UNESCO, UNICEF, WTO, IMF), and live defense spending indicators.
+    </p>
+
+    <!-- Quick Vital Statistics Pills -->
+    <div style="display: flex; justify-content: center; flex-wrap: wrap; gap: 1rem; margin-top: 1rem;">
+      <div class="tn-stat-card" style="padding: 0.85rem 1.5rem; min-width: 170px;">
+        <span class="tn-card-meta-label">Total Member States</span>
+        <div style="font-size: 1.5rem; font-weight: 800; color: var(--text-primary);">193 States</div>
+        <span style="font-size: 0.78rem; color: var(--text-muted);">+ 2 Permanent Observers</span>
+      </div>
+      <div class="tn-stat-card" style="padding: 0.85rem 1.5rem; min-width: 170px;">
+        <span class="tn-card-meta-label">Secretary-General</span>
+        <div style="font-size: 1.15rem; font-weight: 700; color: #60a5fa; margin-top: 4px;">{{ overview.secretary_general }}</div>
+        <span style="font-size: 0.78rem; color: var(--text-muted);">9th UN Secretary-General</span>
+      </div>
+      <div class="tn-stat-card" style="padding: 0.85rem 1.5rem; min-width: 170px;">
+        <span class="tn-card-meta-label">UN Headquarters</span>
+        <div style="font-size: 1.15rem; font-weight: 700; color: var(--text-primary); margin-top: 4px;">New York City</div>
+        <span style="font-size: 0.78rem; color: var(--text-muted);">International Territory</span>
+      </div>
+      <div class="tn-stat-card" style="padding: 0.85rem 1.5rem; min-width: 170px;">
+        <span class="tn-card-meta-label">Security Council</span>
+        <div style="font-size: 1.5rem; font-weight: 800; color: #38bdf8;">15 Members</div>
+        <span style="font-size: 0.78rem; color: var(--text-muted);">5 Permanent (P5) + 10 Elected</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Main Container -->
+<div style="max-width: 1200px; margin: 2.5rem auto 5rem; padding: 0 1.5rem;">
+
+  <!-- SECTION 1: P5 Permanent Members of the Security Council -->
+  <section style="margin-bottom: 3.5rem;">
+    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 0.75rem;">
+      <div>
+        <h2 style="font-size: 1.8rem; font-weight: 800; color: var(--text-primary); margin: 0 0 0.25rem; display: flex; align-items: center; gap: 0.6rem;">
+          🛡️ P5 Permanent Security Council Members
+        </h2>
+        <p style="font-size: 0.95rem; color: var(--text-secondary); margin: 0;">
+          The five nations granted permanent seats under the UN Charter, each holding absolute veto power and recognized nuclear status.
+        </p>
+      </div>
+      <span class="tn-badge" style="background: rgba(239, 68, 68, 0.15); border-color: rgba(239, 68, 68, 0.4); color: #f87171; font-weight: 700; padding: 0.4rem 0.85rem;">
+        ⚡ Absolute Veto Power
+      </span>
+    </div>
+
+    <div class="tn-grid" style="grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));">
+      {% for m in p5_members %}
+      <div class="tn-card" style="padding: 1.5rem; background: var(--bg-card); border: 1px solid var(--border-color); display: flex; flex-direction: column; justify-content: space-between; position: relative; overflow: hidden;">
+        <div style="position: absolute; top: 0; left: 0; right: 0; height: 4px; background: linear-gradient(90deg, #3b82f6, #06b6d4);"></div>
+        
+        <div>
+          <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.75rem;">
+            <div style="display: flex; align-items: center; gap: 0.6rem;">
+              <span style="font-size: 2.2rem; line-height: 1;">{{ m.flag }}</span>
+              <div>
+                <h3 style="font-size: 1.25rem; font-weight: 800; color: var(--text-primary); margin: 0;">{{ m.country_name }}</h3>
+                <span class="tn-badge" style="font-size: 0.72rem; margin-top: 2px;">{{ m.iso_a3 }} &bull; P5 Member</span>
+              </div>
+            </div>
+            <span class="tn-badge" style="background: rgba(34, 197, 94, 0.15); border-color: rgba(34, 197, 94, 0.3); color: #22c55e; font-weight: 700;">
+              VETO
+            </span>
+          </div>
+
+          <div style="background: rgba(15, 23, 42, 0.35); border: 1px solid var(--border-color); border-radius: var(--radius-sm); padding: 0.85rem; margin-bottom: 1rem; font-size: 0.85rem;">
+            <div style="display: flex; justify-content: space-between; margin-bottom: 0.4rem;">
+              <span style="color: var(--text-muted);">Veto Authority:</span>
+              <strong style="color: #60a5fa;">{{ m.veto_status }}</strong>
+            </div>
+            <div style="display: flex; justify-content: space-between; margin-bottom: 0.4rem;">
+              <span style="color: var(--text-muted);">Historical Vetoes Cast:</span>
+              <strong style="color: var(--text-primary);">{{ m.vetoes_cast_history }} times</strong>
+            </div>
+            <div style="display: flex; justify-content: space-between;">
+              <span style="color: var(--text-muted);">Nuclear Warheads:</span>
+              <strong style="color: #f59e0b;">☢️ ~{{ "{:,}".format(m.nuclear_warheads) }} Warheads</strong>
+            </div>
+          </div>
+
+          <!-- Military & Defense Telemetry -->
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; margin-bottom: 1rem;">
+            <div style="background: var(--bg-surface); padding: 0.65rem; border-radius: var(--radius-sm); border: 1px solid var(--border-color);">
+              <span class="tn-card-meta-label">Active Troops</span>
+              <div style="font-size: 1.1rem; font-weight: 700; color: var(--text-primary); margin-top: 2px;">
+                {{ "{:,}".format(m.active_military) }}
+              </div>
+            </div>
+            <div style="background: var(--bg-surface); padding: 0.65rem; border-radius: var(--radius-sm); border: 1px solid var(--border-color);">
+              <span class="tn-card-meta-label">Annual Defense</span>
+              <div style="font-size: 1.1rem; font-weight: 700; color: #10b981; margin-top: 2px;">
+                {{ m.defense_budget_usd }}
+              </div>
+            </div>
+          </div>
+
+          <!-- Live World Bank Defense Indicator -->
+          {% if m.live_military_pct_gdp %}
+          <div style="display: flex; align-items: center; justify-content: space-between; background: rgba(16, 185, 129, 0.08); border: 1px solid rgba(16, 185, 129, 0.25); padding: 0.5rem 0.75rem; border-radius: var(--radius-sm); font-size: 0.8rem; margin-bottom: 1rem;">
+            <span style="color: #34d399; font-weight: 600;">🟢 Live World Bank Defense %:</span>
+            <strong style="color: var(--text-primary);">{{ m.live_military_pct_gdp }}% of GDP</strong>
+          </div>
+          {% endif %}
+        </div>
+
+        <div>
+          <a href="{{ url_for('countries.country_detail', slug=m.slug) }}" class="tn-btn tn-btn-outline tn-btn-sm" style="width: 100%; text-align: center; justify-content: center; font-size: 0.82rem;">
+            View {{ m.country_name }} Profile &rarr;
+          </a>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </section>
+
+  <!-- SECTION 2: 10 Temporary (Non-Permanent) Security Council Members -->
+  <section style="margin-bottom: 3.5rem;">
+    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.25rem; flex-wrap: wrap; gap: 0.5rem;">
+      <div>
+        <h2 style="font-size: 1.8rem; font-weight: 800; color: var(--text-primary); margin: 0 0 0.25rem; display: flex; align-items: center; gap: 0.6rem;">
+          🌍 10 Elected Temporary Security Council Members
+        </h2>
+        <p style="font-size: 0.95rem; color: var(--text-secondary); margin: 0;">
+          Elected by the UN General Assembly for staggered 2-year terms representing global continental regions (No Veto Power).
+        </p>
+      </div>
+      <span class="tn-badge" style="background: rgba(56, 189, 248, 0.15); border-color: rgba(56, 189, 248, 0.3); color: #38bdf8;">
+        General Assembly Elected Seats
+      </span>
+    </div>
+
+    <div class="tn-grid" style="grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));">
+      {% for t in temp_members %}
+      <div class="tn-card" style="padding: 1.25rem; background: var(--bg-card); border: 1px solid var(--border-color); display: flex; flex-direction: column; justify-content: space-between;">
+        <div>
+          <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.5rem;">
+            <div style="display: flex; align-items: center; gap: 0.5rem;">
+              <span style="font-size: 1.8rem;">{{ t.flag }}</span>
+              <div>
+                <h4 style="font-size: 1.1rem; font-weight: 700; color: var(--text-primary); margin: 0;">{{ t.country_name }}</h4>
+                <span style="font-size: 0.72rem; color: var(--text-muted); font-family: monospace;">{{ t.iso_a3 }}</span>
+              </div>
+            </div>
+            <span class="tn-badge" style="font-size: 0.7rem; background: rgba(59, 130, 246, 0.12); color: #60a5fa;">{{ t.term_years }}</span>
+          </div>
+
+          <div style="font-size: 0.82rem; color: var(--text-secondary); margin-bottom: 0.75rem; line-height: 1.6;">
+            <div>Regional Bloc: <strong style="color: var(--text-primary);">{{ t.regional_group }}</strong></div>
+            <div>Active Armed Forces: <strong>{{ "{:,}".format(t.active_military) }}</strong></div>
+            <div>Defense Allocation: <strong>{{ t.defense_budget_usd }}</strong></div>
+          </div>
+        </div>
+
+        <div>
+          <a href="{{ url_for('countries.country_detail', slug=t.slug) }}" style="font-size: 0.8rem; color: var(--accent-cyan); font-weight: 600; text-decoration: none; display: inline-flex; align-items: center; gap: 0.3rem;">
+            Country Details &rarr;
+          </a>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </section>
+
+  <!-- SECTION 3: UN Specialized Agencies & Connected Countries -->
+  <section style="margin-bottom: 3.5rem;">
+    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.25rem; flex-wrap: wrap; gap: 0.5rem;">
+      <div>
+        <h2 style="font-size: 1.8rem; font-weight: 800; color: var(--text-primary); margin: 0 0 0.25rem; display: flex; align-items: center; gap: 0.6rem;">
+          🏛️ United Nations Specialized Agencies & Global Bodies
+        </h2>
+        <p style="font-size: 0.95rem; color: var(--text-secondary); margin: 0;">
+          Autonomous international organizations working with the UN through the Economic and Social Council (ECOSOC).
+        </p>
+      </div>
+      <span class="tn-badge" style="background: rgba(168, 85, 247, 0.15); border-color: rgba(168, 85, 247, 0.3); color: #c084fc;">
+        12 Core Specialized Agencies
+      </span>
+    </div>
+
+    <div class="tn-grid" style="grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));">
+      {% for a in agencies %}
+      <div class="tn-card" style="padding: 1.5rem; background: var(--bg-card); border: 1px solid var(--border-color); display: flex; flex-direction: column; justify-content: space-between;">
+        <div>
+          <div style="display: flex; align-items: flex-start; justify-content: space-between; gap: 0.5rem; margin-bottom: 0.5rem;">
+            <div>
+              <span class="tn-badge" style="background: rgba(59, 130, 246, 0.2); color: #60a5fa; font-weight: 800; font-size: 0.82rem; margin-bottom: 4px;">{{ a.code }}</span>
+              <h3 style="font-size: 1.15rem; font-weight: 700; color: var(--text-primary); margin: 0;">{{ a.name }}</h3>
+            </div>
+            <span class="tn-badge" style="font-size: 0.72rem;">Est. {{ a.founded }}</span>
+          </div>
+
+          <p style="font-size: 0.88rem; color: var(--text-secondary); line-height: 1.5; margin-bottom: 0.75rem;">
+            {{ a.desc }}
+          </p>
+
+          <div style="background: var(--bg-surface); border: 1px solid var(--border-color); border-radius: var(--radius-sm); padding: 0.75rem; margin-bottom: 0.75rem; font-size: 0.8rem; line-height: 1.6;">
+            <div>📍 <strong>Headquarters:</strong> {{ a.headquarters }}</div>
+            <div>👤 <strong>Executive Head:</strong> {{ a.leader }}</div>
+            <div>🌐 <strong>Member States:</strong> {{ a.member_states_count }} Sovereign Nations</div>
+          </div>
+
+          <!-- Connected Countries Pill Tags -->
+          <div>
+            <span class="tn-card-meta-label" style="font-size: 0.72rem; margin-bottom: 0.4rem;">Connected Member Countries:</span>
+            <div style="display: flex; flex-wrap: wrap; gap: 0.35rem;">
+              {% for c_name in a.connected_countries %}
+                <span class="tn-badge" style="font-size: 0.72rem; padding: 2px 7px; background: rgba(255,255,255,0.05); color: var(--text-secondary);">{{ c_name }}</span>
+              {% endfor %}
+            </div>
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </section>
+
+  <!-- SECTION 4: UN Peacekeeping Operations (Blue Helmets) -->
+  <section style="margin-bottom: 3.5rem;">
+    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.25rem; flex-wrap: wrap; gap: 0.5rem;">
+      <div>
+        <h2 style="font-size: 1.8rem; font-weight: 800; color: var(--text-primary); margin: 0 0 0.25rem; display: flex; align-items: center; gap: 0.6rem;">
+          🕊️ UN Peacekeeping Operations (Blue Helmets)
+        </h2>
+        <p style="font-size: 0.95rem; color: var(--text-secondary); margin: 0;">
+          Multinational peacekeeping forces deployed under UN Security Council mandates to maintain armistices and protect civilians.
+        </p>
+      </div>
+      <span class="tn-badge" style="background: rgba(59, 130, 246, 0.15); color: #60a5fa; font-weight: 700;">
+        Active Missions
+      </span>
+    </div>
+
+    <div class="tn-table-responsive" style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--radius-md);">
+      <table class="tn-table">
+        <thead>
+          <tr>
+            <th>Mission Acronym</th>
+            <th>Operation Name</th>
+            <th>Deployment Theater</th>
+            <th>Established</th>
+            <th>Deployed Personnel</th>
+            <th>Major Troop Contributing Nations</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for p in peacekeeping %}
+          <tr>
+            <td><strong style="color: #60a5fa;">{{ p.acronym }}</strong></td>
+            <td><strong>{{ p.name }}</strong></td>
+            <td>📍 {{ p.location }}</td>
+            <td>{{ p.established }}</td>
+            <td><strong>{{ "{:,}".format(p.personnel) }}</strong></td>
+            <td>
+              <div style="display: flex; flex-wrap: wrap; gap: 0.25rem;">
+                {% for nation in p.key_contributors %}
+                  <span class="tn-badge" style="font-size: 0.7rem; padding: 1px 6px;">{{ nation }}</span>
+                {% endfor %}
+              </div>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- SECTION 5: Student Learning Notes & UN Fast Facts -->
+  <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 2rem;">
+    <h3 style="font-size: 1.3rem; font-weight: 800; color: var(--accent-cyan); margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem;">
+      🎓 Student Study Guide & Key Examination Concepts
+    </h3>
+    <ul style="list-style: disc; margin-left: 1.5rem; color: var(--text-secondary); line-height: 1.85; font-size: 0.95rem;">
+      <li><strong>Veto Mechanism:</strong> Any single negative vote by one of the P5 permanent members blocks any non-procedural Security Council resolution, even if supported by the other 14 members.</li>
+      <li><strong>General Assembly Resolutions:</strong> Unlike Security Council resolutions (which can be legally binding under Chapter VII of the UN Charter), General Assembly resolutions carry moral and political weight but are generally non-binding.</li>
+      <li><strong>UN Budget & Funding:</strong> Financed through assessed contributions based on each country's economic size and capacity to pay, with the United States historically assessed at 22% of the regular budget.</li>
+      <li><strong>Six Official Languages:</strong> English, French, Spanish, Russian, Chinese, and Arabic are the official languages of the UN Secretariat and General Assembly.</li>
+    </ul>
+  </div>
+
+</div>
+{% endblock %}

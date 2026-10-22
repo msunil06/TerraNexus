@@ -42,14 +42,15 @@ def seed_roles_and_permissions(app):
         super_role = Role.query.filter_by(name="Super Administrator").first()
         admin_user = User.query.filter_by(username="admin").first()
         if not admin_user:
+            admin_pass = os.getenv("ADMIN_DEFAULT_PASSWORD", "Admin@TerraNexus2026!")
             admin_user = User(
-                username="admin",
-                email="admin@terranexus.internal",
+                username=os.getenv("ADMIN_USERNAME", "admin"),
+                email=os.getenv("ADMIN_EMAIL", "admin@terranexus.internal"),
                 display_name="TerraNexus Admin",
                 preferred_language="en",
                 theme_preference="dark"
             )
-            admin_user.set_password("Admin@TerraNexus2026!")
+            admin_user.set_password(admin_pass)
             db.session.add(admin_user)
             db.session.flush()
 
@@ -59,6 +60,7 @@ def seed_roles_and_permissions(app):
         reg_role = Role.query.filter_by(name="Registered User").first()
         demo_user = User.query.filter_by(username="explorer").first()
         if not demo_user:
+            demo_pass = os.getenv("EXPLORER_DEFAULT_PASSWORD", "Explorer@2026!")
             demo_user = User(
                 username="explorer",
                 email="explorer@terranexus.internal",
@@ -66,7 +68,7 @@ def seed_roles_and_permissions(app):
                 preferred_language="en",
                 theme_preference="dark"
             )
-            demo_user.set_password("Explorer@2026!")
+            demo_user.set_password(demo_pass)
             db.session.add(demo_user)
             db.session.flush()
 

@@ -78,12 +78,9 @@ Open your browser and navigate to: **`http://localhost:5000`**
 
 ---
 
-## 🛡️ Default Administrator & Test Credentials
+## 🛡️ Administrative Access Control
 
-| Account | Username | Password | Role |
-| :--- | :--- | :--- | :--- |
-| **Super Admin** | `admin` | `Admin@TerraNexus2026!` | Super Administrator |
-| **Test Explorer** | `explorer` | `Explorer@2026!` | Registered User |
+Administrative access is managed via environment configuration and role-based access control (RBAC). Authorized administrators configure accounts and credentials privately via their environment configuration (`.env`). Default credentials are not distributed in repository commits.
 
 ---
 

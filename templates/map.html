@@ -29,11 +29,29 @@
       <button id="resetMapView" class="tn-btn tn-btn-outline tn-btn-sm">
         ⟲ Reset World Center
       </button>
+      <button id="btnMapFullScreen" class="tn-btn tn-btn-primary tn-btn-sm tn-btn-fs-toggle" style="background: var(--accent); color: #060c18; font-weight: 700; border: none; padding: 0.5rem 1rem; border-radius: var(--radius-sm); cursor: pointer; display: inline-flex; align-items: center; gap: 0.4rem;">
+        ⛶ Enter Full-Screen
+      </button>
     </div>
   </div>
 
-  <div class="tn-map-card" style="margin-bottom: 2rem;">
+  <div class="tn-map-card" style="margin-bottom: 2rem; position: relative;">
     <div id="worldMap" class="tn-map-frame" style="height: 720px;" data-lat="20.0" data-lon="10.0" data-zoom="3">
+      <!-- Interaction Lock Banner (scroll/pan/zoom active only in full-screen mode) -->
+      <div id="mapFsLockBanner" class="tn-map-fs-lock-banner">
+        <span>🔒 Interaction Locked</span>
+        <span style="color: var(--text-muted);">&bull;</span>
+        <span>Scroll, Pan & Zoom are enabled in Full-Screen Mode</span>
+        <button id="bannerEnterFsBtn" class="tn-btn tn-btn-primary tn-btn-sm" style="margin-left: 0.5rem; padding: 0.3rem 0.8rem; font-size: 0.8rem;">
+          ⛶ Enter Full-Screen
+        </button>
+      </div>
+
+      <!-- Floating Exit Full Screen Button (shown only when in full-screen mode) -->
+      <button id="exitFsFloatingBtn" class="tn-fs-floating-close" title="Exit Full-Screen Mode (Esc)">
+        ✕ Exit Full Screen (Esc)
+      </button>
+
       <!-- Mouse Coordinates Pill -->
       <div id="coordsDisplay" class="tn-coords-pill">0.0000° N, 0.0000° E</div>
 

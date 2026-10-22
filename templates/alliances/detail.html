@@ -1,0 +1,117 @@
+{% extends "base.html" %}
+
+{% block title %}{{ alliance.name }} - Alliance Dossier & Member States - {{ app_name }}{% endblock %}
+
+{% block meta_description %}Detailed study dossier for {{ alliance.name }}: {{ alliance.member_count }} member states, combined GDP ${{ alliance.combined_gdp_trillions }}T, active military personnel {{ "{:,}".format(alliance.combined_military_active) }}, core treaty, and historical timeline.{% endblock %}
+
+{% block content %}
+<!-- Alliance Hero -->
+<section class="tn-hero" style="background: radial-gradient(circle at top right, rgba(245, 158, 11, 0.2), transparent 70%), var(--bg-surface); padding: 3rem 1.5rem 2rem; border-bottom: 1px solid var(--border-color);">
+  <div style="max-width: 1200px; margin: 0 auto;">
+    <div style="margin-bottom: 1rem;">
+      <a href="{{ url_for('alliances.index') }}" style="color: var(--accent-cyan); font-size: 0.9rem; text-decoration: none; font-weight: 600;">
+        &larr; Back to All World Groups
+      </a>
+    </div>
+
+    <div style="display: flex; align-items: flex-start; justify-content: space-between; gap: 1rem; flex-wrap: wrap;">
+      <div>
+        <div style="display: flex; align-items: center; gap: 0.75rem; flex-wrap: wrap;">
+          <h1 style="font-family: var(--font-heading); font-size: 2.3rem; font-weight: 800; color: var(--text-primary); margin: 0;">
+            {{ alliance.name }}
+          </h1>
+          <span class="tn-badge" style="background: rgba(245, 158, 11, 0.15); border-color: rgba(245, 158, 11, 0.35); color: #fbbf24; font-weight: 700;">
+            {{ alliance.member_count }} Members
+          </span>
+          <span class="tn-badge">{{ alliance.type }}</span>
+        </div>
+        <p style="color: var(--text-secondary); font-size: 1.05rem; margin-top: 0.5rem; max-width: 800px; line-height: 1.6;">
+          Founded {{ alliance.founded }} &bull; Headquarters: <strong>{{ alliance.headquarters }}</strong> &bull; Treaty: <strong>{{ alliance.core_treaty }}</strong>
+        </p>
+      </div>
+
+      <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
+        <div class="tn-stat-card" style="padding: 0.75rem 1.25rem;">
+          <span class="tn-card-meta-label">Combined GDP</span>
+          <div style="font-size: 1.4rem; font-weight: 800; color: #10b981;">${{ alliance.combined_gdp_trillions }}T</div>
+        </div>
+        <div class="tn-stat-card" style="padding: 0.75rem 1.25rem;">
+          <span class="tn-card-meta-label">Global Share</span>
+          <div style="font-size: 1.4rem; font-weight: 800; color: #f59e0b;">{{ alliance.global_gdp_share_pct }}%</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div style="max-width: 1200px; margin: 2.5rem auto 5rem; padding: 0 1.5rem;">
+  <!-- Overview Card -->
+  <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 1.75rem; margin-bottom: 2.5rem;">
+    <h3 style="font-size: 1.3rem; font-weight: 700; color: var(--text-primary); margin-bottom: 0.75rem;">
+      Alliance Overview & Geopolitical Role
+    </h3>
+    <p style="font-size: 1.05rem; line-height: 1.8; color: var(--text-secondary); margin-bottom: 1.5rem;">
+      {{ alliance.summary }}
+    </p>
+
+    <!-- Student Takeaways -->
+    <div style="background: rgba(15, 23, 42, 0.3); border: 1px dashed var(--border-color); border-radius: var(--radius-sm); padding: 1.25rem;">
+      <h4 style="font-size: 1rem; font-weight: 700; color: #fbbf24; margin: 0 0 0.5rem;">
+        Key Educational Concepts & Exam Points:
+      </h4>
+      <ul style="list-style: disc; margin-left: 1.25rem; font-size: 0.92rem; color: var(--text-secondary); line-height: 1.7; margin-bottom: 0;">
+        {% for takeaway in alliance.student_takeaways %}
+          <li>{{ takeaway }}</li>
+        {% endfor %}
+      </ul>
+    </div>
+  </div>
+
+  <!-- Member States Complete Table -->
+  <div style="margin-bottom: 3rem;">
+    <h3 style="font-size: 1.4rem; font-weight: 800; color: var(--text-primary); margin-bottom: 1rem;">
+      Complete Roster of Member States ({{ alliance.members|length }} Shown)
+    </h3>
+
+    <div class="tn-table-responsive" style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--radius-md);">
+      <table class="tn-table">
+        <thead>
+          <tr>
+            <th>Member Nation</th>
+            <th>ISO Code</th>
+            <th>GDP (USD Billions)</th>
+            <th>Active Armed Forces</th>
+            <th>Accession / Status</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for m in alliance.members %}
+          <tr>
+            <td>
+              <div style="display: flex; align-items: center; gap: 0.5rem;">
+                <span style="font-size: 1.5rem;">{{ m.flag }}</span>
+                <strong style="color: var(--text-primary);">{{ m.name }}</strong>
+              </div>
+            </td>
+            <td><span class="tn-badge" style="font-family: monospace;">{{ m.iso or 'N/A' }}</span></td>
+            <td><strong style="color: #10b981;">{% if m.gdp_billions %}${{ "{:,}".format(m.gdp_billions) }}B{% else %}N/A{% endif %}</strong></td>
+            <td><strong>{% if m.active_troops %}{{ "{:,}".format(m.active_troops) }}{% else %}N/A{% endif %}</strong></td>
+            <td style="color: var(--text-secondary);">{% if m.joined %}Member since {{ m.joined }}{% else %}Founding / Sovereign{% endif %}</td>
+            <td>
+              {% if m.slug %}
+                <a href="{{ url_for('countries.country_detail', slug=m.slug) }}" class="tn-btn tn-btn-outline tn-btn-xs" style="border-color: var(--accent); color: var(--accent);">
+                  View Profile &rarr;
+                </a>
+              {% else %}
+                <span style="color: var(--text-muted); font-size: 0.8rem;">Multinational</span>
+              {% endif %}
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+{% endblock %}

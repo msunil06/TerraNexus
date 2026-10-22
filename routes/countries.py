@@ -2,6 +2,8 @@ from flask import Blueprint, render_template, request, abort
 from flask_login import current_user
 from services.geographic_service import GeographicService
 from services.live_data_service import LiveDataService
+from services.hydrography_service import HydrographyService
+from services.governance_military_service import GovernanceMilitaryService
 from models.user import UserFavorite
 from models.geography import AdministrativeDivision, City
 
@@ -37,8 +39,17 @@ def country_detail(slug):
     capitals = country.capitals.all()
     cities = country.cities.limit(10).all()
 
-    # Automatic inbuilt free live data (weather, forex, UN telemetry)
+    # Automatic inbuilt free live data (weather, forex, UN telemetry, World Bank live economy)
     live_data = LiveDataService.get_composite_live_data(country)
+
+    # Ocean, marginal sea, and river connectivity
+    hydrography = HydrographyService.get_country_hydrography(country)
+
+    # Border sharing ranked by length (longest border priority first)
+    ranked_borders_data = HydrographyService.get_ranked_borders(country)
+
+    # Leadership & Armed Forces Intelligence
+    leadership_military = GovernanceMilitaryService.get_country_leadership_and_military(country)
 
     # Check if user has favorited
     is_favorite = False
@@ -58,6 +69,9 @@ def country_detail(slug):
         capitals=capitals,
         cities=cities,
         live_data=live_data,
+        hydrography=hydrography,
+        ranked_borders_data=ranked_borders_data,
+        leadership_military=leadership_military,
         is_favorite=is_favorite
     )
 

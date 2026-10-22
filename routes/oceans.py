@@ -10,6 +10,8 @@ def list_oceans():
     oceans = GeographicService.get_all_oceans()
     return render_template("oceans/index.html", oceans=oceans)
 
+from services.live_data_service import LiveDataService
+
 @oceans_bp.route("/<slug>")
 def ocean_detail(slug):
     ocean = GeographicService.get_ocean_by_slug(slug)
@@ -17,6 +19,7 @@ def ocean_detail(slug):
         abort(404)
 
     seas = ocean.seas.all()
+    live_marine = LiveDataService.get_live_ocean_marine(ocean.name)
 
     is_favorite = False
     if current_user.is_authenticated:
@@ -31,5 +34,6 @@ def ocean_detail(slug):
         "oceans/detail.html",
         ocean=ocean,
         seas=seas,
+        live_marine=live_marine,
         is_favorite=is_favorite
     )

@@ -55,6 +55,7 @@ def countries_gallery():
     )
 
 @maps_bp.route("/countries/<slug>")
+@maps_bp.route("/country/<slug>")
 def country_map(slug):
     """Dedicated Interactive Country Map with boundaries, capital, and divisions."""
     country = GeographicService.get_country_by_slug(slug)
@@ -81,7 +82,10 @@ def oceans_gallery():
     seas = GeographicService.get_all_seas()
     return render_template("maps/oceans_gallery.html", oceans=oceans, seas=seas)
 
+from services.live_data_service import LiveDataService
+
 @maps_bp.route("/oceans/<slug>")
+@maps_bp.route("/ocean/<slug>")
 def ocean_map(slug):
     """Dedicated Ocean & Marine Map showing marginal seas, currents, and trenches."""
     ocean = GeographicService.get_ocean_by_slug(slug)
@@ -95,11 +99,14 @@ def ocean_map(slug):
         GeographicFeature.connected_features.ilike(f"%{ocean.name}%")
     ).all()
 
+    live_marine = LiveDataService.get_live_ocean_marine(ocean.name)
+
     return render_template(
         "maps/ocean.html",
         ocean=ocean,
         seas=seas,
-        trenches=trenches
+        trenches=trenches,
+        live_marine=live_marine
     )
 
 @maps_bp.route("/islands")
@@ -124,6 +131,7 @@ def islands_gallery():
     )
 
 @maps_bp.route("/islands/<slug>")
+@maps_bp.route("/island/<slug>")
 def island_map(slug):
     """Dedicated Island Map view showing coordinates, elevation, area, and marine context."""
     island = GeographicFeature.query.filter_by(slug=slug).first()
@@ -135,10 +143,13 @@ def island_map(slug):
     if island.primary_country_iso:
         parent_country = Country.query.filter_by(iso_a3=island.primary_country_iso).first()
 
+    live_island = LiveDataService.get_live_island_data(island)
+
     return render_template(
         "maps/island.html",
         island=island,
-        parent_country=parent_country
+        parent_country=parent_country,
+        live_island=live_island
     )
 
 @maps_bp.route("/search")

@@ -63,6 +63,67 @@
     <div id="islandMap" style="height: 600px; width: 100%; position: relative;"></div>
   </div>
 
+  <!-- Live Meteorological & Marine Telemetry (Zero API Key Required - Open-Meteo Free API) -->
+  {% if live_island and (live_island.weather or live_island.marine) %}
+  <div style="background: linear-gradient(135deg, rgba(16, 185, 129, 0.12) 0%, rgba(15, 23, 42, 0.8) 100%); border: 1px solid rgba(16, 185, 129, 0.35); border-radius: var(--radius-md); padding: 1.5rem; margin-bottom: 2rem;">
+    <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 0.75rem; margin-bottom: 1rem;">
+      <div style="display: flex; align-items: center; gap: 0.6rem;">
+        <span style="font-size: 1.6rem;">🌤️</span>
+        <div>
+          <h3 style="font-size: 1.25rem; font-weight: 700; color: var(--text-primary); margin: 0;">
+            Live Meteorological & Marine Telemetry
+          </h3>
+          <p style="font-size: 0.82rem; color: var(--text-muted); margin: 0;">
+            Real-time conditions observed across {{ island.name }}{% if island.administrative_center %} &bull; {{ island.administrative_center }}{% endif %}
+          </p>
+        </div>
+      </div>
+      <span class="tn-badge" style="background: rgba(16, 185, 129, 0.15); color: #10b981; border: 1px solid rgba(16, 185, 129, 0.3); font-weight: 700; font-size: 0.78rem;">
+        🔒 Zero API Key Required &bull; 100% Free Public API
+      </span>
+    </div>
+
+    <div class="tn-grid" style="grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
+      {% if live_island.weather %}
+      <div class="tn-stat-card" style="border-left: 3px solid #10b981;">
+        <div class="tn-card-meta-label">Current Temperature</div>
+        <div style="font-size: 1.8rem; font-weight: 800; color: var(--text-primary); margin-top: 4px; display: flex; align-items: center; gap: 0.4rem;">
+          <span>{{ live_island.weather.icon }}</span>
+          <span>{{ live_island.weather.temperature_c }}°C</span>
+        </div>
+        <span style="font-size: 0.78rem; color: var(--text-muted);">{{ live_island.weather.condition }} (Feels like {{ live_island.weather.apparent_temperature_c }}°C)</span>
+      </div>
+
+      <div class="tn-stat-card">
+        <div class="tn-card-meta-label">Relative Humidity</div>
+        <div style="font-size: 1.6rem; font-weight: 700; color: var(--text-primary); margin-top: 4px;">
+          💧 {{ live_island.weather.humidity_pct }}%
+        </div>
+        <span style="font-size: 0.78rem; color: var(--text-muted);">Atmospheric moisture</span>
+      </div>
+
+      <div class="tn-stat-card">
+        <div class="tn-card-meta-label">Wind Velocity</div>
+        <div style="font-size: 1.6rem; font-weight: 700; color: var(--text-primary); margin-top: 4px;">
+          💨 {{ live_island.weather.wind_speed_kmh }} km/h
+        </div>
+        <span style="font-size: 0.78rem; color: var(--text-muted);">Surface breeze</span>
+      </div>
+      {% endif %}
+
+      {% if live_island.marine and live_island.marine.wave_height is defined %}
+      <div class="tn-stat-card">
+        <div class="tn-card-meta-label">Coastal Wave Height</div>
+        <div style="font-size: 1.6rem; font-weight: 700; color: var(--text-primary); margin-top: 4px;">
+          🌊 {{ live_island.marine.wave_height }} m
+        </div>
+        <span style="font-size: 0.78rem; color: var(--accent-cyan);">Swell period: {{ live_island.marine.wave_period }}s</span>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+  {% endif %}
+
   <!-- Island Geographic Profile & Statistics -->
   <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.5rem; margin-bottom: 2rem;">
     <div class="tn-stat-card" style="border-left: 3px solid #10b981;">
@@ -80,6 +141,29 @@
       </div>
       <span style="font-size: 0.8rem; color: var(--text-muted);">Above mean sea level</span>
     </div>
+
+    {% if island.administrative_center %}
+    <div class="tn-stat-card" style="border-left: 3px solid var(--accent);">
+      <div class="tn-card-meta-label">Capital / Administrative Center</div>
+      <div style="font-size: 1.4rem; font-weight: 700; color: var(--text-primary); margin-top: 4px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 0.5rem;">
+        <span>{{ island.administrative_center }}</span>
+        <button 
+          type="button" 
+          class="tn-btn tn-btn-outline tn-btn-xs" 
+          data-view-map 
+          data-map-name="{{ island.administrative_center }}" 
+          data-map-lat="{{ island.latitude }}" 
+          data-map-lon="{{ island.longitude }}" 
+          data-map-context="Administrative Center of {{ island.name }}" 
+          data-map-zoom="11"
+          style="border-color: var(--accent); color: var(--accent); padding: 2px 8px; font-size: 0.75rem;"
+        >
+          📍 View Map
+        </button>
+      </div>
+      <span style="font-size: 0.8rem; color: var(--text-muted);">Principal Settlement</span>
+    </div>
+    {% endif %}
 
     <div class="tn-stat-card">
       <div class="tn-card-meta-label">Center Geographic Coordinates</div>
@@ -126,11 +210,11 @@ document.addEventListener("DOMContentLoaded", () => {
     streets: L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
       attribution: '&copy; OpenStreetMap contributors', maxZoom: 19
     }),
-    dark: L.tileLayer("https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png", {
-      attribution: '&copy; CartoDB &copy; OpenStreetMap', subdomains: "abcd", maxZoom: 19
+    dark: L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Base/MapServer/tile/{z}/{y}/{x}", {
+      attribution: 'Tiles &copy; Esri &mdash; Esri Dark Canvas (Zero API Key)', maxZoom: 16
     }),
-    light: L.tileLayer("https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png", {
-      attribution: '&copy; CartoDB &copy; OpenStreetMap', subdomains: "abcd", maxZoom: 19
+    light: L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}", {
+      attribution: 'Tiles &copy; Esri &mdash; Esri World Street (Zero API Key)', maxZoom: 18
     })
   };
 

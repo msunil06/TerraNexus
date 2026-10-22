@@ -80,29 +80,29 @@ API_REGISTRY = {
         "description": "High-resolution satellite and aerial photography covering the entire planet Earth.",
         "documentation": "https://www.arcgis.com/home/item.html?id=10df2279f9684e4a9f6a7f08febac2a9"
     },
-    "map_carto_dark": {
-        "id": "map_carto_dark",
-        "name": "CartoDB Dark Matter Basemap",
+    "map_esri_dark": {
+        "id": "map_esri_dark",
+        "name": "ESRI Canvas Dark Gray Basemap",
         "category": "Map Tiles",
-        "url": "https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png",
+        "url": "https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Base/MapServer/tile/{z}/{y}/{x}",
         "method": "TILE",
         "is_free": True,
         "key_required": False,
-        "ping_url": "https://a.basemaps.cartocdn.com/dark_all/0/0/0.png",
-        "description": "Sleek dark theme map tiles ideal for nighttime navigation and neon data overlays.",
-        "documentation": "https://carto.com/basemaps"
+        "ping_url": "https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Base/MapServer/tile/0/0/0",
+        "description": "Sleek dark theme map tiles ideal for nighttime navigation and neon data overlays (zero watermarks, zero API key).",
+        "documentation": "https://www.arcgis.com/home/item.html?id=4ffd644e0e014e37ad2ecd0471bd2fa4"
     },
-    "map_carto_light": {
-        "id": "map_carto_light",
-        "name": "CartoDB Positron Light Basemap",
+    "map_esri_street": {
+        "id": "map_esri_street",
+        "name": "ESRI World Street Map",
         "category": "Map Tiles",
-        "url": "https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png",
+        "url": "https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}",
         "method": "TILE",
         "is_free": True,
         "key_required": False,
-        "ping_url": "https://a.basemaps.cartocdn.com/light_all/0/0/0.png",
-        "description": "High-contrast minimalist light atlas tiles designed for daytime clarity.",
-        "documentation": "https://carto.com/basemaps"
+        "ping_url": "https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/0/0/0",
+        "description": "High-contrast global street atlas tiles designed for daytime clarity (zero watermarks, zero API key).",
+        "documentation": "https://www.arcgis.com/home/item.html?id=3b93337983e9436f8db950e38a8604c1"
     },
     "map_osm": {
         "id": "map_osm",

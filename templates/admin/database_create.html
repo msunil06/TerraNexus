@@ -1,0 +1,212 @@
+{% extends "admin/layout.html" %}
+
+{% block title %}Create {{ model_name }} | Admin Command{% endblock %}
+
+{% block admin_content %}
+<div style="max-width: 800px; margin: 0 auto;">
+  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+    <div>
+      <span class="tn-badge" style="background: rgba(14, 165, 233, 0.15); color: #0ea5e9; border-color: #0ea5e9;">
+        New Entry
+      </span>
+      <h1 style="font-size: 1.85rem; font-weight: 800; margin: 0.5rem 0 0.25rem;">
+        Add New {{ model_name }}
+      </h1>
+      <p style="color: var(--text-muted); margin: 0; font-size: 0.92rem;">
+        Add a verified geographic record to the TerraNexus core database.
+      </p>
+    </div>
+
+    <a href="{{ url_for('admin.database_records', model_key=model_key) }}" class="tn-btn tn-btn-outline tn-btn-sm">
+      &larr; Back to Catalog
+    </a>
+  </div>
+
+  <div class="tn-card" style="padding: 2rem;">
+    <form method="POST" action="{{ url_for('admin.create_database_record', model_key=model_key) }}">
+      
+      {% if model_key == 'countries' %}
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.25rem; margin-bottom: 1.25rem;">
+          <div>
+            <label style="display: block; font-weight: 600; font-size: 0.88rem; margin-bottom: 0.4rem; color: var(--text-secondary);">
+              Common Name *
+            </label>
+            <input type="text" name="common_name" required placeholder="e.g. Iceland" style="width: 100%; padding: 0.65rem 1rem; background: var(--bg-primary); border: 1px solid var(--border-color); border-radius: var(--radius-sm); color: var(--text-primary); font-size: 0.95rem; outline: none;">
+          </div>
+          <div>
+            <label style="display: block; font-weight: 600; font-size: 0.88rem; margin-bottom: 0.4rem; color: var(--text-secondary);">
+              Official Name *
+            </label>
+            <input type="text" name="official_name" required placeholder="e.g. Republic of Iceland" style="width: 100%; padding: 0.65rem 1rem; background: var(--bg-primary); border: 1px solid var(--border-color); border-radius: var(--radius-sm); color: var(--text-primary); font-size: 0.95rem; outline: none;">
+          </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1.25rem; margin-bottom: 1.25rem;">
+          <div>
+            <label style="display: block; font-weight: 600; font-size: 0.88rem; margin-bottom: 0.4rem; color: var(--text-secondary);">
+              ISO Alpha-2 *
+            </label>
+            <input type="text" name="iso_a2" maxlength="2" required placeholder="IS" style="width: 100%; padding: 0.65rem 1rem; background: var(--bg-primary); border: 1px solid var(--border-color); border-radius: var(--radius-sm); color: var(--text-primary); font-size: 0.95rem; outline: none; text-transform: uppercase;">
+          </div>
+          <div>
+            <label style="display: block; font-weight: 600; font-size: 0.88rem; margin-bottom: 0.4rem; color: var(--text-secondary);">
+              ISO Alpha-3 *
+            </label>
+            <input type="text" name="iso_a3" maxlength="3" required placeholder="ISL" style="width: 100%; padding: 0.65rem 1rem; background: var(--bg-primary); border: 1px solid var(--border-color); border-radius: var(--radius-sm); color: var(--text-primary); font-size: 0.95rem; outline: none; text-transform: uppercase;">
+          </div>
+          <div>
+            <label style="display: block; font-weight: 600; font-size: 0.88rem; margin-bottom: 0.4rem; color: var(--text-secondary);">
+              Flag Emoji
+            </label>
+            <input type="text" name="flag_emoji" placeholder="🇮🇸" style="width: 100%; padding: 0.65rem 1rem; background: var(--bg-primary); border: 1px solid var(--border-color); border-radius: var(--radius-sm); color: var(--text-primary); font-size: 0.95rem; outline: none;">
+          </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.25rem; margin-bottom: 1.25rem;">
+          <div>
+            <label style="display: block; font-weight: 600; font-size: 0.88rem; margin-bottom: 0.4rem; color: var(--text-secondary);">
+              Continent *
+            </label>
+            <select name="continent_id" style="width: 100%; padding: 0.65rem 1rem; background: var(--bg-primary); border: 1px solid var(--border-color); border-radius: var(--radius-sm); color: var(--text-primary); font-size: 0.95rem; outline: none;">
+              {% for cont in continents %}
+                <option value="{{ cont.id }}">{{ cont.name }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div>
+            <label style="display: block; font-weight: 600; font-size: 0.88rem; margin-bottom: 0.4rem; color: var(--text-secondary);">
+              Capital City Name
+            </label>
+            <input type="text" name="capital_name" placeholder="Reykjavik" style="width: 100%; padding: 0.65rem 1rem; background: var(--bg-primary); border: 1px solid var(--border-color); border-radius: var(--radius-sm); color: var(--text-primary); font-size: 0.95rem; outline: none;">
+          </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1.25rem; margin-bottom: 1.25rem;">
+          <div>
+            <label style="display: block; font-weight: 600; font-size: 0.88rem; margin-bottom: 0.4rem; color: var(--text-secondary);">
+              Population
+            </label>
+            <input type="number" name="population" placeholder="376000" style="width: 100%; padding: 0.65rem 1rem; background: var(--bg-primary); border: 1px solid var(--border-color); border-radius: var(--radius-sm); color: var(--text-primary); font-size: 0.95rem; outline: none;">
+          </div>
+          <div>
+            <label style="display: block; font-weight: 600; font-size: 0.88rem; margin-bottom: 0.4rem; color: var(--text-secondary);">
+              Area (km²)
+            </label>
+            <input type="number" step="any" name="area_km2" placeholder="103000" style="width: 100%; padding: 0.65rem 1rem; background: var(--bg-primary); border: 1px solid var(--border-color); border-radius: var(--radius-sm); color: var(--text-primary); font-size: 0.95rem; outline: none;">
+          </div>
+          <div>
+            <label style="display: block; font-weight: 600; font-size: 0.88rem; margin-bottom: 0.4rem; color: var(--text-secondary);">
+              Currency Code
+            </label>
+            <input type="text" name="currency_code" placeholder="ISK" style="width: 100%; padding: 0.65rem 1rem; background: var(--bg-primary); border: 1px solid var(--border-color); border-radius: var(--radius-sm); color: var(--text-primary); font-size: 0.95rem; outline: none;">
+          </div>
+        </div>
+
+        <div style="margin-bottom: 1.5rem;">
+          <label style="display: block; font-weight: 600; font-size: 0.88rem; margin-bottom: 0.4rem; color: var(--text-secondary);">
+            Overview & Facts
+          </label>
+          <textarea name="overview" rows="4" style="width: 100%; padding: 0.65rem 1rem; background: var(--bg-primary); border: 1px solid var(--border-color); border-radius: var(--radius-sm); color: var(--text-primary); font-size: 0.95rem; outline: none;"></textarea>
+        </div>
+
+      {% elif model_key == 'features' %}
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.25rem; margin-bottom: 1.25rem;">
+          <div>
+            <label style="display: block; font-weight: 600; font-size: 0.88rem; margin-bottom: 0.4rem; color: var(--text-secondary);">
+              Feature Name *
+            </label>
+            <input type="text" name="name" required placeholder="e.g. Crete" style="width: 100%; padding: 0.65rem 1rem; background: var(--bg-primary); border: 1px solid var(--border-color); border-radius: var(--radius-sm); color: var(--text-primary); font-size: 0.95rem; outline: none;">
+          </div>
+          <div>
+            <label style="display: block; font-weight: 600; font-size: 0.88rem; margin-bottom: 0.4rem; color: var(--text-secondary);">
+              Feature Type *
+            </label>
+            <select name="feature_type" style="width: 100%; padding: 0.65rem 1rem; background: var(--bg-primary); border: 1px solid var(--border-color); border-radius: var(--radius-sm); color: var(--text-primary); font-size: 0.95rem; outline: none;">
+              <option value="island">Island</option>
+              <option value="archipelago">Archipelago</option>
+              <option value="mountain">Mountain</option>
+              <option value="mountain_range">Mountain Range</option>
+              <option value="river">River</option>
+              <option value="desert">Desert</option>
+              <option value="strait">Strait</option>
+              <option value="trench">Trench</option>
+            </select>
+          </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.25rem; margin-bottom: 1.25rem;">
+          <div>
+            <label style="display: block; font-weight: 600; font-size: 0.88rem; margin-bottom: 0.4rem; color: var(--text-secondary);">
+              Primary Country ISO (3-letters)
+            </label>
+            <input type="text" name="primary_country_iso" maxlength="3" placeholder="GRC" style="width: 100%; padding: 0.65rem 1rem; background: var(--bg-primary); border: 1px solid var(--border-color); border-radius: var(--radius-sm); color: var(--text-primary); font-size: 0.95rem; outline: none; text-transform: uppercase;">
+          </div>
+          <div>
+            <label style="display: block; font-weight: 600; font-size: 0.88rem; margin-bottom: 0.4rem; color: var(--text-secondary);">
+              Capital / Administrative Center (for Islands)
+            </label>
+            <input type="text" name="administrative_center" placeholder="Heraklion" style="width: 100%; padding: 0.65rem 1rem; background: var(--bg-primary); border: 1px solid var(--border-color); border-radius: var(--radius-sm); color: var(--text-primary); font-size: 0.95rem; outline: none;">
+          </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 1.25rem; margin-bottom: 1.25rem;">
+          <div>
+            <label style="display: block; font-weight: 600; font-size: 0.88rem; margin-bottom: 0.4rem; color: var(--text-secondary);">
+              Surface Area (km²)
+            </label>
+            <input type="number" step="any" name="area_km2" placeholder="8450" style="width: 100%; padding: 0.65rem 1rem; background: var(--bg-primary); border: 1px solid var(--border-color); border-radius: var(--radius-sm); color: var(--text-primary); font-size: 0.95rem; outline: none;">
+          </div>
+          <div>
+            <label style="display: block; font-weight: 600; font-size: 0.88rem; margin-bottom: 0.4rem; color: var(--text-secondary);">
+              Elevation (m)
+            </label>
+            <input type="number" name="elevation_m" placeholder="2456" style="width: 100%; padding: 0.65rem 1rem; background: var(--bg-primary); border: 1px solid var(--border-color); border-radius: var(--radius-sm); color: var(--text-primary); font-size: 0.95rem; outline: none;">
+          </div>
+          <div>
+            <label style="display: block; font-weight: 600; font-size: 0.88rem; margin-bottom: 0.4rem; color: var(--text-secondary);">
+              Latitude
+            </label>
+            <input type="number" step="any" name="latitude" placeholder="35.24" style="width: 100%; padding: 0.65rem 1rem; background: var(--bg-primary); border: 1px solid var(--border-color); border-radius: var(--radius-sm); color: var(--text-primary); font-size: 0.95rem; outline: none;">
+          </div>
+          <div>
+            <label style="display: block; font-weight: 600; font-size: 0.88rem; margin-bottom: 0.4rem; color: var(--text-secondary);">
+              Longitude
+            </label>
+            <input type="number" step="any" name="longitude" placeholder="24.80" style="width: 100%; padding: 0.65rem 1rem; background: var(--bg-primary); border: 1px solid var(--border-color); border-radius: var(--radius-sm); color: var(--text-primary); font-size: 0.95rem; outline: none;">
+          </div>
+        </div>
+
+        <div style="margin-bottom: 1.5rem;">
+          <label style="display: block; font-weight: 600; font-size: 0.88rem; margin-bottom: 0.4rem; color: var(--text-secondary);">
+            Overview & Description
+          </label>
+          <textarea name="overview" rows="4" style="width: 100%; padding: 0.65rem 1rem; background: var(--bg-primary); border: 1px solid var(--border-color); border-radius: var(--radius-sm); color: var(--text-primary); font-size: 0.95rem; outline: none;"></textarea>
+        </div>
+
+      {% else %}
+        <div style="margin-bottom: 1.25rem;">
+          <label style="display: block; font-weight: 600; font-size: 0.88rem; margin-bottom: 0.4rem; color: var(--text-secondary);">
+            Name *
+          </label>
+          <input type="text" name="name" required style="width: 100%; padding: 0.65rem 1rem; background: var(--bg-primary); border: 1px solid var(--border-color); border-radius: var(--radius-sm); color: var(--text-primary); font-size: 0.95rem; outline: none;">
+        </div>
+        <div style="margin-bottom: 1.5rem;">
+          <label style="display: block; font-weight: 600; font-size: 0.88rem; margin-bottom: 0.4rem; color: var(--text-secondary);">
+            Overview *
+          </label>
+          <textarea name="overview" rows="4" required style="width: 100%; padding: 0.65rem 1rem; background: var(--bg-primary); border: 1px solid var(--border-color); border-radius: var(--radius-sm); color: var(--text-primary); font-size: 0.95rem; outline: none;"></textarea>
+        </div>
+      {% endif %}
+
+      <div style="display: flex; gap: 0.75rem;">
+        <button type="submit" class="tn-btn tn-btn-primary">
+          Save {{ model_name }} Record
+        </button>
+        <a href="{{ url_for('admin.database_records', model_key=model_key) }}" class="tn-btn tn-btn-outline">
+          Cancel
+        </a>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

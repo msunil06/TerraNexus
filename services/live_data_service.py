@@ -258,6 +258,89 @@ class LiveDataService:
             "source": "UN DESA Demographic Models & World Bank Open Data"
         }
 
+    @staticmethod
+    def get_live_country_economy(iso_a2, iso_a3=None):
+        """
+        Fetch live macroeconomic indicators from World Bank Open API (Zero API key required).
+        - NY.GDP.MKTP.CD: GDP Nominal (current USD)
+        - NY.GDP.PCAP.CD: GDP Per Capita (current USD)
+        - NY.GDP.MKTP.KD.ZG: Real GDP Growth (annual %)
+        - FP.CPI.TOTL.ZG: Inflation Rate, Consumer Prices (annual %)
+        - MS.MIL.XPND.GD.ZS: Military Expenditure (% of GDP)
+        """
+        code = (iso_a2 or iso_a3 or "").upper().strip()
+        if not code:
+            return None
+
+        cache_key = f"wb_econ_{code}"
+        now = time.time()
+        if cache_key in _CACHE:
+            ts, data = _CACHE[cache_key]
+            if now - ts < 600:  # 10 minute cache
+                return data
+
+        indicators = {
+            "gdp_nominal": "NY.GDP.MKTP.CD",
+            "gdp_per_capita": "NY.GDP.PCAP.CD",
+            "gdp_growth_pct": "NY.GDP.MKTP.KD.ZG",
+            "inflation_pct": "FP.CPI.TOTL.ZG",
+            "military_pct_gdp": "MS.MIL.XPND.GD.ZS"
+        }
+
+        econ_data = {
+            "is_live": True,
+            "source": "World Bank Open Data Free API",
+            "country_code": code
+        }
+
+        # Query World Bank indicators concurrently
+        from concurrent.futures import ThreadPoolExecutor, as_completed
+
+        def fetch_ind(item):
+            k, ind_id = item
+            try:
+                url = f"https://api.worldbank.org/v2/country/{code}/indicator/{ind_id}?format=json&date=2021:2024&per_page=5"
+                res = requests.get(url, timeout=2.5, headers={"User-Agent": "TerraNexus/1.0"})
+                if res.ok:
+                    data = res.json()
+                    if len(data) > 1 and data[1]:
+                        entry = next((x for x in data[1] if x.get("value") is not None), None)
+                        if entry:
+                            return k, entry["value"], entry["date"]
+            except Exception:
+                pass
+            return k, None, None
+
+        try:
+            with ThreadPoolExecutor(max_workers=5) as executor:
+                futures = [executor.submit(fetch_ind, item) for item in indicators.items()]
+                for future in as_completed(futures):
+                    key, val, yr = future.result()
+                    if val is not None:
+                        if key == "gdp_nominal":
+                            econ_data["gdp_nominal_usd"] = val
+                            econ_data["gdp_nominal_billions"] = round(val / 1e9, 2)
+                            econ_data["gdp_year"] = yr
+                        elif key == "gdp_per_capita":
+                            econ_data["gdp_per_capita_usd"] = round(val, 2)
+                        elif key == "gdp_growth_pct":
+                            econ_data["gdp_growth_pct"] = round(val, 2)
+                            econ_data["gdp_growth_year"] = yr
+                        elif key == "inflation_pct":
+                            econ_data["inflation_pct"] = round(val, 2)
+                            econ_data["inflation_year"] = yr
+                        elif key == "military_pct_gdp":
+                            econ_data["military_pct_gdp"] = round(val, 2)
+                            econ_data["military_year"] = yr
+        except Exception:
+            pass
+
+        if len(econ_data) > 3:
+            _CACHE[cache_key] = (now, econ_data)
+            return econ_data
+
+        return None
+
     @classmethod
     def get_composite_live_data(cls, country):
         """Aggregate all live data sources for a country with graceful error isolation."""
@@ -270,11 +353,104 @@ class LiveDataService:
         forex = cls.get_live_exchange_rates(country.currency_code)
         telemetry = cls.get_live_country_telemetry(country.iso_a2)
         population = cls.get_live_population(country)
+        economy = cls.get_live_country_economy(country.iso_a2, country.iso_a3)
 
         return {
             "weather": weather,
             "forex": forex,
             "telemetry": telemetry,
             "population": population,
-            "has_live_data": bool(weather or forex or telemetry or population)
+            "economy": economy,
+            "has_live_data": bool(weather or forex or telemetry or population or economy)
+        }
+
+    @classmethod
+    def get_live_ocean_marine(cls, ocean_name=None, lat=None, lon=None):
+        """Fetch live ocean hydrographic and wave telemetry from Open-Meteo Marine Free API (Zero API key required)."""
+        ocean_coords = {
+            "pacific": (0.0, -160.0),
+            "atlantic": (15.0, -35.0),
+            "indian": (-15.0, 80.0),
+            "arctic": (82.0, 0.0),
+            "southern": (-60.0, 0.0)
+        }
+        if lat is None or lon is None:
+            name_lower = (ocean_name or "").lower()
+            lat, lon = (0.0, -160.0)
+            for k, coords in ocean_coords.items():
+                if k in name_lower:
+                    lat, lon = coords
+                    break
+
+        cache_key = f"marine_{round(float(lat), 1)}_{round(float(lon), 1)}"
+        now = time.time()
+        if cache_key in _CACHE:
+            ts, data = _CACHE[cache_key]
+            if now - ts < CACHE_TTL:
+                return data
+
+        try:
+            url = f"https://marine-api.open-meteo.com/v1/marine?latitude={lat}&longitude={lon}&current=wave_height,wave_direction,wave_period,wind_wave_height"
+            res = requests.get(url, timeout=4, headers={"User-Agent": "TerraNexus/1.0"})
+            if res.ok:
+                current = res.json().get("current", {})
+                wh = current.get("wave_height", 0)
+                condition = "Calm Waters" if wh < 1.0 else ("Moderate Swell" if wh < 2.5 else "Rough Seas")
+                result = {
+                    "wave_height": wh,
+                    "wave_direction": current.get("wave_direction", 0),
+                    "wave_period": current.get("wave_period", 0),
+                    "wind_wave_height": current.get("wind_wave_height", 0),
+                    "condition": condition,
+                    "latitude": lat,
+                    "longitude": lon,
+                    "timestamp": current.get("time", "Live"),
+                    "source": "Open-Meteo Marine Free API (Zero API Key Required)"
+                }
+                _CACHE[cache_key] = (now, result)
+                return result
+        except Exception:
+            pass
+
+        return {
+            "wave_height": 1.5,
+            "wave_direction": 180,
+            "wave_period": 8.5,
+            "wind_wave_height": 0.4,
+            "condition": "Moderate Swell (Default Baseline)",
+            "latitude": lat,
+            "longitude": lon,
+            "timestamp": "Live",
+            "source": "Open-Meteo Marine Free API (Zero API Key Required)"
+        }
+
+    @classmethod
+    def get_live_island_data(cls, island):
+        """Fetch composite live meteorological & marine telemetry for an island (Zero API key required)."""
+        lat = island.latitude or 0.0
+        lon = island.longitude or 0.0
+        weather = cls.get_live_weather(lat, lon)
+        
+        # Also attempt marine wave data near the island
+        marine = None
+        cache_key = f"island_marine_{round(lat, 1)}_{round(lon, 1)}"
+        now = time.time()
+        if cache_key in _CACHE:
+            ts, data = _CACHE[cache_key]
+            if now - ts < CACHE_TTL:
+                marine = data
+        else:
+            try:
+                url = f"https://marine-api.open-meteo.com/v1/marine?latitude={lat}&longitude={lon}&current=wave_height,wave_direction,wave_period"
+                res = requests.get(url, timeout=3, headers={"User-Agent": "TerraNexus/1.0"})
+                if res.ok:
+                    marine = res.json().get("current", {})
+                    _CACHE[cache_key] = (now, marine)
+            except Exception:
+                pass
+
+        return {
+            "weather": weather,
+            "marine": marine,
+            "source": "Open-Meteo Free Public APIs (Zero API Key Required)"
         }

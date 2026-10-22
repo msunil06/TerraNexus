@@ -34,8 +34,23 @@
     <div class="tn-grid" style="grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); margin-top: 2rem;">
       <div class="tn-stat-card" style="padding: 1.25rem;">
         <span class="tn-card-meta-label">Administrative Center</span>
-        <div style="font-size: 1.2rem; font-weight: 700; color: var(--text-primary); margin-top: 4px;">
-          {{ division.capital_or_center or 'N/A' }}
+        <div style="font-size: 1.2rem; font-weight: 700; color: var(--text-primary); margin-top: 4px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 0.5rem;">
+          <span>{{ division.capital_or_center or 'N/A' }}</span>
+          {% if division.capital_or_center %}
+          <button 
+            type="button" 
+            class="tn-btn tn-btn-outline tn-btn-xs" 
+            data-view-map 
+            data-map-name="{{ division.capital_or_center }}" 
+            data-map-lat="{{ division.latitude or country.latitude or 0 }}" 
+            data-map-lon="{{ division.longitude or country.longitude or 0 }}" 
+            data-map-context="Administrative Center of {{ division.name }}, {{ country.common_name }}" 
+            data-map-zoom="11"
+            style="border-color: var(--accent); color: var(--accent); padding: 2px 8px; font-size: 0.75rem;"
+          >
+            📍 View Map
+          </button>
+          {% endif %}
         </div>
       </div>
 
@@ -55,8 +70,21 @@
 
       <div class="tn-stat-card" style="padding: 1.25rem;">
         <span class="tn-card-meta-label">Geographic Coordinates</span>
-        <div style="font-size: 1.1rem; font-weight: 600; color: var(--text-primary); margin-top: 4px;">
-          {{ division.latitude or '0' }}° N, {{ division.longitude or '0' }}° E
+        <div style="font-size: 1.1rem; font-weight: 600; color: var(--text-primary); margin-top: 4px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 0.5rem;">
+          <span>{{ division.latitude or '0' }}° N, {{ division.longitude or '0' }}° E</span>
+          <button 
+            type="button" 
+            class="tn-btn tn-btn-outline tn-btn-xs" 
+            data-view-map 
+            data-map-name="{{ division.name }}" 
+            data-map-lat="{{ division.latitude or country.latitude or 0 }}" 
+            data-map-lon="{{ division.longitude or country.longitude or 0 }}" 
+            data-map-context="{{ division.division_type }} in {{ country.common_name }}" 
+            data-map-zoom="9"
+            style="border-color: var(--accent); color: var(--accent); padding: 2px 8px; font-size: 0.75rem;"
+          >
+            📍 View Map
+          </button>
         </div>
       </div>
     </div>

@@ -132,13 +132,13 @@ document.addEventListener("DOMContentLoaded", () => {
       attribution: 'Tiles &copy; Esri &mdash; High-Resolution Satellite (Free Public)',
       maxZoom: 18
     }),
-    dark: L.tileLayer("https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png", {
-      attribution: '&copy; CartoDB &copy; OpenStreetMap',
-      subdomains: "abcd", maxZoom: 19
+    dark: L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Base/MapServer/tile/{z}/{y}/{x}", {
+      attribution: 'Tiles &copy; Esri &mdash; Esri Dark Canvas (Zero API Key)',
+      maxZoom: 16
     }),
-    light: L.tileLayer("https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png", {
-      attribution: '&copy; CartoDB &copy; OpenStreetMap',
-      subdomains: "abcd", maxZoom: 19
+    light: L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}", {
+      attribution: 'Tiles &copy; Esri &mdash; Esri World Street (Zero API Key)',
+      maxZoom: 18
     }),
     streets: L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
       attribution: '&copy; OpenStreetMap contributors', maxZoom: 19

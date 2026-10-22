@@ -30,8 +30,11 @@
   <script>
     (function() {
       try {
-        var t = localStorage.getItem("tn_theme") || "dark";
-        document.documentElement.setAttribute("data-theme", t);
+        var localTheme = localStorage.getItem("tn_theme");
+        var userTheme = "{% if current_user.is_authenticated and current_user.theme_preference %}{{ current_user.theme_preference }}{% endif %}";
+        var finalTheme = localTheme || userTheme || "dark";
+        document.documentElement.setAttribute("data-theme", finalTheme);
+        localStorage.setItem("tn_theme", finalTheme);
       } catch (e) {}
     })();
   </script>
@@ -40,7 +43,7 @@
 </head>
 <body>
 
-  <!-- Main Navigation Bar -->
+  <!-- Main Navigation Bar: Only Home, World Map, Continents, Countries -->
   <header class="tn-navbar">
     <div class="tn-nav-container">
       <a href="{{ url_for('main.index') }}" class="tn-brand" aria-label="TerraNexus Home">
@@ -48,54 +51,211 @@
         <span class="tn-brand-name">{{ app_name }}</span>
       </a>
 
+      <!-- Core Navigation Links (Only essential sections + More dropdown) -->
+      <nav class="tn-core-nav" aria-label="Core Navigation">
+        <ul class="tn-nav-links">
+          <li><a href="{{ url_for('main.index') }}" class="tn-nav-link {% if request.endpoint == 'main.index' %}active{% endif %}">Home</a></li>
+          <li><a href="{{ url_for('maps.world_map') }}" class="tn-nav-link {% if request.endpoint == 'maps.world_map' %}active{% endif %}" style="color: var(--accent); font-weight: 700;">🗺️ World Map</a></li>
+          <li><a href="{{ url_for('continents.list_continents') }}" class="tn-nav-link {% if request.endpoint and 'continents' in request.endpoint %}active{% endif %}">🌍 Continents</a></li>
+          <li><a href="{{ url_for('countries.list_countries') }}" class="tn-nav-link {% if request.endpoint and 'countries' in request.endpoint %}active{% endif %}">🏛️ Countries</a></li>
+          
+          <!-- Sleek Dropdown for Secondary Atlas Explorations -->
+          <li class="tn-nav-dropdown" id="navMoreDropdown">
+            <button class="tn-nav-dropdown-btn tn-nav-link" type="button" id="navMoreDropdownBtn" aria-expanded="false" aria-haspopup="true">
+              <span>More</span> <span class="tn-dropdown-caret" aria-hidden="true">▾</span>
+            </button>
+            <div class="tn-dropdown-menu" id="navMoreMenu" role="menu">
+              <a href="{{ url_for('un.index') }}" class="tn-dropdown-item {% if request.endpoint and 'un.' in request.endpoint %}active{% endif %}" role="menuitem">
+                <span class="tn-dropdown-icon">🇺🇳</span>
+                <div>
+                  <div class="tn-dropdown-title">United Nations</div>
+                  <div class="tn-dropdown-desc">Security Council, P5, Agencies & Peacekeeping</div>
+                </div>
+              </a>
+              <a href="{{ url_for('alliances.index') }}" class="tn-dropdown-item {% if request.endpoint and 'alliances.' in request.endpoint %}active{% endif %}" role="menuitem">
+                <span class="tn-dropdown-icon">🌐</span>
+                <div>
+                  <div class="tn-dropdown-title">World Groups</div>
+                  <div class="tn-dropdown-desc">NATO, BRICS, G7, G20 & Economic Blocs</div>
+                </div>
+              </a>
+              <a href="{{ url_for('maps.islands_gallery') }}" class="tn-dropdown-item {% if request.endpoint and 'islands' in request.endpoint %}active{% endif %}" role="menuitem">
+                <span class="tn-dropdown-icon">🏝️</span>
+                <div>
+                  <div class="tn-dropdown-title">World Islands</div>
+                  <div class="tn-dropdown-desc">Archipelagos, Atolls & Island Territories</div>
+                </div>
+              </a>
+              <a href="{{ url_for('oceans.list_oceans') }}" class="tn-dropdown-item {% if request.endpoint and ('oceans' in request.endpoint or 'seas' in request.endpoint) %}active{% endif %}" role="menuitem">
+                <span class="tn-dropdown-icon">🌊</span>
+                <div>
+                  <div class="tn-dropdown-title">Oceans & Seas</div>
+                  <div class="tn-dropdown-desc">Marine Basins, Gulfs & Littoral Waters</div>
+                </div>
+              </a>
+              <div style="border-top: 1px solid var(--border-color); margin: 0.25rem 0;"></div>
+              <a href="{{ url_for('features.list_features') }}" class="tn-dropdown-item {% if request.endpoint and 'features' in request.endpoint %}active{% endif %}" role="menuitem">
+                <span class="tn-dropdown-icon">🏔️</span>
+                <div>
+                  <div class="tn-dropdown-title">Physical Features</div>
+                  <div class="tn-dropdown-desc">Mountain Peaks, Rivers & Deserts</div>
+                </div>
+              </a>
+            </div>
+          </li>
+        </ul>
+      </nav>
+
       <!-- Global Live Search -->
       <div class="tn-search-wrapper" role="search">
         <div class="tn-search-input-group">
           <span class="tn-search-icon" aria-hidden="true">🔍</span>
-          <input type="text" class="tn-search-input" placeholder="Search countries, capitals, seas..." autocomplete="off" aria-label="Global geography search">
+          <input type="text" class="tn-search-input" placeholder="Search countries, capitals..." autocomplete="off" aria-label="Global geography search">
         </div>
         <div class="tn-search-dropdown" role="listbox"></div>
       </div>
 
-      <!-- Navigation Links -->
-      <nav>
-        <ul class="tn-nav-links" id="navLinks">
-          <li><a href="{{ url_for('main.index') }}" class="tn-nav-link">Home</a></li>
-          <li><a href="{{ url_for('maps.maps_hub') }}" class="tn-nav-link" style="color: var(--accent); font-weight: 700;">🗺️ Maps Atlas</a></li>
-          <li><a href="{{ url_for('countries.list_countries') }}" class="tn-nav-link">Countries</a></li>
-          <li><a href="{{ url_for('continents.list_continents') }}" class="tn-nav-link">Continents</a></li>
-          <li><a href="{{ url_for('oceans.list_oceans') }}" class="tn-nav-link">Oceans</a></li>
-          <li><a href="{{ url_for('maps.islands_gallery') }}" class="tn-nav-link">🏝️ Islands</a></li>
-          <li><a href="{{ url_for('seas.list_seas') }}" class="tn-nav-link">Seas</a></li>
-          <li><a href="{{ url_for('features.list_features') }}" class="tn-nav-link">Features</a></li>
-          <li><a href="{{ url_for('main.about') }}" class="tn-nav-link">About</a></li>
-
-          {% if current_user.is_authenticated %}
-            {% if current_user.is_admin %}
-              <li><a href="{{ url_for('admin.dashboard') }}" class="tn-nav-link" style="color: var(--warning); font-weight: 700;">Admin</a></li>
-            {% endif %}
-            <li><a href="{{ url_for('auth.favorites') }}" class="tn-nav-link">★ Favorites</a></li>
-            <li><a href="{{ url_for('auth.profile') }}" class="tn-nav-link">{{ current_user.display_name or current_user.username }}</a></li>
-            <li><a href="{{ url_for('auth.logout') }}" class="tn-nav-link" style="color: var(--danger);">Logout</a></li>
-          {% else %}
-            <li><a href="{{ url_for('auth.login') }}" class="tn-btn tn-btn-outline tn-btn-sm">Sign In</a></li>
-            <li><a href="{{ url_for('auth.register') }}" class="tn-btn tn-btn-primary tn-btn-sm">Join</a></li>
-          {% endif %}
-        </ul>
-      </nav>
-
-      <!-- Theme Switcher & Mobile Menu Button -->
-      <div style="display: flex; align-items: center; gap: 0.5rem;">
+      <!-- Action Controls: Theme Switcher, Profile, & Collapsible Sidebar Menu Toggle -->
+      <div class="tn-nav-actions">
         <button id="themeToggle" class="tn-theme-btn" aria-label="Toggle Light and Dark Theme" title="Switch Theme (Dark / Light)">
           <span id="themeIcon">🌙</span>
-          <span id="themeText">Dark Cosmos</span>
+          <span id="themeText" class="tn-btn-label">Dark Cosmos</span>
         </button>
-        <button id="mobileNavToggle" class="tn-btn-icon tn-mobile-menu-toggle" style="display: none;" aria-label="Toggle navigation menu" aria-expanded="false">
-          ☰
+
+        {% if current_user.is_authenticated %}
+          {% if current_user.is_admin %}
+            <a href="{{ url_for('admin.dashboard') }}" class="tn-badge-admin" title="Admin Command Center">
+              <span>🛡️</span> <span class="tn-btn-label">Admin</span>
+            </a>
+          {% endif %}
+          <a href="{{ url_for('auth.profile') }}" class="tn-user-avatar-btn" title="{{ current_user.display_name or current_user.username }}">
+            {{ (current_user.display_name or current_user.username)[0].upper() }}
+          </a>
+        {% else %}
+          <a href="{{ url_for('auth.login') }}" class="tn-btn tn-btn-outline tn-btn-sm tn-btn-label">Sign In</a>
+        {% endif %}
+
+        <!-- Collapsible Sidebar Menu Toggle Button -->
+        <button id="sidebarToggleBtn" class="tn-sidebar-toggle-btn" aria-label="Open exploration menu" title="Explore All Sections">
+          <span style="font-size: 1.1rem; line-height: 1;">☰</span>
+          <span class="tn-btn-label">Sections</span>
         </button>
       </div>
     </div>
   </header>
+
+  <!-- Collapsible Sliding Sidebar & Backdrop -->
+  <div id="tnSidebarBackdrop" class="tn-sidebar-backdrop"></div>
+  <aside id="tnSidebar" class="tn-sidebar-drawer" aria-label="All Sections Navigation">
+    <div class="tn-sidebar-header">
+      <div class="tn-sidebar-brand">
+        <img src="/static/images/logo.png" alt="TerraNexus Logo" style="width: 32px; height: 32px; border-radius: 50%;">
+        <div>
+          <div style="font-family: var(--font-heading); font-weight: 800; font-size: 1.1rem; color: var(--text-primary);">TerraNexus</div>
+          <div style="font-size: 0.72rem; color: var(--accent); font-weight: 600;">Global Geographic Atlas</div>
+        </div>
+      </div>
+      <button id="closeSidebarBtn" class="tn-sidebar-close-btn" aria-label="Close menu">&times;</button>
+    </div>
+
+    <div class="tn-sidebar-body">
+      <!-- Section: Geography & Cartography -->
+      <div class="tn-sidebar-group">
+        <div class="tn-sidebar-group-title">Atlas & Cartography</div>
+        <ul class="tn-sidebar-list">
+          <li><a href="{{ url_for('main.index') }}" class="tn-sidebar-link"><span class="tn-sidebar-icon">🏠</span> Home Page</a></li>
+          <li><a href="{{ url_for('maps.world_map') }}" class="tn-sidebar-link"><span class="tn-sidebar-icon">🗺️</span> Interactive World Map</a></li>
+          <li><a href="{{ url_for('maps.maps_hub') }}" class="tn-sidebar-link"><span class="tn-sidebar-icon">🧭</span> Maps & Atlas Hub</a></li>
+          <li><a href="{{ url_for('continents.list_continents') }}" class="tn-sidebar-link"><span class="tn-sidebar-icon">🌍</span> Continents of Earth (All 7)</a></li>
+          <li><a href="{{ url_for('countries.list_countries') }}" class="tn-sidebar-link"><span class="tn-sidebar-icon">🏛️</span> Countries of the World</a></li>
+          <li><a href="{{ url_for('un.index') }}" class="tn-sidebar-link" style="color: #60a5fa;"><span class="tn-sidebar-icon">🇺🇳</span> United Nations & Security Council</a></li>
+          <li><a href="{{ url_for('alliances.index') }}" class="tn-sidebar-link" style="color: #f59e0b;"><span class="tn-sidebar-icon">🌐</span> World Groups (NATO, G7, BRICS)</a></li>
+          <li><a href="{{ url_for('maps.islands_gallery') }}" class="tn-sidebar-link"><span class="tn-sidebar-icon">🏝️</span> World Islands & Archipelagos</a></li>
+          <li><a href="{{ url_for('oceans.list_oceans') }}" class="tn-sidebar-link"><span class="tn-sidebar-icon">🌊</span> Oceans & Marine Basins</a></li>
+          <li><a href="{{ url_for('seas.list_seas') }}" class="tn-sidebar-link"><span class="tn-sidebar-icon">⛵</span> Seas & Marginal Gulfs</a></li>
+          <li><a href="{{ url_for('features.list_features') }}" class="tn-sidebar-link"><span class="tn-sidebar-icon">🏔️</span> Physical Features (Peaks, Rivers, Deserts)</a></li>
+        </ul>
+      </div>
+
+      <!-- Section: User Tools -->
+      <div class="tn-sidebar-group">
+        <div class="tn-sidebar-group-title">User & Exploration Tools</div>
+        <ul class="tn-sidebar-list">
+          <li><a href="{{ url_for('maps.countries_gallery') }}" class="tn-sidebar-link"><span class="tn-sidebar-icon">📍</span> Country Maps Explorer</a></li>
+          {% if current_user.is_authenticated %}
+            <li><a href="{{ url_for('auth.favorites') }}" class="tn-sidebar-link"><span class="tn-sidebar-icon">★</span> Saved Favorites</a></li>
+            <li><a href="{{ url_for('auth.settings') }}" class="tn-sidebar-link"><span class="tn-sidebar-icon">⚙️</span> Settings & Theme</a></li>
+            <li><a href="{{ url_for('auth.profile') }}" class="tn-sidebar-link"><span class="tn-sidebar-icon">👤</span> Profile ({{ current_user.display_name or current_user.username }})</a></li>
+            <li><a href="{{ url_for('auth.logout') }}" class="tn-sidebar-link" style="color: var(--danger);"><span class="tn-sidebar-icon">🚪</span> Sign Out</a></li>
+          {% else %}
+            <li><a href="{{ url_for('auth.login') }}" class="tn-sidebar-link"><span class="tn-sidebar-icon">🔑</span> Sign In</a></li>
+            <li><a href="{{ url_for('auth.register') }}" class="tn-sidebar-link"><span class="tn-sidebar-icon">✨</span> Create Free Account</a></li>
+          {% endif %}
+        </ul>
+      </div>
+
+      <!-- Section: Admin (if admin) -->
+      {% if current_user.is_authenticated and current_user.is_admin %}
+      <div class="tn-sidebar-group" style="background: rgba(245, 158, 11, 0.05); border: 1px solid rgba(245, 158, 11, 0.2); border-radius: var(--radius-sm); padding: 0.75rem;">
+        <div class="tn-sidebar-group-title" style="color: var(--warning);">🛡️ Admin Command Center</div>
+        <ul class="tn-sidebar-list">
+          <li><a href="{{ url_for('admin.dashboard') }}" class="tn-sidebar-link"><span class="tn-sidebar-icon">📊</span> Admin Overview</a></li>
+          <li><a href="{{ url_for('admin.users') }}" class="tn-sidebar-link"><span class="tn-sidebar-icon">👥</span> User Accounts & Controls</a></li>
+          <li><a href="{{ url_for('admin.database_records', model_key='countries') }}" class="tn-sidebar-link"><span class="tn-sidebar-icon">🗄️</span> Database Records Manager</a></li>
+          <li><a href="{{ url_for('admin.content_management') }}" class="tn-sidebar-link"><span class="tn-sidebar-icon">🗺️</span> Website Content</a></li>
+          <li><a href="{{ url_for('admin.system_settings') }}" class="tn-sidebar-link"><span class="tn-sidebar-icon">⚙️</span> System Settings & API Keys</a></li>
+          <li><a href="{{ url_for('admin.apis_hub') }}" class="tn-sidebar-link"><span class="tn-sidebar-icon">🌐</span> Centralized APIs Gateway</a></li>
+          <li><a href="{{ url_for('admin.server_connections') }}" class="tn-sidebar-link"><span class="tn-sidebar-icon">🔌</span> Server Connections</a></li>
+        </ul>
+      </div>
+      {% endif %}
+
+      <!-- Section: Platform & Legal -->
+      <div class="tn-sidebar-group">
+        <div class="tn-sidebar-group-title">Platform Information</div>
+        <ul class="tn-sidebar-list">
+          <li><a href="{{ url_for('main.about') }}" class="tn-sidebar-link"><span class="tn-sidebar-icon">ℹ️</span> About TerraNexus</a></li>
+          <li><a href="{{ url_for('main.sources') }}" class="tn-sidebar-link"><span class="tn-sidebar-icon">📚</span> Authoritative Data Sources</a></li>
+          <li><a href="{{ url_for('main.submit_report') }}" class="tn-sidebar-link"><span class="tn-sidebar-icon">✏️</span> Submit Correction / Feedback</a></li>
+          <li><a href="{{ url_for('main.accessibility') }}" class="tn-sidebar-link"><span class="tn-sidebar-icon">♿</span> Accessibility Statement</a></li>
+          <li><a href="{{ url_for('main.privacy') }}" class="tn-sidebar-link"><span class="tn-sidebar-icon">🔒</span> Privacy Policy</a></li>
+          <li><a href="{{ url_for('main.terms') }}" class="tn-sidebar-link"><span class="tn-sidebar-icon">📜</span> Terms of Service</a></li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="tn-sidebar-footer">
+      <div style="display: flex; justify-content: space-between; align-items: center;">
+        <span style="font-size: 0.78rem; color: var(--text-muted);">&copy; 2026 TerraNexus Atlas</span>
+        <button onclick="applyTheme(document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark')" class="tn-btn tn-btn-outline tn-btn-sm" style="font-size: 0.75rem; padding: 0.3rem 0.6rem;">
+          Toggle Theme
+        </button>
+      </div>
+    </div>
+  </aside>
+
+  <!-- Universal Interactive City / Capital / Island Map Modal -->
+  <div id="cityMapModalBackdrop" class="tn-modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="cityModalTitle">
+    <div id="cityModalCard" class="tn-city-modal">
+      <div class="tn-city-modal-header">
+        <div>
+          <h3 id="cityModalTitle" style="font-size: 1.25rem; font-weight: 700; color: var(--text-primary); margin: 0 0 2px;">
+            City Map
+          </h3>
+          <p id="cityModalSubtitle" style="font-size: 0.8rem; color: var(--text-muted); margin: 0;">
+            Interactive Geographic Coordinates • 🔒 Zero API Key Required
+          </p>
+        </div>
+        <div style="display: flex; align-items: center; gap: 0.5rem;">
+          <button id="toggleModalFullScreenBtn" type="button" class="tn-btn tn-btn-outline tn-btn-sm" style="font-size: 0.8rem; padding: 0.3rem 0.75rem; border-color: var(--accent); color: var(--accent); display: flex; align-items: center; gap: 0.35rem;" title="Toggle Full Mode">
+            <span id="fullScreenBtnIcon">⛶</span> <span id="fullScreenBtnText">Full Mode</span>
+          </button>
+          <button id="closeCityModalBtn" class="tn-sidebar-close-btn" aria-label="Close city map">&times;</button>
+        </div>
+      </div>
+      <div id="cityModalMapFrame" class="tn-city-modal-body"></div>
+    </div>
+  </div>
 
   <!-- Flash Messages -->
   <div style="max-width: 1440px; margin: 1rem auto 0; padding: 0 1.5rem; width: 100%;">

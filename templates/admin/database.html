@@ -1,0 +1,209 @@
+{% extends "admin/layout.html" %}
+
+{% block title %}Database Records Explorer | Admin Command{% endblock %}
+
+{% block admin_content %}
+<div>
+  <!-- Header -->
+  <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 1rem;">
+    <div>
+      <span class="tn-badge" style="background: rgba(14, 165, 233, 0.15); color: #0ea5e9; border-color: #0ea5e9;">
+        Database Records Manager
+      </span>
+      <h1 style="font-size: 1.85rem; font-weight: 800; margin: 0.5rem 0 0.25rem;">
+        🗄️ Database Records Explorer
+      </h1>
+      <p style="color: var(--text-muted); margin: 0; font-size: 0.92rem;">
+        View, search, edit, create, and manage records across all geographic tables in TerraNexus.
+      </p>
+    </div>
+
+    <div>
+      <a href="{{ url_for('admin.create_database_record', model_key=model_key) }}" class="tn-btn tn-btn-primary" style="font-size: 0.88rem;">
+        + Add New {{ model_name }}
+      </a>
+    </div>
+  </div>
+
+  <!-- Model Switcher Tabs -->
+  <div style="display: flex; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 1.5rem; border-bottom: 1px solid var(--border-color); padding-bottom: 0.75rem;">
+    {% for key, (cls, name, col) in all_models.items() %}
+      <a href="{{ url_for('admin.database_records', model_key=key) }}"
+         style="
+           padding: 0.5rem 1rem; border-radius: var(--radius-sm); font-size: 0.88rem; font-weight: 600; text-decoration: none;
+           background: {% if model_key == key %}var(--accent){% else %}var(--bg-card){% endif %};
+           color: {% if model_key == key %}#060c18{% else %}var(--text-secondary){% endif %};
+           border: 1px solid {% if model_key == key %}var(--accent){% else %}var(--border-color){% endif %};
+           transition: all var(--transition-fast);
+         ">
+        {% if key == 'countries' %}🏛️ Countries
+        {% elif key == 'continents' %}🌍 Continents
+        {% elif key == 'divisions' %}📍 Divisions
+        {% elif key == 'features' %}🏝️ Features & Islands
+        {% elif key == 'oceans' %}🌊 Oceans
+        {% elif key == 'seas' %}⛵ Seas
+        {% else %}{{ name }}{% endif %}
+      </a>
+    {% endfor %}
+  </div>
+
+  <!-- Search & Filter Bar -->
+  <div class="tn-card" style="padding: 1rem 1.25rem; margin-bottom: 1.5rem;">
+    <form method="GET" action="{{ url_for('admin.database_records', model_key=model_key) }}" style="display: flex; gap: 0.75rem; flex-wrap: wrap;">
+      <input type="text" name="q" value="{{ search or '' }}" placeholder="Search {{ model_name }} records..." style="
+        flex: 1; min-width: 260px; padding: 0.55rem 1rem; background: var(--bg-primary); border: 1px solid var(--border-color);
+        border-radius: var(--radius-sm); color: var(--text-primary); font-size: 0.9rem; outline: none;
+      ">
+      <button type="submit" class="tn-btn tn-btn-primary tn-btn-sm" style="padding: 0.55rem 1.2rem;">
+        🔍 Search
+      </button>
+      {% if search %}
+        <a href="{{ url_for('admin.database_records', model_key=model_key) }}" class="tn-btn tn-btn-outline tn-btn-sm">
+          Reset
+        </a>
+      {% endif %}
+    </form>
+  </div>
+
+  <!-- Records Table Card -->
+  <div class="tn-card" style="overflow: hidden; padding: 0;">
+    <div style="padding: 1rem 1.25rem; border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center; background: rgba(0,0,0,0.2);">
+      <div style="font-weight: 700; font-size: 0.95rem; color: var(--text-primary);">
+        {{ model_name }} Catalog
+      </div>
+      <div style="font-size: 0.85rem; color: var(--text-muted);">
+        Total: <strong>{{ pagination.total }}</strong> records found
+      </div>
+    </div>
+
+    <div style="overflow-x: auto;">
+      <table style="width: 100%; border-collapse: collapse; font-size: 0.88rem; text-align: left;">
+        <thead>
+          <tr style="border-bottom: 1px solid var(--border-color); background: rgba(255,255,255,0.02); color: var(--text-muted); font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.5px;">
+            <th style="padding: 0.85rem 1.25rem; width: 60px;">ID</th>
+            {% if model_key == 'countries' %}
+              <th style="padding: 0.85rem 1rem;">Flag</th>
+              <th style="padding: 0.85rem 1rem;">Common Name</th>
+              <th style="padding: 0.85rem 1rem;">ISO Code</th>
+              <th style="padding: 0.85rem 1rem;">Continent</th>
+              <th style="padding: 0.85rem 1rem;">Capital</th>
+              <th style="padding: 0.85rem 1rem;">Population</th>
+            {% elif model_key == 'continents' %}
+              <th style="padding: 0.85rem 1rem;">Name</th>
+              <th style="padding: 0.85rem 1rem;">Code</th>
+              <th style="padding: 0.85rem 1rem;">Surface Area</th>
+              <th style="padding: 0.85rem 1rem;">Countries Count</th>
+            {% elif model_key == 'features' %}
+              <th style="padding: 0.85rem 1rem;">Name</th>
+              <th style="padding: 0.85rem 1rem;">Type</th>
+              <th style="padding: 0.85rem 1rem;">Country</th>
+              <th style="padding: 0.85rem 1rem;">Admin Center</th>
+              <th style="padding: 0.85rem 1rem;">Surface Area</th>
+              <th style="padding: 0.85rem 1rem;">Elevation</th>
+            {% elif model_key == 'divisions' %}
+              <th style="padding: 0.85rem 1rem;">Name</th>
+              <th style="padding: 0.85rem 1rem;">Country</th>
+              <th style="padding: 0.85rem 1rem;">Type</th>
+              <th style="padding: 0.85rem 1rem;">Administrative Center</th>
+            {% else %}
+              <th style="padding: 0.85rem 1rem;">Name</th>
+              <th style="padding: 0.85rem 1rem;">Slug</th>
+              <th style="padding: 0.85rem 1rem;">Area (km²)</th>
+            {% endif %}
+            <th style="padding: 0.85rem 1.25rem; text-align: right; width: 140px;">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% if records %}
+            {% for rec in records %}
+              <tr style="border-bottom: 1px solid rgba(255,255,255,0.05); transition: background var(--transition-fast);">
+                <td style="padding: 0.85rem 1.25rem; color: var(--text-muted); font-family: monospace;">#{{ rec.id }}</td>
+                
+                {% if model_key == 'countries' %}
+                  <td style="padding: 0.85rem 1rem; font-size: 1.3rem;">{{ rec.flag_emoji or '🌐' }}</td>
+                  <td style="padding: 0.85rem 1rem; font-weight: 600; color: var(--text-primary);">
+                    <a href="{{ url_for('countries.country_detail', slug=rec.slug) }}" target="_blank" style="color: var(--text-primary);">
+                      {{ rec.common_name }}
+                    </a>
+                  </td>
+                  <td style="padding: 0.85rem 1rem;"><span class="tn-badge">{{ rec.iso_a3 }}</span></td>
+                  <td style="padding: 0.85rem 1rem; color: var(--text-secondary);">{{ rec.continent_rel.name if rec.continent_rel else 'N/A' }}</td>
+                  <td style="padding: 0.85rem 1rem; color: var(--accent-cyan);">{{ rec.capital_name or 'N/A' }}</td>
+                  <td style="padding: 0.85rem 1rem; color: var(--text-secondary);">{{ "{:,}".format(rec.population) if rec.population else 'N/A' }}</td>
+
+                {% elif model_key == 'continents' %}
+                  <td style="padding: 0.85rem 1rem; font-weight: 600; color: var(--text-primary);">{{ rec.name }}</td>
+                  <td style="padding: 0.85rem 1rem;"><span class="tn-badge">{{ rec.code }}</span></td>
+                  <td style="padding: 0.85rem 1rem; color: var(--text-secondary);">{{ "{:,}".format(rec.area_km2) if rec.area_km2 else 'N/A' }} km²</td>
+                  <td style="padding: 0.85rem 1rem; font-weight: 700; color: var(--accent);">{{ rec.countries.count() }} Nations</td>
+
+                {% elif model_key == 'features' %}
+                  <td style="padding: 0.85rem 1rem; font-weight: 600; color: var(--text-primary);">{{ rec.name }}</td>
+                  <td style="padding: 0.85rem 1rem;"><span class="tn-badge">{{ rec.feature_type | capitalize }}</span></td>
+                  <td style="padding: 0.85rem 1rem;"><span class="tn-badge">{{ rec.primary_country_iso or 'International' }}</span></td>
+                  <td style="padding: 0.85rem 1rem; color: var(--accent-cyan);">{{ rec.administrative_center or 'N/A' }}</td>
+                  <td style="padding: 0.85rem 1rem; color: var(--text-secondary);">{{ "{:,.0f}".format(rec.area_km2) if rec.area_km2 else 'N/A' }} km²</td>
+                  <td style="padding: 0.85rem 1rem; color: var(--text-secondary);">{{ "{:,}".format(rec.elevation_m) if rec.elevation_m else 'N/A' }} m</td>
+
+                {% elif model_key == 'divisions' %}
+                  <td style="padding: 0.85rem 1rem; font-weight: 600; color: var(--text-primary);">{{ rec.name }}</td>
+                  <td style="padding: 0.85rem 1rem;"><span class="tn-badge">{{ rec.country.common_name if rec.country else 'N/A' }}</span></td>
+                  <td style="padding: 0.85rem 1rem; color: var(--text-muted);">{{ rec.division_type }}</td>
+                  <td style="padding: 0.85rem 1rem; color: var(--accent-cyan);">{{ rec.capital_or_center or 'N/A' }}</td>
+
+                {% else %}
+                  <td style="padding: 0.85rem 1rem; font-weight: 600; color: var(--text-primary);">{{ rec.name }}</td>
+                  <td style="padding: 0.85rem 1rem; color: var(--text-muted); font-family: monospace;">{{ rec.slug }}</td>
+                  <td style="padding: 0.85rem 1rem; color: var(--text-secondary);">{{ "{:,}".format(rec.area_km2) if rec.area_km2 else 'N/A' }}</td>
+                {% endif %}
+
+                <td style="padding: 0.85rem 1.25rem; text-align: right;">
+                  <div style="display: flex; gap: 0.4rem; justify-content: flex-end;">
+                    <a href="{{ url_for('admin.edit_database_record', model_key=model_key, record_id=rec.id) }}"
+                       class="tn-btn tn-btn-outline tn-btn-sm" style="padding: 0.3rem 0.6rem; font-size: 0.78rem;" title="Edit Record">
+                      ✏️ Edit
+                    </a>
+                    <form method="POST" action="{{ url_for('admin.delete_database_record', model_key=model_key, record_id=rec.id) }}"
+                          onsubmit="return confirm('Are you sure you want to permanently delete this record?');" style="display: inline;">
+                      <button type="submit" class="tn-btn tn-btn-sm" style="padding: 0.3rem 0.6rem; font-size: 0.78rem; background: rgba(239, 68, 68, 0.2); color: #ef4444; border: 1px solid #ef4444;" title="Delete Record">
+                        🗑️
+                      </button>
+                    </form>
+                  </div>
+                </td>
+              </tr>
+            {% endfor %}
+          {% else %}
+            <tr>
+              <td colspan="8" style="padding: 3rem 1.5rem; text-align: center; color: var(--text-muted);">
+                No {{ model_name }} records matched your query.
+              </td>
+            </tr>
+          {% endif %}
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Pagination Controls -->
+    {% if pagination.pages > 1 %}
+    <div style="padding: 1rem 1.25rem; border-top: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center; background: rgba(0,0,0,0.15);">
+      <div style="font-size: 0.84rem; color: var(--text-muted);">
+        Page {{ pagination.page }} of {{ pagination.pages }}
+      </div>
+      <div style="display: flex; gap: 0.4rem;">
+        {% if pagination.has_prev %}
+          <a href="{{ url_for('admin.database_records', model_key=model_key, page=pagination.prev_num, q=search) }}" class="tn-btn tn-btn-outline tn-btn-sm">
+            &larr; Previous
+          </a>
+        {% endif %}
+        {% if pagination.has_next %}
+          <a href="{{ url_for('admin.database_records', model_key=model_key, page=pagination.next_num, q=search) }}" class="tn-btn tn-btn-outline tn-btn-sm">
+            Next &rarr;
+          </a>
+        {% endif %}
+      </div>
+    </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

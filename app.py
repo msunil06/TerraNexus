@@ -8,6 +8,21 @@ def create_app(config_class=Config):
     app = Flask(__name__)
     app.config.from_object(config_class)
 
+    # Security Protocol: Block execution if environment authorization key is missing
+    if not app.config.get("TESTING"):
+        auth_key = app.config.get("TERRANEXUS_AUTH_KEY")
+        master_key = app.config.get("TERRANEXUS_MASTER_KEY", "TNX-CORE-9842-AUTHORIZED-2026")
+        if not auth_key or auth_key != master_key:
+            raise RuntimeError(
+                "\n"
+                "====================================================================\n"
+                "  [TERRANEXUS ACCESS CONTROL ERROR]\n"
+                "  Missing or invalid environment authorization key (.env).\n"
+                "  This private repository cannot be executed without administrator\n"
+                "  environment credentials.\n"
+                "====================================================================\n"
+            )
+
     # Initialize extensions
     db.init_app(app)
     login_manager.init_app(app)
@@ -25,8 +40,10 @@ def create_app(config_class=Config):
     from routes.seas import seas_bp
     from routes.features import features_bp
     from routes.api import api_bp
-    from routes.admin import admin_bp
+    from admin import admin_bp
     from routes.maps import maps_bp
+    from routes.un import un_bp
+    from routes.alliances import alliances_bp
 
     app.register_blueprint(main_bp)
     app.register_blueprint(auth_bp)
@@ -38,6 +55,8 @@ def create_app(config_class=Config):
     app.register_blueprint(api_bp)
     app.register_blueprint(admin_bp)
     app.register_blueprint(maps_bp)
+    app.register_blueprint(un_bp)
+    app.register_blueprint(alliances_bp)
 
     @app.before_request
     def check_server_connection():

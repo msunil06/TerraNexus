@@ -1,59 +1,566 @@
 {% extends "base.html" %}
 
-{% block title %}Continents of Earth - {{ app_name }}{% endblock %}
+{% block title %}Continents of Earth - Interactive Maps & Country Directory - {{ app_name }}{% endblock %}
+
+{% block meta_description %}Explore all seven continents of Earth, verified country counts, complete sovereign nation directories, search filters, and an interactive continental map.{% endblock %}
 
 {% block content %}
 <div style="max-width: 1440px; margin: 2rem auto 4rem; padding: 0 1.5rem;">
-  <div style="margin-bottom: 2rem;">
-    <h1 style="font-size: 2.4rem; margin-bottom: 0.5rem;">Continents of Earth</h1>
-    <p style="color: var(--text-secondary); font-size: 1rem; max-width: 800px;">
-      Explore Earth's major landmasses defined by geographic convention. Compare continental surface areas, human populations, and geopolitical groupings.
-    </p>
+  
+  <!-- Header -->
+  <div style="display: flex; align-items: flex-start; justify-content: space-between; flex-wrap: wrap; gap: 1.5rem; margin-bottom: 2rem;">
+    <div>
+      <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.35rem;">
+        <span class="tn-badge" style="background: rgba(0, 245, 212, 0.15); color: var(--accent); font-weight: 700;">Global Geographic Atlas</span>
+        <span style="color: var(--text-muted);">&bull;</span>
+        <span style="font-size: 0.85rem; color: var(--text-muted);">7 Major Landmasses</span>
+      </div>
+      <h1 style="font-size: 2.4rem; font-weight: 800; margin: 0 0 0.5rem; letter-spacing: -0.5px;">Continents of Earth</h1>
+      <p style="color: var(--text-secondary); font-size: 1rem; max-width: 820px; margin: 0; line-height: 1.6;">
+        Explore all 7 continental landmasses, their verified sovereign nations, demographic distributions, and geographical extremes. Use the interactive map and instant search to navigate continents and their member countries.
+      </p>
+    </div>
+
+    <!-- Quick Stats Pill Grid -->
+    <div style="display: flex; align-items: center; gap: 1rem; flex-wrap: wrap;">
+      <button id="toggleContinentMapBtn" type="button" class="tn-btn tn-btn-primary" style="display: flex; align-items: center; gap: 0.5rem; font-weight: 700; padding: 0.65rem 1.25rem;">
+        🗺️ <span id="toggleContinentMapText">View Continent Interactive Map</span>
+      </button>
+      <div class="tn-stat-card" style="padding: 0.75rem 1.25rem; min-width: 120px;">
+        <div style="font-size: 1.6rem; font-weight: 800; color: var(--accent);">7</div>
+        <div style="font-size: 0.75rem; text-transform: uppercase; color: var(--text-muted); font-weight: 600;">Continents</div>
+      </div>
+      <div class="tn-stat-card" style="padding: 0.75rem 1.25rem; min-width: 120px;">
+        <div style="font-size: 1.6rem; font-weight: 800; color: #60a5fa;">196</div>
+        <div style="font-size: 0.75rem; text-transform: uppercase; color: var(--text-muted); font-weight: 600;">Sovereign States</div>
+      </div>
+      <div class="tn-stat-card" style="padding: 0.75rem 1.25rem; min-width: 120px;">
+        <div style="font-size: 1.6rem; font-weight: 800; color: #f59e0b;">148.9M</div>
+        <div style="font-size: 0.75rem; text-transform: uppercase; color: var(--text-muted); font-weight: 600;">km² Total Land</div>
+      </div>
+    </div>
   </div>
 
-  <div class="tn-grid">
-    {% for continent in continents %}
-      <a href="{{ url_for('continents.continent_detail', slug=continent.slug) }}" class="tn-card">
-        <div class="tn-card-header">
+  <!-- Interactive Continent Map Section (Revealed on 'View Map') -->
+  <div id="continentMapSection" style="display: none; margin-bottom: 2.5rem;">
+    <div id="continentMapCard" class="tn-card tn-continent-map-card" style="padding: 1.25rem; border: 1px solid var(--border-color); background: var(--bg-card); position: relative;">
+      <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem; flex-wrap: wrap; gap: 0.75rem;">
+        <div style="display: flex; align-items: center; gap: 0.6rem;">
+          <span style="font-size: 1.4rem;">🗺️</span>
           <div>
-            <h3 class="tn-card-title" style="font-size: 1.3rem;">{{ continent.name }}</h3>
-            <span class="tn-badge">{{ continent.code }}</span>
-          </div>
-          <div style="font-size: 2.2rem;">🌍</div>
-        </div>
-
-        <p style="font-size: 0.88rem; color: var(--text-secondary); margin: 0.75rem 0; line-height: 1.6;">
-          {{ continent.overview[:140] }}...
-        </p>
-
-        <div class="tn-card-meta">
-          <div>
-            <span class="tn-card-meta-label">Total Area</span>
-            <span class="tn-card-meta-val">{{ "{:,}".format(continent.area_km2) }} km²</span>
-          </div>
-          <div>
-            <span class="tn-card-meta-label">Est. Population</span>
-            <span class="tn-card-meta-val">{{ "{:,}".format(continent.population) }}</span>
-          </div>
-          <div>
-            <span class="tn-card-meta-label">Countries</span>
-            <span class="tn-card-meta-val">{{ continent.countries_count }} Nations</span>
-          </div>
-          <div>
-            <span class="tn-card-meta-label">Highest Peak</span>
-            <span class="tn-card-meta-val">{{ continent.highest_point or 'N/A' }}</span>
+            <h2 style="font-size: 1.15rem; font-weight: 700; margin: 0; color: var(--text-primary);">Interactive Continental Navigator</h2>
+            <p style="font-size: 0.8rem; color: var(--text-muted); margin: 0;">Click any marker or pill to focus the continent • 🔒 Zero API Key Required</p>
           </div>
         </div>
 
-        <div style="margin-top: 1rem; text-align: right; color: var(--accent-cyan); font-weight: 600; font-size: 0.85rem;">
-          Explore {{ continent.name }} &rarr;
+        <!-- Full Mode and Close Buttons -->
+        <div style="display: flex; align-items: center; gap: 0.5rem;">
+          <button id="toggleContinentFullScreenBtn" type="button" class="tn-btn tn-btn-outline tn-btn-sm" style="font-size: 0.82rem; padding: 0.35rem 0.85rem; border-color: var(--accent); color: var(--accent); display: flex; align-items: center; gap: 0.35rem;" title="Toggle Full Mode">
+            <span id="continentFullIcon">⛶</span> <span id="continentFullText">Full Mode</span>
+          </button>
+          <button id="closeContinentMapBtn" type="button" class="tn-btn tn-btn-outline tn-btn-sm" style="font-size: 0.82rem; padding: 0.35rem 0.75rem;" title="Close Map">
+            ✕ Close Map
+          </button>
         </div>
-      </a>
+      </div>
+
+      <!-- Quick Switcher Buttons -->
+      <div id="continentPillButtons" style="display: flex; align-items: center; gap: 0.4rem; flex-wrap: wrap; margin-bottom: 0.85rem;">
+        <button class="tn-btn tn-btn-sm tn-btn-primary" data-focus-lat="20" data-focus-lon="10" data-focus-zoom="2" data-target-slug="all" style="font-size: 0.8rem; padding: 0.35rem 0.75rem;">
+          🌍 All
+        </button>
+        <button class="tn-btn tn-btn-sm tn-btn-outline" data-focus-lat="34.0" data-focus-lon="100.0" data-focus-zoom="3" data-target-slug="asia" style="font-size: 0.8rem; padding: 0.35rem 0.75rem;">
+          Asia (49)
+        </button>
+        <button class="tn-btn tn-btn-sm tn-btn-outline" data-focus-lat="1.5" data-focus-lon="20.0" data-focus-zoom="3" data-target-slug="africa" style="font-size: 0.8rem; padding: 0.35rem 0.75rem;">
+          Africa (54)
+        </button>
+        <button class="tn-btn tn-btn-sm tn-btn-outline" data-focus-lat="54.0" data-focus-lon="15.0" data-focus-zoom="4" data-target-slug="europe" style="font-size: 0.8rem; padding: 0.35rem 0.75rem;">
+          Europe (44)
+        </button>
+        <button class="tn-btn tn-btn-sm tn-btn-outline" data-focus-lat="50.0" data-focus-lon="-100.0" data-focus-zoom="3" data-target-slug="north-america" style="font-size: 0.8rem; padding: 0.35rem 0.75rem;">
+          North America (23)
+        </button>
+        <button class="tn-btn tn-btn-sm tn-btn-outline" data-focus-lat="-15.0" data-focus-lon="-60.0" data-focus-zoom="3" data-target-slug="south-america" style="font-size: 0.8rem; padding: 0.35rem 0.75rem;">
+          South America (12)
+        </button>
+        <button class="tn-btn tn-btn-sm tn-btn-outline" data-focus-lat="-25.0" data-focus-lon="135.0" data-focus-zoom="3" data-target-slug="oceania" style="font-size: 0.8rem; padding: 0.35rem 0.75rem;">
+          Oceania (14)
+        </button>
+        <button class="tn-btn tn-btn-sm tn-btn-outline" data-focus-lat="-80.0" data-focus-lon="0.0" data-focus-zoom="2" data-target-slug="antarctica" style="font-size: 0.8rem; padding: 0.35rem 0.75rem;">
+          Antarctica (0)
+        </button>
+      </div>
+
+      <!-- Map Container -->
+      <div id="continentMap" style="height: 480px; width: 100%; border-radius: var(--radius-sm); overflow: hidden; background: #070e1e; border: 1px solid var(--border-color);"></div>
+    </div>
+  </div>
+
+  <!-- Built-In Search & Filter Toolbar -->
+  <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 1.25rem 1.5rem; margin-bottom: 2rem; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem;">
+    <div style="flex: 1; min-width: 280px; position: relative;">
+      <span style="position: absolute; left: 1rem; top: 50%; transform: translateY(-50%); font-size: 1.1rem; color: var(--text-muted); pointer-events: none;">🔍</span>
+      <input 
+        type="text" 
+        id="continentSearchInput" 
+        placeholder="Search continents or member countries (e.g. Asia, Germany, Kenya, Brazil, Japan)..." 
+        style="
+          width: 100%; padding: 0.75rem 1rem 0.75rem 2.8rem; border-radius: var(--radius-sm);
+          background: rgba(0, 0, 0, 0.25); border: 1px solid var(--border-color);
+          color: var(--text-primary); font-size: 0.95rem; outline: none; transition: border-color 0.2s;
+        "
+      />
+    </div>
+
+    <div style="display: flex; align-items: center; gap: 1rem;">
+      <span id="continentMatchCount" style="font-size: 0.88rem; color: var(--text-muted); font-weight: 600;">
+        Showing all 7 continents • 196 nations
+      </span>
+      <button id="toggleAllCountriesBtn" class="tn-btn tn-btn-outline tn-btn-sm" style="font-size: 0.82rem; white-space: nowrap;">
+        ⇄ Toggle Country Lists
+      </button>
+    </div>
+  </div>
+
+  <!-- Detailed Continents List with Country Directories -->
+  <div id="continentsContainer" style="display: flex; flex-direction: column; gap: 2rem;">
+    {% for item in continents_data %}
+      {% set continent = item.continent %}
+      {% set countries = item.countries %}
+      {% set country_count = item.count %}
+      
+      <div 
+        class="tn-continent-card tn-card" 
+        id="continent-{{ continent.slug }}"
+        data-continent-name="{{ continent.name|lower }}"
+        data-continent-slug="{{ continent.slug }}"
+        data-continent-code="{{ continent.code|lower }}"
+        style="border: 1px solid var(--border-color); padding: 1.75rem; background: var(--bg-card); transition: all 0.25s ease;"
+      >
+        <!-- Continent Header Bar -->
+        <div style="display: flex; align-items: flex-start; justify-content: space-between; flex-wrap: wrap; gap: 1rem; margin-bottom: 1.25rem;">
+          <div style="display: flex; align-items: center; gap: 1rem;">
+            <div style="
+              width: 54px; height: 54px; border-radius: 14px; display: flex; align-items: center; justify-content: center;
+              background: rgba(0, 245, 212, 0.1); border: 1.5px solid var(--accent); font-size: 1.8rem;
+            ">
+              {% if continent.slug == 'asia' %}🌏{% elif continent.slug == 'africa' %}🌍{% elif continent.slug == 'europe' %}🏰{% elif continent.slug == 'north-america' %}🌎{% elif continent.slug == 'south-america' %}🌴{% elif continent.slug == 'oceania' %}🏝️{% else %}❄️{% endif %}
+            </div>
+            <div>
+              <div style="display: flex; align-items: center; gap: 0.6rem; flex-wrap: wrap;">
+                <h2 style="font-size: 1.6rem; font-weight: 800; margin: 0; color: var(--text-primary);">
+                  {{ continent.name }}
+                </h2>
+                <span class="tn-badge" style="background: rgba(0, 245, 212, 0.15); color: var(--accent); font-weight: 700;">
+                  {{ continent.code }}
+                </span>
+                <span class="tn-badge" style="background: rgba(59, 130, 246, 0.15); color: #60a5fa; font-weight: 700;">
+                  {{ country_count }} Sovereign {{ 'Nations' if country_count != 1 else 'Nation' }}
+                </span>
+              </div>
+              <p style="font-size: 0.88rem; color: var(--text-secondary); margin: 0.25rem 0 0; max-width: 800px; line-height: 1.5;">
+                {{ continent.overview or 'Earth continental division.' }}
+              </p>
+            </div>
+          </div>
+
+          <!-- Actions -->
+          <div style="display: flex; align-items: center; gap: 0.6rem; flex-wrap: wrap;">
+            <button 
+              class="tn-btn tn-btn-outline tn-btn-sm btn-focus-continent"
+              data-continent="{{ continent.slug }}"
+              title="View interactive map for {{ continent.name }}"
+              style="font-size: 0.82rem; border-color: var(--accent); color: var(--accent); font-weight: 700;"
+            >
+              📍 View Map
+            </button>
+            <a 
+              href="{{ url_for('continents.continent_detail', slug=continent.slug) }}" 
+              class="tn-btn tn-btn-primary tn-btn-sm"
+              style="font-size: 0.82rem;"
+            >
+              Explore Dossier &rarr;
+            </a>
+          </div>
+        </div>
+
+        <!-- Metric Cards Grid -->
+        <div style="
+          display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 0.75rem;
+          margin-bottom: 1.5rem; background: rgba(0, 0, 0, 0.15); padding: 1rem; border-radius: var(--radius-sm); border: 1px solid rgba(255, 255, 255, 0.05);
+        ">
+          <div>
+            <div style="font-size: 0.75rem; text-transform: uppercase; color: var(--text-muted); font-weight: 600;">Total Surface Area</div>
+            <div style="font-size: 1.05rem; font-weight: 700; color: var(--text-primary); margin-top: 2px;">
+              {{ "{:,}".format(continent.area_km2) }} km²
+            </div>
+          </div>
+          <div>
+            <div style="font-size: 0.75rem; text-transform: uppercase; color: var(--text-muted); font-weight: 600;">Est. Human Population</div>
+            <div style="font-size: 1.05rem; font-weight: 700; color: var(--text-primary); margin-top: 2px;">
+              {{ "{:,}".format(continent.population or 0) }}
+            </div>
+          </div>
+          <div>
+            <div style="font-size: 0.75rem; text-transform: uppercase; color: var(--text-muted); font-weight: 600;">Highest Peak</div>
+            <div style="font-size: 1.05rem; font-weight: 700; color: var(--text-primary); margin-top: 2px;">
+              {{ continent.highest_point or 'N/A' }}
+            </div>
+          </div>
+          <div>
+            <div style="font-size: 0.75rem; text-transform: uppercase; color: var(--text-muted); font-weight: 600;">Lowest Point</div>
+            <div style="font-size: 1.05rem; font-weight: 700; color: var(--text-primary); margin-top: 2px;">
+              {{ continent.lowest_point or 'N/A' }}
+            </div>
+          </div>
+        </div>
+
+        <!-- Complete Country List Section -->
+        <div>
+          <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.75rem;">
+            <div style="display: flex; align-items: center; gap: 0.5rem;">
+              <span style="font-size: 0.95rem; font-weight: 700; color: var(--text-primary);">
+                Complete Country Directory
+              </span>
+              <span class="continent-country-counter" style="font-size: 0.8rem; color: var(--text-muted);">
+                ({{ country_count }} countries)
+              </span>
+            </div>
+            <span style="font-size: 0.78rem; color: var(--text-muted);">
+              Click any country to view deep dossier & map
+            </span>
+          </div>
+
+          {% if countries %}
+            <div class="tn-countries-chip-grid" style="
+              display: flex; flex-wrap: wrap; gap: 0.45rem; max-height: 260px; overflow-y: auto; padding: 0.5rem;
+              background: rgba(0, 0, 0, 0.2); border-radius: var(--radius-sm); border: 1px solid var(--border-color);
+            ">
+              {% for country in countries %}
+                <a 
+                  href="{{ url_for('countries.country_detail', slug=country.slug) }}" 
+                  class="tn-country-chip"
+                  data-country-name="{{ country.common_name|lower }}"
+                  data-country-official="{{ country.official_name|lower }}"
+                  data-country-capital="{{ (country.capital_name or '')|lower }}"
+                  data-country-iso="{{ country.iso_a2|lower }} {{ country.iso_a3|lower }}"
+                  title="Capital: {{ country.capital_name or 'N/A' }} • Population: {{ '{:,}'.format(country.population or 0) }}"
+                  style="
+                    display: inline-flex; align-items: center; gap: 0.4rem; padding: 0.35rem 0.65rem;
+                    background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 20px;
+                    color: var(--text-secondary); text-decoration: none; font-size: 0.82rem; font-weight: 500;
+                    transition: all 0.2s ease;
+                  "
+                >
+                  <span style="font-size: 1rem;">{{ country.flag_emoji or '🏳️' }}</span>
+                  <span class="country-chip-name">{{ country.common_name }}</span>
+                  {% if country.capital_name %}
+                    <span style="font-size: 0.72rem; color: var(--text-muted);">&bull; {{ country.capital_name }}</span>
+                  {% endif %}
+                </a>
+              {% endfor %}
+            </div>
+          {% else %}
+            <div style="padding: 1rem; background: rgba(0, 0, 0, 0.15); border-radius: var(--radius-sm); font-size: 0.85rem; color: var(--text-muted);">
+              Antarctica is preserved as an international scientific sanctuary under the Antarctic Treaty System; no permanent sovereign territories or nation states are recognized.
+            </div>
+          {% endif %}
+        </div>
+      </div>
     {% endfor %}
   </div>
 
-  <div style="margin-top: 3rem; background: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 1.5rem; font-size: 0.88rem; color: var(--text-secondary);">
-    <strong>Geographic Convention Note:</strong> Continental classification models vary across educational and cultural traditions (ranging from 4-continent models combining Afro-Eurasia to the standard 7-continent model supported on TerraNexus).
+  <!-- Geographic Convention Note -->
+  <div style="margin-top: 3rem; background: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 1.5rem; font-size: 0.88rem; color: var(--text-secondary); line-height: 1.6;">
+    <strong style="color: var(--text-primary);">Geographic Convention Standards:</strong> 
+    TerraNexus categorizes global landmasses according to the widely adopted 7-continent convention (Asia, Africa, Europe, North America, South America, Oceania, Antarctica). All 196 listed countries represent UN member states, official permanent observers, and internationally cataloged sovereign entities with ISO 3166-1 identifiers.
   </div>
 </div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+  // 1. Initialize Interactive Leaflet Continent Map (Free Public Tiles - No API Key Needed)
+  const mapElement = document.getElementById("continentMap");
+  if (!mapElement) return;
+
+  const continentCoordinates = {
+    "asia": { lat: 34.0, lon: 100.0, zoom: 3, name: "Asia", count: 49 },
+    "africa": { lat: 1.5, lon: 20.0, zoom: 3, name: "Africa", count: 54 },
+    "europe": { lat: 54.0, lon: 15.0, zoom: 4, name: "Europe", count: 44 },
+    "north-america": { lat: 50.0, lon: -100.0, zoom: 3, name: "North America", count: 23 },
+    "south-america": { lat: -15.0, lon: -60.0, zoom: 3, name: "South America", count: 12 },
+    "oceania": { lat: -25.0, lon: 135.0, zoom: 3, name: "Oceania", count: 14 },
+    "antarctica": { lat: -80.0, lon: 0.0, zoom: 2, name: "Antarctica", count: 0 }
+  };
+
+  const continentMap = L.map(mapElement, {
+    center: [20.0, 10.0],
+    zoom: 2,
+    minZoom: 2,
+    maxZoom: 9,
+    scrollWheelZoom: true
+  });
+
+  // 100% Free Public Tiles - Zero Watermarks & Zero API Key Required
+  const darkLayer = L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Base/MapServer/tile/{z}/{y}/{x}", {
+    attribution: 'Tiles &copy; Esri &mdash; Esri Dark Canvas (Zero API Key)',
+    maxZoom: 16
+  }).addTo(continentMap);
+
+  const satLayer = L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}", {
+    attribution: 'Tiles &copy; Esri &mdash; Satellite (Free Public)',
+    maxZoom: 18
+  });
+
+  const streetLayer = L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}", {
+    attribution: 'Tiles &copy; Esri World Street (Zero API Key)',
+    maxZoom: 18
+  });
+
+  const osmLayer = L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+    attribution: '&copy; OpenStreetMap contributors',
+    maxZoom: 19
+  });
+
+  L.control.layers({
+    "ESRI Dark Canvas": darkLayer,
+    "ESRI Satellite": satLayer,
+    "ESRI World Street": streetLayer,
+    "OpenStreetMap": osmLayer
+  }, null, { position: "topright" }).addTo(continentMap);
+
+  // Add markers for all 7 continents
+  Object.keys(continentCoordinates).forEach(slug => {
+    const data = continentCoordinates[slug];
+    const markerHtml = `
+      <div style="
+        background: rgba(10, 19, 36, 0.92);
+        border: 2px solid var(--accent);
+        border-radius: 20px;
+        padding: 4px 10px;
+        color: #fff;
+        font-size: 12px;
+        font-weight: 700;
+        white-space: nowrap;
+        box-shadow: 0 0 12px rgba(0, 245, 212, 0.5);
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        gap: 5px;
+      ">
+        <span>🌍</span>
+        <span>${data.name}</span>
+        <span style="background: var(--accent); color: #060c18; padding: 1px 6px; border-radius: 10px; font-size: 11px;">${data.count}</span>
+      </div>
+    `;
+
+    const icon = L.divIcon({
+      className: 'continent-marker',
+      html: markerHtml,
+      iconSize: [120, 30],
+      iconAnchor: [60, 15]
+    });
+
+    const marker = L.marker([data.lat, data.lon], { icon: icon }).addTo(continentMap);
+    marker.on("click", () => {
+      focusContinent(slug);
+    });
+  });
+
+  function focusContinent(slug) {
+    const data = continentCoordinates[slug];
+    if (data) {
+      continentMap.flyTo([data.lat, data.lon], data.zoom, { duration: 1.2 });
+      const targetCard = document.getElementById("continent-" + slug);
+      if (targetCard) {
+        targetCard.scrollIntoView({ behavior: "smooth", block: "center" });
+        targetCard.style.borderColor = "var(--accent)";
+        targetCard.style.boxShadow = "0 0 25px var(--accent-glow)";
+        setTimeout(() => {
+          targetCard.style.borderColor = "";
+          targetCard.style.boxShadow = "";
+        }, 1800);
+      }
+    }
+  }
+
+  // Map Visibility & Toggle Controls
+  const mapSection = document.getElementById("continentMapSection");
+  const mapCard = document.getElementById("continentMapCard");
+  const toggleMapBtn = document.getElementById("toggleContinentMapBtn");
+  const toggleMapText = document.getElementById("toggleContinentMapText");
+  const closeMapBtn = document.getElementById("closeContinentMapBtn");
+  const fullScreenBtn = document.getElementById("toggleContinentFullScreenBtn");
+  const fullIcon = document.getElementById("continentFullIcon");
+  const fullText = document.getElementById("continentFullText");
+
+  function openMapSection(focusSlug = null) {
+    if (mapSection) {
+      mapSection.style.display = "block";
+      if (toggleMapText) toggleMapText.textContent = "Hide Continent Map";
+      setTimeout(() => {
+        continentMap.invalidateSize();
+        if (focusSlug) {
+          focusContinent(focusSlug);
+          mapSection.scrollIntoView({ behavior: "smooth", block: "start" });
+        } else {
+          mapSection.scrollIntoView({ behavior: "smooth", block: "start" });
+        }
+      }, 150);
+    }
+  }
+
+  function closeMapSection() {
+    if (mapSection) {
+      mapSection.style.display = "none";
+      if (toggleMapText) toggleMapText.textContent = "View Continent Interactive Map";
+      if (mapCard && mapCard.classList.contains("full-mode")) {
+        mapCard.classList.remove("full-mode");
+        if (fullIcon) fullIcon.textContent = "⛶";
+        if (fullText) fullText.textContent = "Full Mode";
+      }
+    }
+  }
+
+  if (toggleMapBtn) {
+    toggleMapBtn.addEventListener("click", () => {
+      if (mapSection.style.display === "none" || !mapSection.style.display) {
+        openMapSection();
+      } else {
+        closeMapSection();
+      }
+    });
+  }
+
+  if (closeMapBtn) {
+    closeMapBtn.addEventListener("click", closeMapSection);
+  }
+
+  if (fullScreenBtn && mapCard) {
+    fullScreenBtn.addEventListener("click", () => {
+      const isFull = mapCard.classList.toggle("full-mode");
+      if (fullIcon) fullIcon.textContent = isFull ? "🗗" : "⛶";
+      if (fullText) fullText.textContent = isFull ? "Normal Mode" : "Full Mode";
+      setTimeout(() => {
+        continentMap.invalidateSize();
+      }, 150);
+    });
+  }
+
+  // Handle Pill buttons above map
+  const pillButtons = document.querySelectorAll("#continentPillButtons button");
+  pillButtons.forEach(btn => {
+    btn.addEventListener("click", () => {
+      pillButtons.forEach(b => {
+        b.classList.remove("tn-btn-primary");
+        b.classList.add("tn-btn-outline");
+      });
+      btn.classList.remove("tn-btn-outline");
+      btn.classList.add("tn-btn-primary");
+
+      const slug = btn.dataset.targetSlug;
+      if (slug === "all") {
+        continentMap.flyTo([20, 10], 2, { duration: 1 });
+      } else {
+        focusContinent(slug);
+      }
+    });
+  });
+
+  // Handle "View Map" buttons on continent cards
+  document.querySelectorAll(".btn-focus-continent").forEach(btn => {
+    btn.addEventListener("click", () => {
+      const slug = btn.dataset.continent;
+      openMapSection(slug);
+    });
+  });
+
+  // 2. Built-in Instant Search Functionality (Requirement 4 & 9)
+  const searchInput = document.getElementById("continentSearchInput");
+  const continentCards = document.querySelectorAll(".tn-continent-card");
+  const matchCounter = document.getElementById("continentMatchCount");
+
+  if (searchInput) {
+    searchInput.addEventListener("input", function () {
+      const query = this.value.trim().toLowerCase();
+      let visibleContinents = 0;
+      let visibleCountries = 0;
+
+      continentCards.forEach(card => {
+        const continentName = card.dataset.continentName || "";
+        const continentCode = card.dataset.continentCode || "";
+        const countryChips = card.querySelectorAll(".tn-country-chip");
+
+        let continentMatches = continentName.includes(query) || continentCode.includes(query);
+        let matchedCountriesInContinent = 0;
+
+        countryChips.forEach(chip => {
+          const cName = chip.dataset.countryName || "";
+          const cOfficial = chip.dataset.countryOfficial || "";
+          const cCapital = chip.dataset.countryCapital || "";
+          const cIso = chip.dataset.countryIso || "";
+
+          const isCountryMatch = !query || cName.includes(query) || cOfficial.includes(query) || cCapital.includes(query) || cIso.includes(query);
+
+          if (isCountryMatch) {
+            chip.style.display = "inline-flex";
+            if (query && !continentMatches) {
+              chip.style.borderColor = "var(--accent)";
+              chip.style.background = "var(--accent-glow)";
+            } else {
+              chip.style.borderColor = "";
+              chip.style.background = "";
+            }
+            matchedCountriesInContinent++;
+            visibleCountries++;
+          } else {
+            chip.style.display = "none";
+          }
+        });
+
+        // Update counter inside card
+        const cardCounter = card.querySelector(".continent-country-counter");
+        if (cardCounter) {
+          if (query) {
+            cardCounter.textContent = `(${matchedCountriesInContinent} matching nations)`;
+          } else {
+            cardCounter.textContent = `(${countryChips.length} countries)`;
+          }
+        }
+
+        if (!query || continentMatches || matchedCountriesInContinent > 0) {
+          card.style.display = "block";
+          visibleContinents++;
+        } else {
+          card.style.display = "none";
+        }
+      });
+
+      if (matchCounter) {
+        if (!query) {
+          matchCounter.textContent = `Showing all 7 continents • 196 nations`;
+        } else {
+          matchCounter.textContent = `Found ${visibleContinents} continents • ${visibleCountries} countries matching "${query}"`;
+        }
+      }
+    });
+  }
+
+  // 3. Toggle All Country Lists Expand/Collapse
+  const toggleBtn = document.getElementById("toggleAllCountriesBtn");
+  let isCollapsed = false;
+  if (toggleBtn) {
+    toggleBtn.addEventListener("click", () => {
+      isCollapsed = !isCollapsed;
+      document.querySelectorAll(".tn-countries-chip-grid").forEach(grid => {
+        grid.style.display = isCollapsed ? "none" : "flex";
+      });
+      toggleBtn.textContent = isCollapsed ? "⊞ Expand Country Lists" : "⊟ Collapse Country Lists";
+    });
+  }
+});
+</script>
 {% endblock %}
