@@ -32,19 +32,42 @@ function initTerraNexusMap(container) {
   // Add scale bar
   L.control.scale({ imperial: true, metric: true, position: "bottomright" }).addTo(map);
 
-  // 2. Base Tile Layers (Dark CartoDB / OpenStreetMap fallback)
-  const darkTiles = L.tileLayer("https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png", {
-    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/attributions">CARTO</a>',
-    subdomains: "abcd",
-    maxZoom: 19
-  });
+  // 2. Base Tile Layers (100% Free Public APIs - Zero API Key Required)
+  const tileLayers = {
+    satellite: L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}", {
+      attribution: 'Tiles &copy; Esri &mdash; High-Resolution Satellite & Aerial Imagery (Free Public)',
+      maxZoom: 18
+    }),
+    dark: L.tileLayer("https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png", {
+      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/attributions">CARTO</a>',
+      subdomains: "abcd",
+      maxZoom: 19
+    }),
+    light: L.tileLayer("https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png", {
+      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/attributions">CARTO</a>',
+      subdomains: "abcd",
+      maxZoom: 19
+    }),
+    streets: L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+      maxZoom: 19
+    }),
+    topo: L.tileLayer("https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png", {
+      attribution: '&copy; <a href="https://opentopomap.org">OpenTopoMap</a> & OpenStreetMap',
+      maxZoom: 17
+    })
+  };
 
-  const streetTiles = L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
-    maxZoom: 19
-  });
+  const initialTheme = document.documentElement.getAttribute("data-theme") || "dark";
+  let activeTileKey = initialTheme === "light" ? "light" : "dark";
+  tileLayers[activeTileKey].addTo(map);
 
-  darkTiles.addTo(map);
+  function switchTileLayer(key) {
+    if (!tileLayers[key] || key === activeTileKey) return;
+    map.removeLayer(tileLayers[activeTileKey]);
+    tileLayers[key].addTo(map);
+    activeTileKey = key;
+  }
 
   // 3. Layer Groups
   markersLayerGroup = L.layerGroup().addTo(map);
@@ -59,7 +82,7 @@ function initTerraNexusMap(container) {
     });
   }
 
-  // 5. Controls (Reset view & Fullscreen)
+  // 5. Controls (Reset view & Layer Toggle)
   const resetBtn = document.getElementById("resetMapView");
   if (resetBtn) {
     resetBtn.addEventListener("click", () => {
@@ -69,16 +92,21 @@ function initTerraNexusMap(container) {
 
   const layerToggle = document.getElementById("tileLayerSelect");
   if (layerToggle) {
+    layerToggle.value = activeTileKey;
     layerToggle.addEventListener("change", (e) => {
-      if (e.target.value === "streets") {
-        map.removeLayer(darkTiles);
-        streetTiles.addTo(map);
-      } else {
-        map.removeLayer(streetTiles);
-        darkTiles.addTo(map);
-      }
+      switchTileLayer(e.target.value);
     });
   }
+
+  // Sync with global website theme toggle (Dark / Light)
+  window.addEventListener("themeChanged", (e) => {
+    const nextTheme = e.detail && e.detail.theme;
+    if (layerToggle && (activeTileKey === "dark" || activeTileKey === "light")) {
+      const targetLayer = nextTheme === "light" ? "light" : "dark";
+      switchTileLayer(targetLayer);
+      layerToggle.value = targetLayer;
+    }
+  });
 
   // 6. Load Boundaries (GeoJSON) and Markers
   loadCountryBoundaries();

@@ -88,10 +88,30 @@
       </div>
 
       <div class="tn-stat-card">
-        <div class="tn-card-meta-label">Total Population ({{ country.population_year }})</div>
-        <div style="font-size: 1.4rem; font-weight: 700; color: var(--text-primary); margin-top: 4px;">
-          {{ "{:,}".format(country.population) if country.population else 'N/A' }}
+        <div class="tn-card-meta-label">
+          {% if live_data and live_data.population %}
+            <span style="display: inline-block; width: 6px; height: 6px; border-radius: 50%; background: #22c55e; margin-right: 4px; box-shadow: 0 0 6px #22c55e;"></span>
+            Live Estimated Population
+          {% else %}
+            Total Population ({{ country.population_year }})
+          {% endif %}
         </div>
+        <div style="font-size: 1.4rem; font-weight: 700; color: var(--text-primary); margin-top: 4px;">
+          {% if live_data and live_data.population %}
+            <span data-live-population="{{ live_data.population.live_population }}" data-growth-per-sec="{{ live_data.population.net_change_per_second }}">
+              {{ "{:,}".format(live_data.population.live_population) }}
+            </span>
+          {% else %}
+            {{ "{:,}".format(country.population) if country.population else 'N/A' }}
+          {% endif %}
+        </div>
+        <span style="font-size: 0.78rem; color: var(--text-muted);">
+          {% if live_data and live_data.population %}
+            {{ live_data.population.annual_growth_rate_pct }}% annual growth &bull; {{ live_data.population.global_share_pct }}% global share
+          {% else %}
+            Official Census Year {{ country.population_year }}
+          {% endif %}
+        </span>
       </div>
 
       <div class="tn-stat-card">
@@ -124,13 +144,88 @@
             <h3 style="font-size: 1.3rem; margin: 0; color: var(--text-primary);">Automatic Real-Time Telemetry & Public Free APIs</h3>
           </div>
           <p style="color: var(--text-secondary); font-size: 0.95rem; margin: 0;">
-            Zero-key open public data feeds stream real-time meteorological conditions, currency exchange valuations, and sovereign status.
+            Zero-key open public data feeds stream real-time meteorological conditions, currency exchange valuations, sovereign status, and live demographics.
           </p>
         </div>
         <a href="{{ url_for('api.get_country_live_data', identifier=country.slug) }}" target="_blank" class="tn-btn tn-btn-outline tn-btn-sm" style="border-color: var(--accent-cyan); color: var(--accent-cyan);">
           ⚡ View Raw Inbuilt JSON API
         </a>
       </div>
+    </div>
+
+    <!-- Real-Time Live Population Demographics Section (Worldometer Model) -->
+    <div style="margin-bottom: 2.5rem;">
+      <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem; flex-wrap: wrap; gap: 0.5rem;">
+        <h4 style="font-size: 1.15rem; color: var(--accent-cyan); display: flex; align-items: center; gap: 0.5rem; margin: 0;">
+          👥 Real-Time Live Population Status & Dynamic Demographics
+        </h4>
+        <span class="tn-badge" style="background: rgba(16, 185, 129, 0.15); border-color: rgba(16, 185, 129, 0.3); color: #10b981;">
+          UN DESA & World Bank Free Data
+        </span>
+      </div>
+
+      {% if live_data and live_data.population %}
+      <div class="tn-grid" style="grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));">
+        <div class="tn-stat-card" style="border-left: 3px solid #10b981;">
+          <div class="tn-card-meta-label">
+            <span style="display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: #10b981; box-shadow: 0 0 8px #10b981; margin-right: 4px;"></span>
+            Current Live Population (Ticking)
+          </div>
+          <div style="font-size: 1.8rem; font-weight: 800; color: var(--text-primary); margin-top: 4px; font-variant-numeric: tabular-nums;">
+            <span data-live-population="{{ live_data.population.live_population }}" data-growth-per-sec="{{ live_data.population.net_change_per_second }}">
+              {{ "{:,}".format(live_data.population.live_population) }}
+            </span>
+          </div>
+          <span style="font-size: 0.8rem; color: #10b981; font-weight: 600;">
+            {% if live_data.population.net_change_per_second > 0 %}
+              +{{ "{:.2f}".format(live_data.population.net_change_per_second) }} persons/sec (ticking live)
+            {% else %}
+              {{ "{:.2f}".format(live_data.population.net_change_per_second) }} persons/sec (ticking live)
+            {% endif %}
+          </span>
+        </div>
+
+        <div class="tn-stat-card">
+          <div class="tn-card-meta-label">Annual Growth Rate</div>
+          <div style="font-size: 1.6rem; font-weight: 700; color: var(--text-primary); margin-top: 4px;">
+            {{ live_data.population.annual_growth_rate_pct }}%
+          </div>
+          <span style="font-size: 0.8rem; color: var(--text-muted);">UN DESA demographic index</span>
+        </div>
+
+        <div class="tn-stat-card">
+          <div class="tn-card-meta-label">Net Daily Change</div>
+          <div style="font-size: 1.6rem; font-weight: 700; color: var(--text-primary); margin-top: 4px;">
+            {% if live_data.population.daily_net_change > 0 %}
+              +{{ "{:,}".format(live_data.population.daily_net_change) }}
+            {% else %}
+              {{ "{:,}".format(live_data.population.daily_net_change) }}
+            {% endif %}
+          </div>
+          <span style="font-size: 0.8rem; color: var(--text-muted);">Est. net growth per 24 hours</span>
+        </div>
+
+        <div class="tn-stat-card">
+          <div class="tn-card-meta-label">Share of World Population</div>
+          <div style="font-size: 1.6rem; font-weight: 700; color: var(--text-primary); margin-top: 4px;">
+            {{ live_data.population.global_share_pct }}%
+          </div>
+          <span style="font-size: 0.8rem; color: var(--text-muted);">Of 8.15 Billion Global Earth total</span>
+        </div>
+      </div>
+
+      {% if live_data.population.world_bank_latest %}
+      <div style="margin-top: 0.75rem; font-size: 0.8rem; color: var(--text-muted); display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 0.5rem;">
+        <span>* Latest World Bank Official Recorded Indicator: <strong>{{ "{:,}".format(live_data.population.world_bank_latest.value) }}</strong> (Year {{ live_data.population.world_bank_latest.date }})</span>
+        <span class="tn-badge" style="font-size: 0.7rem; background: rgba(16, 185, 129, 0.1); color: #10b981; border-color: rgba(16, 185, 129, 0.3);">World Bank Open Data API (Zero Key)</span>
+      </div>
+      {% endif %}
+
+      {% else %}
+      <div style="padding: 1.5rem; background: var(--bg-card); border-radius: var(--radius-md); border: 1px dashed var(--border-color); text-align: center; color: var(--text-muted);">
+        Live population modeling currently calibrating for {{ country.common_name }}.
+      </div>
+      {% endif %}
     </div>
 
     <!-- Live Weather Section -->

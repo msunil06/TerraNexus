@@ -77,12 +77,15 @@ class IntegrationRouteTestCase(unittest.TestCase):
         self.assertIn("weather", json_data["live"])
         self.assertIn("forex", json_data["live"])
         self.assertIn("telemetry", json_data["live"])
+        self.assertIn("population", json_data["live"])
+        self.assertIsNotNone(json_data["live"]["population"]["live_population"])
 
         # Test Country detail page renders live telemetry section
         res_page = self.client.get("/countries/india")
         self.assertEqual(res_page.status_code, 200)
         self.assertIn(b"Real-Time Live Data", res_page.data)
         self.assertIn(b"Open-Meteo", res_page.data)
+        self.assertIn(b"Live Estimated Population", res_page.data)
 
     def test_unauthorized_admin_access_denied(self):
         # Guest accessing /admin/dashboard should be redirected to login

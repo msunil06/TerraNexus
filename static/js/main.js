@@ -5,31 +5,60 @@ document.addEventListener("DOMContentLoaded", () => {
   initPWA();
   initFavoriteButtons();
   initTabs();
+  initLivePopulationTickers();
 });
 
-// 1. Theme Management (Dark / Light)
+// 1. Theme Management (Dark Cosmos & Light Atlas)
 function initTheme() {
   const themeToggle = document.getElementById("themeToggle");
   const storedTheme = localStorage.getItem("tn_theme") || "dark";
-  document.documentElement.setAttribute("data-theme", storedTheme);
-  updateThemeIcon(storedTheme);
+  applyTheme(storedTheme);
 
   if (themeToggle) {
     themeToggle.addEventListener("click", () => {
       const current = document.documentElement.getAttribute("data-theme") || "dark";
       const next = current === "dark" ? "light" : "dark";
-      document.documentElement.setAttribute("data-theme", next);
-      localStorage.setItem("tn_theme", next);
-      updateThemeIcon(next);
+      applyTheme(next);
     });
   }
 }
 
-function updateThemeIcon(theme) {
+function applyTheme(theme) {
+  document.documentElement.setAttribute("data-theme", theme);
+  try {
+    localStorage.setItem("tn_theme", theme);
+  } catch (e) {}
+
   const themeIcon = document.getElementById("themeIcon");
+  const themeText = document.getElementById("themeText");
   if (themeIcon) {
-    themeIcon.textContent = theme === "dark" ? "☀️" : "🌙";
+    themeIcon.textContent = theme === "dark" ? "🌙" : "☀️";
   }
+  if (themeText) {
+    themeText.textContent = theme === "dark" ? "Dark Cosmos" : "Light Atlas";
+  }
+
+  // Dispatch global event for interactive components (e.g. Leaflet map)
+  window.dispatchEvent(new CustomEvent("themeChanged", { detail: { theme } }));
+}
+
+// 2. Real-Time Live Population Ticker (Worldometer-style)
+function initLivePopulationTickers() {
+  const tickerEls = document.querySelectorAll("[data-live-population]");
+  tickerEls.forEach((el) => {
+    let currentPop = parseFloat(el.getAttribute("data-live-population"));
+    const growthPerSec = parseFloat(el.getAttribute("data-growth-per-sec")) || 0.0;
+
+    if (!isNaN(currentPop) && growthPerSec !== 0) {
+      const intervalMs = 200; // update 5 times per second for ultra-smooth fluid count
+      const incrementPerTick = growthPerSec * (intervalMs / 1000.0);
+
+      setInterval(() => {
+        currentPop += incrementPerTick;
+        el.textContent = Math.round(currentPop).toLocaleString();
+      }, intervalMs);
+    }
+  });
 }
 
 // 2. Mobile Navigation Toggle

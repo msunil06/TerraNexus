@@ -164,6 +164,95 @@ class LiveDataService:
             pass
         return None
 
+    @staticmethod
+    def get_live_population(country):
+        """
+        Calculate high-precision real-time live estimated population and fetch
+        authoritative World Bank Demographic indicators (Zero API key required).
+        """
+        if not country or not country.population:
+            return None
+
+        # UN DESA Annual Population Growth Rate Benchmarks (%)
+        GROWTH_RATES = {
+            "IND": 0.0080, # India ~0.80%
+            "CHN": -0.0005,# China -0.05%
+            "USA": 0.0050, # US ~0.50%
+            "IDN": 0.0074, # Indonesia ~0.74%
+            "PAK": 0.0190, # Pakistan ~1.90%
+            "NGA": 0.0240, # Nigeria ~2.40%
+            "BRA": 0.0052, # Brazil ~0.52%
+            "BGD": 0.0103, # Bangladesh ~1.03%
+            "RUS": -0.0018,# Russia -0.18%
+            "MEX": 0.0075, # Mexico ~0.75%
+            "JPN": -0.0053,# Japan -0.53%
+            "DEU": -0.0002,# Germany -0.02%
+            "GBR": 0.0034, # UK ~0.34%
+            "FRA": 0.0028, # France ~0.28%
+            "ITA": -0.0025,# Italy -0.25%
+            "ZAF": 0.0084, # South Africa ~0.84%
+            "AUS": 0.0120, # Australia ~1.20%
+            "CAN": 0.0150  # Canada ~1.50%
+        }
+
+        iso_a3 = (country.iso_a3 or "").upper()
+        growth_rate = GROWTH_RATES.get(iso_a3, 0.0070) # default global avg ~0.70%
+
+        # Calculate time elapsed since base year
+        base_pop = country.population
+        base_year = country.population_year or 2023
+        import datetime
+        now_dt = datetime.datetime.now(datetime.timezone.utc)
+        base_dt = datetime.datetime(base_year, 1, 1, tzinfo=datetime.timezone.utc)
+        elapsed_seconds = (now_dt - base_dt).total_seconds()
+        seconds_in_year = 365.25 * 86400.0
+
+        elapsed_years = elapsed_seconds / seconds_in_year
+        current_live_estimate = int(base_pop * ((1.0 + growth_rate) ** elapsed_years))
+
+        # Net change per second and daily births/deaths approximation
+        net_per_second = (base_pop * growth_rate) / seconds_in_year
+        daily_growth = int(net_per_second * 86400)
+        global_share = round((current_live_estimate / 8150000000.0) * 100.0, 2)
+
+        # Optional World Bank Open API latest indicator (cached)
+        wb_data = None
+        if country.iso_a2:
+            cache_key = f"wb_pop_{country.iso_a2.upper()}"
+            cache_now = time.time()
+            if cache_key in _CACHE:
+                _, wb_data = _CACHE[cache_key]
+            else:
+                try:
+                    wb_url = f"https://api.worldbank.org/v2/country/{country.iso_a2.upper()}/indicator/SP.POP.TOTL?format=json&per_page=2"
+                    wb_res = requests.get(wb_url, timeout=3)
+                    if wb_res.ok:
+                        wb_json = wb_res.json()
+                        if len(wb_json) > 1 and wb_json[1]:
+                            latest = wb_json[1][0]
+                            wb_data = {
+                                "value": latest.get("value"),
+                                "date": latest.get("date"),
+                                "source": "World Bank Open Data API"
+                            }
+                            _CACHE[cache_key] = (cache_now, wb_data)
+                except Exception:
+                    pass
+
+        return {
+            "is_live": True,
+            "live_population": current_live_estimate,
+            "base_population": base_pop,
+            "base_year": base_year,
+            "annual_growth_rate_pct": round(growth_rate * 100, 2),
+            "net_change_per_second": round(net_per_second, 5),
+            "daily_net_change": daily_growth,
+            "global_share_pct": global_share,
+            "world_bank_latest": wb_data,
+            "calculation_timestamp": now_dt.isoformat(),
+            "source": "UN DESA Demographic Models & World Bank Open Data"
+        }
+
     @classmethod
     def get_composite_live_data(cls, country):
         """Aggregate all live data sources for a country with graceful error isolation."""
@@ -175,10 +264,12 @@ class LiveDataService:
         weather = cls.get_live_weather(lat, lon)
         forex = cls.get_live_exchange_rates(country.currency_code)
         telemetry = cls.get_live_country_telemetry(country.iso_a2)
+        population = cls.get_live_population(country)
 
         return {
             "weather": weather,
             "forex": forex,
             "telemetry": telemetry,
-            "has_live_data": bool(weather or forex or telemetry)
+            "population": population,
+            "has_live_data": bool(weather or forex or telemetry or population)
         }

@@ -26,6 +26,16 @@
   <link rel="stylesheet" href="/static/css/style.css">
   <link rel="stylesheet" href="/static/css/responsive.css">
   
+  <!-- Instant Anti-FOUC Theme Initializer -->
+  <script>
+    (function() {
+      try {
+        var t = localStorage.getItem("tn_theme") || "dark";
+        document.documentElement.setAttribute("data-theme", t);
+      } catch (e) {}
+    })();
+  </script>
+
   {% block extra_head %}{% endblock %}
 </head>
 <body>
@@ -75,8 +85,9 @@
 
       <!-- Theme Switcher & Mobile Menu Button -->
       <div style="display: flex; align-items: center; gap: 0.5rem;">
-        <button id="themeToggle" class="tn-btn-icon" aria-label="Toggle light and dark theme">
-          <span id="themeIcon">☀️</span>
+        <button id="themeToggle" class="tn-theme-btn" aria-label="Toggle Light and Dark Theme" title="Switch Theme (Dark / Light)">
+          <span id="themeIcon">🌙</span>
+          <span id="themeText">Dark Cosmos</span>
         </button>
         <button id="mobileNavToggle" class="tn-btn-icon tn-mobile-menu-toggle" style="display: none;" aria-label="Toggle navigation menu" aria-expanded="false">
           ☰
