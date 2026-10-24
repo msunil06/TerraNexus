@@ -156,14 +156,25 @@ class UNService:
                 "status": "Elected Non-Permanent"
             },
             {
-                "country_name": "Ecuador",
-                "iso_a3": "ECU",
-                "flag": "🇪🇨",
-                "slug": "ecuador",
-                "term_years": "2023–2024 / 2025 Transition",
-                "regional_group": "Latin American and Caribbean Group (GRULAC)",
-                "active_military": 41500,
-                "defense_budget_usd": "$2.5 Billion",
+                "country_name": "Denmark",
+                "iso_a3": "DNK",
+                "flag": "🇩🇰",
+                "slug": "denmark",
+                "term_years": "2025–2026",
+                "regional_group": "Western European and Others Group (WEOG)",
+                "active_military": 20000,
+                "defense_budget_usd": "$9.4 Billion",
+                "status": "Elected Non-Permanent"
+            },
+            {
+                "country_name": "Greece",
+                "iso_a3": "GRC",
+                "flag": "🇬🇷",
+                "slug": "greece",
+                "term_years": "2025–2026",
+                "regional_group": "Western European and Others Group (WEOG)",
+                "active_military": 142700,
+                "defense_budget_usd": "$8.5 Billion",
                 "status": "Elected Non-Permanent"
             },
             {
@@ -178,14 +189,25 @@ class UNService:
                 "status": "Elected Non-Permanent"
             },
             {
-                "country_name": "Japan",
-                "iso_a3": "JPN",
-                "flag": "🇯🇵",
-                "slug": "japan",
-                "term_years": "2023–2024 / 2025 Transition",
+                "country_name": "Pakistan",
+                "iso_a3": "PAK",
+                "flag": "🇵🇰",
+                "slug": "pakistan",
+                "term_years": "2025–2026",
                 "regional_group": "Asia-Pacific Group",
-                "active_military": 247150,
-                "defense_budget_usd": "$54.0 Billion",
+                "active_military": 654000,
+                "defense_budget_usd": "$8.5 Billion",
+                "status": "Elected Non-Permanent"
+            },
+            {
+                "country_name": "Panama",
+                "iso_a3": "PAN",
+                "flag": "🇵🇦",
+                "slug": "panama",
+                "term_years": "2025–2026",
+                "regional_group": "Latin American and Caribbean Group (GRULAC)",
+                "active_military": 26000,
+                "defense_budget_usd": "$920 Million",
                 "status": "Elected Non-Permanent"
             },
             {
@@ -197,28 +219,6 @@ class UNService:
                 "regional_group": "Asia-Pacific Group",
                 "active_military": 500000,
                 "defense_budget_usd": "$47.9 Billion",
-                "status": "Elected Non-Permanent"
-            },
-            {
-                "country_name": "Malta",
-                "iso_a3": "MLT",
-                "flag": "🇲🇹",
-                "slug": "malta",
-                "term_years": "2023–2024 / 2025 Transition",
-                "regional_group": "Western European and Others Group (WEOG)",
-                "active_military": 1950,
-                "defense_budget_usd": "$110 Million",
-                "status": "Elected Non-Permanent"
-            },
-            {
-                "country_name": "Mozambique",
-                "iso_a3": "MOZ",
-                "flag": "🇲🇿",
-                "slug": "mozambique",
-                "term_years": "2023–2024 / 2025 Transition",
-                "regional_group": "African Group",
-                "active_military": 11200,
-                "defense_budget_usd": "$340 Million",
                 "status": "Elected Non-Permanent"
             },
             {
@@ -244,14 +244,14 @@ class UNService:
                 "status": "Elected Non-Permanent"
             },
             {
-                "country_name": "Switzerland",
-                "iso_a3": "CHE",
-                "flag": "🇨🇭",
-                "slug": "switzerland",
-                "term_years": "2023–2024 / 2025 Transition",
-                "regional_group": "Western European and Others Group (WEOG)",
-                "active_military": 21800,
-                "defense_budget_usd": "$6.2 Billion",
+                "country_name": "Somalia",
+                "iso_a3": "SOM",
+                "flag": "🇸🇴",
+                "slug": "somalia",
+                "term_years": "2025–2026",
+                "regional_group": "African Group",
+                "active_military": 20000,
+                "defense_budget_usd": "$180 Million",
                 "status": "Elected Non-Permanent"
             }
         ]

@@ -28,16 +28,28 @@ wheels/
 *.sqlite
 *.sqlite3
 terranexus.db
+instance/
+
+# Binaries & Executables
+*.exe
+cloudflared.exe
+
+# Scratch & Temporary
+scratch/
+.system_generated/
 
 # Logs
-logs
+logs/
 *.log
 
-# Environment variables & secrets
+# Environment variables & secrets (CRITICAL: NEVER COMMIT SECRETS)
 .env
-.env.local
-.env.*.local
+.env*
+!.env.example
 *.env
+*.pem
+*.key
+*.cert
 
 # IDE & OS
 .vscode/

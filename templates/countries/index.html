@@ -5,7 +5,7 @@
 {% block meta_description %}Complete catalog of all 196 sovereign nations of Earth. Search by name, capital, continent, or ISO code, view demographic profiles, and open interactive capital maps.{% endblock %}
 
 {% block content %}
-<div style="max-width: 1560px; margin: 2rem auto 4rem; padding: 0 1.5rem;">
+<div class="tn-container" style="margin: 2rem auto 4rem;">
   
   <!-- Header -->
   <div style="display: flex; align-items: flex-start; justify-content: space-between; flex-wrap: wrap; gap: 1.5rem; margin-bottom: 2rem;">
@@ -72,13 +72,17 @@
       </div>
     </div>
 
-    <!-- Continent Filter Pills (Requirement 5) -->
+    <!-- Filter Pills: All Countries, Major Economies, and Continents -->
     <div id="continentFilterPills" style="display: flex; align-items: center; gap: 0.45rem; flex-wrap: wrap; margin-top: 1rem; padding-top: 1rem; border-top: 1px solid rgba(255, 255, 255, 0.05);">
-      <button class="tn-btn tn-btn-sm tn-btn-primary country-filter-pill active" data-continent="all" style="font-size: 0.8rem; padding: 0.35rem 0.85rem; border-radius: 20px;">
-        🌍 All Continents ({{ total_count }})
+      <button class="tn-btn tn-btn-sm tn-btn-primary country-filter-pill active" data-continent="all" data-scope="all" style="font-size: 0.8rem; padding: 0.35rem 0.85rem; border-radius: 20px;">
+        🌍 All Countries ({{ total_count }})
       </button>
+      <button class="tn-btn tn-btn-sm tn-btn-outline country-scope-pill" id="top15EconomiesBtn" data-scope="top15" style="font-size: 0.8rem; padding: 0.35rem 0.85rem; border-radius: 20px; color: #f59e0b; border-color: rgba(245, 158, 11, 0.4);">
+        ⭐ Top 15 World Economies
+      </button>
+      <span style="color: var(--text-muted); font-size: 0.8rem; margin: 0 0.25rem;">|</span>
       {% for cont in continents %}
-        <button class="tn-btn tn-btn-sm tn-btn-outline country-filter-pill" data-continent="{{ cont.slug }}" style="font-size: 0.8rem; padding: 0.35rem 0.85rem; border-radius: 20px;">
+        <button class="tn-btn tn-btn-sm tn-btn-outline country-filter-pill" data-continent="{{ cont.slug }}" data-scope="continent" style="font-size: 0.8rem; padding: 0.35rem 0.85rem; border-radius: 20px;">
           {{ cont.name }}
         </button>
       {% endfor %}
@@ -88,14 +92,14 @@
   <!-- Results Count Indicator -->
   <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.25rem; font-size: 0.88rem; color: var(--text-secondary); flex-wrap: wrap; gap: 0.5rem;">
     <div id="countryResultsText">
-      Displaying <strong>{{ total_count }}</strong> sovereign countries
+      Displaying all <strong>{{ total_count }}</strong> sovereign countries
     </div>
     <div style="font-size: 0.8rem; color: var(--text-muted);">
       💡 Click <strong>📍 View Map</strong> on any card to inspect interactive capital coordinates
     </div>
   </div>
 
-  <!-- Countries Grid (Requirement: Initially show 15 major nations, others revealed on 'Show More' or Search) -->
+  <!-- Countries Grid (All 196 Sovereign Nations Displayed) -->
   {% set important_isos = ['usa', 'chn', 'ind', 'gbr', 'deu', 'fra', 'jpn', 'bra', 'can', 'aus', 'ita', 'rus', 'zaf', 'sau', 'mex'] %}
   <div id="countriesGridContainer" class="tn-grid" style="grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 1.25rem;">
     {% for country in countries %}
@@ -110,7 +114,7 @@
         data-population="{{ country.population or 0 }}"
         data-area="{{ country.area_km2 or 0 }}"
         data-important="{{ 'true' if is_important else 'false' }}"
-        style="display: {{ 'flex' if is_important else 'none' }}; flex-direction: column; justify-content: space-between; border: 1px solid var(--border-color); transition: all 0.2s ease;"
+        style="display: flex; flex-direction: column; justify-content: space-between; border: 1px solid var(--border-color); transition: all 0.2s ease;"
       >
         <div>
           <!-- Card Header: Name, Flag, Continent -->
@@ -143,7 +147,7 @@
             {% if country.capital_name and country.latitude and country.longitude %}
               <button 
                 type="button" 
-                class="tn-btn tn-btn-outline tn-btn-xs" 
+                class="tn-btn-view-map" 
                 data-view-map 
                 data-map-name="{{ country.capital_name }}" 
                 data-map-lat="{{ country.latitude }}" 
@@ -151,7 +155,6 @@
                 data-map-context="National Capital of {{ country.common_name }}" 
                 data-map-zoom="11"
                 title="Open interactive map centered on {{ country.capital_name }}"
-                style="border-color: var(--accent); color: var(--accent); font-weight: 700; padding: 3px 10px; font-size: 0.78rem; border-radius: 14px; white-space: nowrap;"
               >
                 📍 View Map
               </button>
@@ -225,11 +228,13 @@ document.addEventListener("DOMContentLoaded", function () {
   const showMoreBtn = document.getElementById("showMoreCountriesBtn");
 
   let activeContinent = "all";
-  let isShowingAll = false;
+  let onlyTop15 = false;
+
+  const top15Btn = document.getElementById("top15EconomiesBtn");
+  const allCountriesPill = document.querySelector('.country-filter-pill[data-continent="all"]');
 
   function applyFiltersAndSort() {
-    const query = searchInput.value.trim().toLowerCase();
-    const isFiltered = query.length > 0 || activeContinent !== "all";
+    const query = searchInput ? searchInput.value.trim().toLowerCase() : "";
     let visibleCount = 0;
 
     countryCards.forEach(card => {
@@ -244,11 +249,10 @@ document.addEventListener("DOMContentLoaded", function () {
       const matchesContinent = activeContinent === "all" || continent === activeContinent;
 
       let shouldShow = false;
-      if (isFiltered || isShowingAll) {
-        shouldShow = matchesQuery && matchesContinent;
+      if (onlyTop15) {
+        shouldShow = isImportant && matchesQuery;
       } else {
-        // Default state: only show the 15 major/important countries
-        shouldShow = isImportant;
+        shouldShow = matchesQuery && matchesContinent;
       }
 
       if (shouldShow) {
@@ -259,22 +263,20 @@ document.addEventListener("DOMContentLoaded", function () {
       }
     });
 
-    // Handle "Show More" button visibility & text
+    // Handle "Show More / All" button visibility & text
     if (showMoreWrapper) {
-      if (isFiltered) {
-        showMoreWrapper.style.display = "none";
-      } else {
+      if (onlyTop15) {
         showMoreWrapper.style.display = "block";
         if (showMoreBtn) {
-          showMoreBtn.innerHTML = isShowingAll 
-            ? "▴ Show Less (15 Major Nations)" 
-            : `✨ Show More Countries (${countryCards.length - 15} More Nations) ▾`;
+          showMoreBtn.innerHTML = `🌍 View All ${countryCards.length} Sovereign Countries ▾`;
         }
+      } else {
+        showMoreWrapper.style.display = "none";
       }
     }
 
     // Sort visible items
-    const sortVal = sortSelect.value;
+    const sortVal = sortSelect ? sortSelect.value : "name";
     const sortedCards = countryCards.slice().sort((a, b) => {
       if (sortVal === "name") {
         return a.dataset.countryName.localeCompare(b.dataset.countryName);
@@ -295,12 +297,14 @@ document.addEventListener("DOMContentLoaded", function () {
     // Update UI indicators
     if (countBadge) countBadge.textContent = visibleCount;
     if (resultsText) {
-      if (!isFiltered && !isShowingAll) {
-        resultsText.innerHTML = `Displaying <strong>15</strong> major nations &bull; Click <strong>Show More</strong> or use search for all ${countryCards.length} countries`;
-      } else if (!isFiltered && isShowingAll) {
-        resultsText.innerHTML = `Displaying all <strong>${visibleCount}</strong> sovereign countries`;
+      if (onlyTop15) {
+        resultsText.innerHTML = `Displaying <strong>${visibleCount}</strong> top global economies &bull; Click <strong>All Countries</strong> to see all ${countryCards.length}`;
+      } else if (activeContinent !== "all") {
+        resultsText.innerHTML = `Displaying <strong>${visibleCount}</strong> sovereign countries in this region`;
+      } else if (query) {
+        resultsText.innerHTML = `Found <strong>${visibleCount}</strong> countries matching "${query}"`;
       } else {
-        resultsText.innerHTML = `Found <strong>${visibleCount}</strong> countries matching filters`;
+        resultsText.innerHTML = `Displaying all <strong>${visibleCount}</strong> sovereign countries across 6 continents`;
       }
     }
 
@@ -311,7 +315,29 @@ document.addEventListener("DOMContentLoaded", function () {
 
   if (showMoreBtn) {
     showMoreBtn.addEventListener("click", () => {
-      isShowingAll = !isShowingAll;
+      onlyTop15 = false;
+      if (top15Btn) {
+        top15Btn.classList.remove("tn-btn-primary");
+        top15Btn.classList.add("tn-btn-outline");
+      }
+      if (allCountriesPill) {
+        allCountriesPill.classList.remove("tn-btn-outline");
+        allCountriesPill.classList.add("tn-btn-primary", "active");
+      }
+      applyFiltersAndSort();
+    });
+  }
+
+  if (top15Btn) {
+    top15Btn.addEventListener("click", () => {
+      onlyTop15 = true;
+      activeContinent = "all";
+      pillButtons.forEach(p => {
+        p.classList.remove("tn-btn-primary", "active");
+        p.classList.add("tn-btn-outline");
+      });
+      top15Btn.classList.remove("tn-btn-outline");
+      top15Btn.classList.add("tn-btn-primary");
       applyFiltersAndSort();
     });
   }
@@ -326,6 +352,12 @@ document.addEventListener("DOMContentLoaded", function () {
 
   pillButtons.forEach(pill => {
     pill.addEventListener("click", () => {
+      onlyTop15 = false;
+      if (top15Btn) {
+        top15Btn.classList.remove("tn-btn-primary");
+        top15Btn.classList.add("tn-btn-outline");
+      }
+
       pillButtons.forEach(p => {
         p.classList.remove("tn-btn-primary", "active");
         p.classList.add("tn-btn-outline");
@@ -342,7 +374,11 @@ document.addEventListener("DOMContentLoaded", function () {
     if (searchInput) searchInput.value = "";
     if (sortSelect) sortSelect.value = "name";
     activeContinent = "all";
-    isShowingAll = false;
+    onlyTop15 = false;
+    if (top15Btn) {
+      top15Btn.classList.remove("tn-btn-primary");
+      top15Btn.classList.add("tn-btn-outline");
+    }
     pillButtons.forEach(p => {
       p.classList.remove("tn-btn-primary", "active");
       p.classList.add("tn-btn-outline");
@@ -357,7 +393,7 @@ document.addEventListener("DOMContentLoaded", function () {
   if (resetBtn) resetBtn.addEventListener("click", resetAll);
   if (clearSearchBtn) clearSearchBtn.addEventListener("click", resetAll);
 
-  // Trigger initial filter & sort
+  // Trigger initial filter & sort showing all 196 countries
   applyFiltersAndSort();
 });
 </script>

@@ -109,9 +109,17 @@ def create_app(config_class=Config):
 if __name__ == "__main__":
     app = create_app()
     with app.app_context():
-        db.create_all()
-        from database.seed_data import run_all_seeds
-        # Seed if empty
-        if User.query.count() == 0:
-            run_all_seeds(app)
+        try:
+            db.create_all()
+            from database.seed_data import run_all_seeds
+            # Seed if empty or incomplete
+            from database.populate_world_data import populate_all_world_data
+            from models.geography import Country
+            from models.user import User
+            if User.query.count() == 0:
+                run_all_seeds(app)
+            elif Country.query.count() < 100:
+                populate_all_world_data(app)
+        except Exception as e:
+            print(f"[DATABASE NOTICE] {e}")
     app.run(host="0.0.0.0", port=5000, debug=True)

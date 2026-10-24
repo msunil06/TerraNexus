@@ -35,7 +35,7 @@
   </div>
 </section>
 
-<div style="max-width: 1440px; margin: 0 auto 4rem; padding: 0 1.5rem;">
+<div class="tn-container" style="margin: 0 auto 4rem;">
   <div class="tn-grid" style="grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));">
     {% for country in countries %}
     <a href="{{ url_for('maps.country_map', slug=country.slug) }}" class="tn-card">

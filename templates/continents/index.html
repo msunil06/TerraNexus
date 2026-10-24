@@ -5,7 +5,7 @@
 {% block meta_description %}Explore all seven continents of Earth, verified country counts, complete sovereign nation directories, search filters, and an interactive continental map.{% endblock %}
 
 {% block content %}
-<div style="max-width: 1440px; margin: 2rem auto 4rem; padding: 0 1.5rem;">
+<div class="tn-container" style="margin: 2rem auto 4rem;">
   
   <!-- Header -->
   <div style="display: flex; align-items: flex-start; justify-content: space-between; flex-wrap: wrap; gap: 1.5rem; margin-bottom: 2rem;">
@@ -168,10 +168,9 @@
           <!-- Actions -->
           <div style="display: flex; align-items: center; gap: 0.6rem; flex-wrap: wrap;">
             <button 
-              class="tn-btn tn-btn-outline tn-btn-sm btn-focus-continent"
+              class="tn-btn-view-map btn-focus-continent"
               data-continent="{{ continent.slug }}"
               title="View interactive map for {{ continent.name }}"
-              style="font-size: 0.82rem; border-color: var(--accent); color: var(--accent); font-weight: 700;"
             >
               📍 View Map
             </button>

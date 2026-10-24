@@ -168,3 +168,232 @@
     height: 340px;
   }
 }
+
+/* ==========================================================================
+   TerraNexus Universal Fluid Container & Large Desktop Display System
+   Supports:
+   - Compact Laptops (1280px - 1366px)
+   - Standard Laptops & MacBooks (1440px - 1536px)
+   - Full HD Desktops (1920x1080)
+   - 2K / QHD Displays (2560x1440)
+   - Ultra-Wide (3440x1440) & 4K UHD Monitors (3840x2160)
+   ========================================================================== */
+
+:root {
+  --container-max-width: 1400px;
+  --container-padding: clamp(1.25rem, 2.5vw, 2.75rem);
+}
+
+/* Laptops & Standard Desktops (1280px - 1439px) */
+@media (min-width: 1280px) and (max-width: 1439px) {
+  :root {
+    --container-max-width: 1360px;
+  }
+}
+
+/* Wide Desktops & 1080p FHD Monitors (1440px - 1679px) */
+@media (min-width: 1440px) {
+  :root {
+    --container-max-width: 1560px;
+  }
+}
+
+/* Large Desktop Monitors / 1080p Full-Screen & 1440p Scaled (1680px - 1999px) */
+@media (min-width: 1680px) {
+  :root {
+    --container-max-width: 1720px;
+    --container-padding: clamp(1.5rem, 3vw, 3.5rem);
+  }
+}
+
+/* Ultra-Wide (21:9) & 2K Native Displays (2000px - 2559px) */
+@media (min-width: 2000px) {
+  :root {
+    --container-max-width: 1980px;
+    --container-padding: clamp(2rem, 3.5vw, 4rem);
+  }
+}
+
+/* 4K UHD & Super Ultra-Wide Displays (>= 2560px) */
+@media (min-width: 2560px) {
+  :root {
+    --container-max-width: 2300px;
+    --container-padding: clamp(2.5rem, 4vw, 5rem);
+  }
+}
+
+/* Universal Page Containers */
+.tn-container,
+.tn-page-container {
+  width: 100% !important;
+  max-width: var(--container-max-width) !important;
+  margin-left: auto !important;
+  margin-right: auto !important;
+  padding-left: var(--container-padding) !important;
+  padding-right: var(--container-padding) !important;
+  box-sizing: border-box !important;
+}
+
+/* Synchronize Navigation & Footer Containers */
+.tn-nav-container,
+.tn-footer-container,
+.tn-footer-bottom {
+  width: 100% !important;
+  max-width: var(--container-max-width) !important;
+  margin-left: auto !important;
+  margin-right: auto !important;
+  padding-left: var(--container-padding) !important;
+  padding-right: var(--container-padding) !important;
+  box-sizing: border-box !important;
+}
+
+/* Detail Headers & Tabs Containers */
+.tn-detail-header,
+.tn-detail-tabs,
+.tn-tabs-container {
+  width: 100% !important;
+  max-width: var(--container-max-width) !important;
+  margin-left: auto !important;
+  margin-right: auto !important;
+  padding-left: var(--container-padding) !important;
+  padding-right: var(--container-padding) !important;
+  box-sizing: border-box !important;
+}
+
+/* Hero Content Containers */
+.tn-hero-container,
+.tn-hero-content {
+  width: 100% !important;
+  max-width: min(var(--container-max-width), 1400px) !important;
+  margin-left: auto !important;
+  margin-right: auto !important;
+  padding-left: var(--container-padding) !important;
+  padding-right: var(--container-padding) !important;
+  box-sizing: border-box !important;
+}
+
+@media (min-width: 1680px) {
+  .tn-hero-container,
+  .tn-hero-content {
+    max-width: min(var(--container-max-width), 1600px) !important;
+  }
+}
+
+@media (min-width: 2000px) {
+  .tn-hero-container,
+  .tn-hero-content {
+    max-width: min(var(--container-max-width), 1850px) !important;
+  }
+}
+
+/* Universal override for inline max-width wrappers across all templates */
+div[style*="max-width: 1200px"],
+div[style*="max-width: 1440px"],
+div[style*="max-width: 1560px"],
+div[style*="max-width: 1600px"],
+section[style*="max-width: 1200px"],
+section[style*="max-width: 1440px"] {
+  max-width: var(--container-max-width) !important;
+  padding-left: var(--container-padding) !important;
+  padding-right: var(--container-padding) !important;
+  box-sizing: border-box !important;
+}
+
+/* Ensure inner cards and form boxes do not expand inappropriately */
+.tn-card div[style*="max-width"],
+.tn-stat-card div[style*="max-width"],
+form div[style*="max-width"] {
+  padding-left: inherit;
+  padding-right: inherit;
+}
+
+/* Adaptive Card Grids on Large Monitors */
+@media (min-width: 1440px) {
+  .tn-grid {
+    grid-template-columns: repeat(auto-fill, minmax(290px, 1fr));
+    gap: 1.5rem;
+  }
+}
+
+@media (min-width: 1680px) {
+  .tn-grid {
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 1.75rem;
+  }
+}
+
+@media (min-width: 2100px) {
+  .tn-grid {
+    grid-template-columns: repeat(auto-fill, minmax(330px, 1fr));
+    gap: 2rem;
+  }
+}
+
+/* P5 Security Council Grid: Balanced on all desktop screens */
+.tn-p5-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1.25rem;
+}
+
+@media (min-width: 1540px) {
+  .tn-p5-grid {
+    grid-template-columns: repeat(5, 1fr) !important;
+  }
+}
+
+@media (max-width: 1539px) and (min-width: 1100px) {
+  .tn-p5-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+/* UN Hero Vital Stats Bar: Balanced 4-column metric bar on desktop */
+.tn-un-stats-bar {
+  display: grid !important;
+  grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+  gap: 1rem;
+  max-width: 1200px;
+  margin: 1.5rem auto 0;
+  width: 100%;
+}
+
+@media (min-width: 1024px) {
+  .tn-un-stats-bar {
+    grid-template-columns: repeat(4, 1fr) !important;
+    max-width: 1300px;
+  }
+}
+
+@media (min-width: 1680px) {
+  .tn-un-stats-bar {
+    max-width: 1540px;
+    gap: 1.25rem;
+  }
+}
+
+@media (min-width: 2100px) {
+  .tn-un-stats-bar {
+    max-width: 1780px;
+    gap: 1.5rem;
+  }
+}
+
+/* Interactive Maps on Large Screens */
+@media (min-width: 1440px) {
+  .tn-map-frame {
+    height: 620px;
+  }
+}
+
+@media (min-width: 1680px) {
+  .tn-map-frame {
+    height: 680px;
+  }
+}
+
+@media (min-width: 2100px) {
+  .tn-map-frame {
+    height: 760px;
+  }
+}

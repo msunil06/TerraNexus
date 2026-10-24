@@ -198,31 +198,43 @@ function openCityMapModal(name, lat, lon, context = "", zoom = 10) {
       });
 
       // 100% Free Public Tiles - Zero Watermarks & Zero API Key Required
-      const satLayer = L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}", {
-        attribution: 'Tiles &copy; Esri &mdash; High-Res Satellite (Free Public)',
-        maxZoom: 18
-      }).addTo(cityModalMap);
+      const satLayer = L.layerGroup([
+        L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}", {
+          attribution: 'Tiles &copy; Esri &mdash; High-Res Satellite (Free Public)',
+          maxZoom: 18
+        }),
+        L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}", {
+          attribution: '',
+          maxZoom: 18
+        })
+      ]).addTo(cityModalMap);
 
-      const darkLayer = L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Base/MapServer/tile/{z}/{y}/{x}", {
-        attribution: 'Tiles &copy; Esri Dark Canvas (Zero API Key)',
-        maxZoom: 16
+      const darkLayer = L.tileLayer("https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png", {
+        attribution: '&copy; CartoDB &copy; OpenStreetMap',
+        subdomains: 'abcd',
+        maxZoom: 19
       });
 
-      const streetLayer = L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}", {
-        attribution: 'Tiles &copy; Esri World Street (Zero API Key)',
-        maxZoom: 18
-      });
+      const oceanLayer = L.layerGroup([
+        L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/Ocean/World_Ocean_Base/MapServer/tile/{z}/{y}/{x}", {
+          attribution: 'Tiles &copy; Esri, GEBCO &mdash; Ocean Bathymetry',
+          maxZoom: 16
+        }),
+        L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/Ocean/World_Ocean_Reference/MapServer/tile/{z}/{y}/{x}", {
+          maxZoom: 16
+        })
+      ]);
 
-      const osmLayer = L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+      const streetLayer = L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
         attribution: '&copy; OpenStreetMap contributors',
         maxZoom: 19
       });
 
       L.control.layers({
-        "ESRI Satellite": satLayer,
-        "ESRI Dark Canvas": darkLayer,
-        "ESRI Street Map": streetLayer,
-        "OpenStreetMap": osmLayer
+        "🛰️ Satellite + Labels": satLayer,
+        "🌊 Ocean Bathymetry": oceanLayer,
+        "🌙 Dark Cosmos": darkLayer,
+        "🗺️ Street Atlas": streetLayer
       }, null, { position: "topright" }).addTo(cityModalMap);
 
       cityModalMarker = L.marker([lat, lon]).addTo(cityModalMap);
@@ -241,6 +253,7 @@ function openCityMapModal(name, lat, lon, context = "", zoom = 10) {
 
     if (cityModalMap) {
       cityModalMap.invalidateSize();
+      setTimeout(() => cityModalMap.invalidateSize(), 300);
     }
   }, 200);
 }

@@ -7,38 +7,38 @@
 {% block content %}
 <!-- UN Hero Header -->
 <section class="tn-hero" style="background: radial-gradient(circle at top right, rgba(59, 130, 246, 0.25), transparent 70%), var(--bg-surface); padding: 3.5rem 1.5rem 2.5rem; border-bottom: 1px solid var(--border-color);">
-  <div class="tn-hero-content" style="max-width: 1200px; margin: 0 auto; text-align: center;">
+  <div class="tn-hero-content tn-container" style="text-align: center;">
     <div style="font-size: 3.2rem; margin-bottom: 0.5rem; filter: drop-shadow(0 4px 12px rgba(59, 130, 246, 0.4));">🇺🇳</div>
     <div style="display: inline-flex; align-items: center; gap: 0.5rem; background: rgba(59, 130, 246, 0.15); border: 1px solid rgba(59, 130, 246, 0.35); padding: 0.35rem 0.95rem; border-radius: 999px; font-size: 0.85rem; color: #60a5fa; margin-bottom: 1rem; font-weight: 600;">
       <span>Charter of the United Nations (1945)</span> &bull; <span>193 Sovereign Member States</span>
     </div>
-    <h1 style="font-family: var(--font-heading); font-size: 2.5rem; font-weight: 800; color: var(--text-primary); margin: 0 0 0.75rem;">
+    <h1 style="font-family: var(--font-heading); font-size: clamp(2rem, 3.5vw, 3rem); font-weight: 800; color: var(--text-primary); margin: 0 0 0.75rem;">
       United Nations (UN) Intelligence Hub
     </h1>
-    <p style="font-size: 1.1rem; color: var(--text-secondary); max-width: 820px; margin: 0 auto 1.5rem; line-height: 1.7;">
+    <p style="font-size: 1.1rem; color: var(--text-secondary); max-width: 900px; margin: 0 auto 1.5rem; line-height: 1.7;">
       Comprehensive student dossier detailing the General Assembly, the P5 Permanent Members with veto power, 10 elected non-permanent Security Council members, specialized international agencies (WHO, UNESCO, UNICEF, WTO, IMF), and live defense spending indicators.
     </p>
 
-    <!-- Quick Vital Statistics Pills -->
-    <div style="display: flex; justify-content: center; flex-wrap: wrap; gap: 1rem; margin-top: 1rem;">
-      <div class="tn-stat-card" style="padding: 0.85rem 1.5rem; min-width: 170px;">
+    <!-- Quick Vital Statistics Pills (Responsive 4-column Dashboard Metric Bar) -->
+    <div class="tn-un-stats-bar">
+      <div class="tn-stat-card" style="padding: 1rem 1.25rem;">
         <span class="tn-card-meta-label">Total Member States</span>
-        <div style="font-size: 1.5rem; font-weight: 800; color: var(--text-primary);">193 States</div>
+        <div style="font-size: 1.6rem; font-weight: 800; color: var(--text-primary);">193 States</div>
         <span style="font-size: 0.78rem; color: var(--text-muted);">+ 2 Permanent Observers</span>
       </div>
-      <div class="tn-stat-card" style="padding: 0.85rem 1.5rem; min-width: 170px;">
+      <div class="tn-stat-card" style="padding: 1rem 1.25rem;">
         <span class="tn-card-meta-label">Secretary-General</span>
         <div style="font-size: 1.15rem; font-weight: 700; color: #60a5fa; margin-top: 4px;">{{ overview.secretary_general }}</div>
         <span style="font-size: 0.78rem; color: var(--text-muted);">9th UN Secretary-General</span>
       </div>
-      <div class="tn-stat-card" style="padding: 0.85rem 1.5rem; min-width: 170px;">
+      <div class="tn-stat-card" style="padding: 1rem 1.25rem;">
         <span class="tn-card-meta-label">UN Headquarters</span>
         <div style="font-size: 1.15rem; font-weight: 700; color: var(--text-primary); margin-top: 4px;">New York City</div>
         <span style="font-size: 0.78rem; color: var(--text-muted);">International Territory</span>
       </div>
-      <div class="tn-stat-card" style="padding: 0.85rem 1.5rem; min-width: 170px;">
+      <div class="tn-stat-card" style="padding: 1rem 1.25rem;">
         <span class="tn-card-meta-label">Security Council</span>
-        <div style="font-size: 1.5rem; font-weight: 800; color: #38bdf8;">15 Members</div>
+        <div style="font-size: 1.6rem; font-weight: 800; color: #38bdf8;">15 Members</div>
         <span style="font-size: 0.78rem; color: var(--text-muted);">5 Permanent (P5) + 10 Elected</span>
       </div>
     </div>
@@ -46,7 +46,7 @@
 </section>
 
 <!-- Main Container -->
-<div style="max-width: 1200px; margin: 2.5rem auto 5rem; padding: 0 1.5rem;">
+<div class="tn-container" style="margin: 2.5rem auto 5rem;">
 
   <!-- SECTION 1: P5 Permanent Members of the Security Council -->
   <section style="margin-bottom: 3.5rem;">
@@ -64,7 +64,7 @@
       </span>
     </div>
 
-    <div class="tn-grid" style="grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));">
+    <div class="tn-grid tn-p5-grid">
       {% for m in p5_members %}
       <div class="tn-card" style="padding: 1.5rem; background: var(--bg-card); border: 1px solid var(--border-color); display: flex; flex-direction: column; justify-content: space-between; position: relative; overflow: hidden;">
         <div style="position: absolute; top: 0; left: 0; right: 0; height: 4px; background: linear-gradient(90deg, #3b82f6, #06b6d4);"></div>
@@ -144,9 +144,14 @@
           Elected by the UN General Assembly for staggered 2-year terms representing global continental regions (No Veto Power).
         </p>
       </div>
-      <span class="tn-badge" style="background: rgba(56, 189, 248, 0.15); border-color: rgba(56, 189, 248, 0.3); color: #38bdf8;">
-        General Assembly Elected Seats
-      </span>
+      <div style="display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap;">
+        <span class="tn-badge" style="background: rgba(34, 197, 94, 0.15); border-color: rgba(34, 197, 94, 0.3); color: #22c55e; font-weight: 700;">
+          🟢 Active 2025–2026 Mandate
+        </span>
+        <span class="tn-badge" style="background: rgba(56, 189, 248, 0.15); border-color: rgba(56, 189, 248, 0.3); color: #38bdf8;">
+          General Assembly Elected Seats
+        </span>
+      </div>
     </div>
 
     <div class="tn-grid" style="grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));">

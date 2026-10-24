@@ -3,7 +3,8 @@ from services.un_service import UNService
 
 un_bp = Blueprint("un", __name__, url_prefix="/un")
 
-@un_bp.route("")
+@un_bp.route("", strict_slashes=False)
+@un_bp.route("/", strict_slashes=False)
 def index():
     overview = UNService.get_un_overview()
     p5_members = UNService.get_p5_permanent_members()

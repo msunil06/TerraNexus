@@ -100,7 +100,7 @@ class UserFavorite(db.Model):
     item_id = db.Column(db.String(100), nullable=False)  # code or slug
     item_title = db.Column(db.String(150), nullable=False)
     item_subtitle = db.Column(db.String(150), nullable=True)
-    item_flag = db.Column(db.String(50), nullable=True)
+    item_flag = db.Column(db.Unicode(50), nullable=True)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
     __table_args__ = (

@@ -32,7 +32,7 @@
   </div>
 </section>
 
-<div style="max-width: 1440px; margin: 0 auto 4rem; padding: 0 1.5rem;">
+<div class="tn-container" style="margin: 0 auto 4rem;">
   
   <!-- Map Card -->
   <div class="tn-map-card" style="margin-bottom: 2rem;">
@@ -45,11 +45,10 @@
           background: var(--bg-card); color: var(--text-primary); border: 1px solid var(--border-color);
           border-radius: var(--radius-sm); padding: 0.4rem 0.75rem; font-size: 0.84rem; outline: none; cursor: pointer;
         ">
-          <option value="satellite">🛰️ Satellite View (ESRI)</option>
-          <option value="dark">🌙 Dark Cosmos (CartoDB)</option>
-          <option value="light">☀️ Light Atlas (CartoDB)</option>
-          <option value="topo">🏔️ Bathymetry / Relief (OpenTopoMap)</option>
-          <option value="streets">🗺️ Street Map (OpenStreetMap)</option>
+          <option value="bathymetry" selected>🌊 Ocean Bathymetry & Relief (ESRI/GEBCO)</option>
+          <option value="satellite">🛰️ Satellite Imagery & Labels (ESRI)</option>
+          <option value="dark">🌙 Dark Marine Cosmos (CartoDB)</option>
+          <option value="streets">🗺️ Global Atlas (OpenStreetMap)</option>
         </select>
         <button id="resetOceanView" class="tn-btn tn-btn-outline tn-btn-sm">⟲ Center Ocean</button>
       </div>
@@ -192,31 +191,49 @@ document.addEventListener("DOMContentLoaded", () => {
     worldCopyJump: true
   });
 
+  // Authoritative Ocean Map Tile Layers (Zero API Key Required)
   const tileLayers = {
-    satellite: L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}", {
-      attribution: 'Tiles &copy; Esri &mdash; High-Resolution Satellite (Free Public)',
-      maxZoom: 18
+    // 1. ESRI World Ocean Base + Detailed Ocean Reference (Best ocean bathymetry available)
+    bathymetry: L.layerGroup([
+      L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/Ocean/World_Ocean_Base/MapServer/tile/{z}/{y}/{x}", {
+        attribution: 'Tiles &copy; Esri, GEBCO, NOAA, National Geographic &mdash; Ocean Bathymetry (Zero Key)',
+        maxZoom: 16
+      }),
+      L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/Ocean/World_Ocean_Reference/MapServer/tile/{z}/{y}/{x}", {
+        attribution: '',
+        maxZoom: 16
+      })
+    ]),
+    // 2. High-Resolution Satellite with boundaries and coastal labels
+    satellite: L.layerGroup([
+      L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}", {
+        attribution: 'Tiles &copy; Esri &mdash; High-Resolution Satellite (Free Public)',
+        maxZoom: 18
+      }),
+      L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}", {
+        attribution: '',
+        maxZoom: 18
+      })
+    ]),
+    // 3. Dark Marine Cosmos (CartoDB Dark Matter)
+    dark: L.tileLayer("https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png", {
+      attribution: '&copy; CartoDB &copy; OpenStreetMap',
+      subdomains: 'abcd',
+      maxZoom: 19
     }),
-    dark: L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Base/MapServer/tile/{z}/{y}/{x}", {
-      attribution: 'Tiles &copy; Esri &mdash; Esri Dark Canvas (Zero API Key)', maxZoom: 16
-    }),
-    light: L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}", {
-      attribution: 'Tiles &copy; Esri &mdash; Esri World Street (Zero API Key)', maxZoom: 18
-    }),
-    topo: L.tileLayer("https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png", {
-      attribution: '&copy; OpenTopoMap', maxZoom: 17
-    }),
+    // 4. Global Street / Atlas (OpenStreetMap)
     streets: L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-      attribution: '&copy; OpenStreetMap contributors', maxZoom: 19
+      attribution: '&copy; OpenStreetMap contributors',
+      maxZoom: 19
     })
   };
 
-  tileLayers.satellite.addTo(map);
+  let activeKey = "bathymetry";
+  tileLayers.bathymetry.addTo(map);
 
   const select = document.getElementById("oceanMapLayerSelect");
-  let activeKey = "satellite";
   if (select) {
-    select.value = "satellite";
+    select.value = "bathymetry";
     select.addEventListener("change", (e) => {
       map.removeLayer(tileLayers[activeKey]);
       tileLayers[e.target.value].addTo(map);
@@ -226,23 +243,68 @@ document.addEventListener("DOMContentLoaded", () => {
 
   const resetBtn = document.getElementById("resetOceanView");
   if (resetBtn) {
-    resetBtn.addEventListener("click", () => map.setView([centerLat, centerLon], initialZoom));
+    resetBtn.addEventListener("click", () => {
+      map.setView([centerLat, centerLon], initialZoom);
+    });
   }
 
-  // Plot Marginal Seas Markers
+  // World's Deepest Oceanic Trenches Database
+  const oceanTrenches = {
+    "pacific-ocean": { name: "Mariana Trench (Challenger Deep)", lat: 11.3493, lon: 142.1996, depth: "10,994 m (36,070 ft)", desc: "Deepest known point on Earth, located in the western Pacific Ocean." },
+    "atlantic-ocean": { name: "Puerto Rico Trench (Milwaukee Deep)", lat: 19.8450, lon: -66.5000, depth: "8,376 m (27,480 ft)", desc: "Deepest point in the Atlantic Ocean and Caribbean Sea boundary." },
+    "indian-ocean": { name: "Java / Sunda Trench", lat: -10.3167, lon: 109.9667, depth: "7,450 m (24,442 ft)", desc: "Deepest oceanic trench in the Indian Ocean, parallel to Sumatra and Java." },
+    "southern-ocean": { name: "South Sandwich Trench (Meteor Deep)", lat: -55.6667, lon: -25.9167, depth: "7,235 m (23,737 ft)", desc: "Subduction trench in the South Atlantic / Southern Ocean quadrant." },
+    "arctic-ocean": { name: "Molloy Deep (Fram Strait)", lat: 79.1417, lon: 2.7833, depth: "5,550 m (18,209 ft)", desc: "Bathymetric abyss between Greenland and Svalbard archipelago." }
+  };
+
+  const trench = oceanTrenches["{{ ocean.slug }}"];
+  if (trench) {
+    const trenchIcon = L.divIcon({
+      className: "tn-trench-marker",
+      html: `<div style="background: linear-gradient(135deg, #7c3aed, #ec4899); border: 2px solid #ffffff; border-radius: 50%; width: 34px; height: 34px; display: flex; align-items: center; justify-content: center; font-size: 16px; box-shadow: 0 0 16px rgba(236,72,153,0.85); cursor: pointer; animation: pulse 2s infinite;">🔱</div>`,
+      iconSize: [34, 34],
+      iconAnchor: [17, 17]
+    });
+
+    L.marker([trench.lat, trench.lon], { icon: trenchIcon })
+      .addTo(map)
+      .bindPopup(`
+        <div style="font-family: var(--font-sans); min-width: 200px;">
+          <div style="font-size: 0.72rem; text-transform: uppercase; color: #ec4899; font-weight: 800; letter-spacing: 0.5px;">Deepest Point Sounding</div>
+          <strong style="font-size: 1.05rem; color: #1e293b; display: block; margin: 2px 0 4px;">${trench.name}</strong>
+          <div style="font-size: 0.95rem; font-weight: 800; color: #7c3aed; margin-bottom: 4px;">Depth: ${trench.depth}</div>
+          <p style="font-size: 0.8rem; color: #64748b; margin: 0; line-height: 1.4;">${trench.desc}</p>
+        </div>
+      `);
+  }
+
+  // Plot Marginal Seas Markers (Define icon once outside loop to prevent redeclaration SyntaxError)
+  const seaIcon = L.divIcon({
+    className: "tn-sea-marker",
+    html: `<div style="background: rgba(6,182,212,0.9); border: 1.5px solid #ffffff; border-radius: 50%; width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; font-size: 13px; box-shadow: 0 0 10px #06b6d4; cursor: pointer;">⛵</div>`,
+    iconSize: [28, 28],
+    iconAnchor: [14, 14]
+  });
+
   {% for sea in seas %}
     {% if sea.latitude and sea.longitude %}
-      const seaIcon = L.divIcon({
-        className: "tn-sea-marker",
-        html: `<div style="background: rgba(6,182,212,0.85); border: 1.5px solid #ffffff; border-radius: 50%; width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; font-size: 13px; box-shadow: 0 0 10px #06b6d4;">⛵</div>`,
-        iconSize: [28, 28], iconAnchor: [14, 14]
-      });
-
       L.marker([{{ sea.latitude }}, {{ sea.longitude }}], { icon: seaIcon })
         .addTo(map)
-        .bindPopup(`<strong>{{ sea.name }}</strong><br>Type: {{ sea.sea_type | capitalize }}<br><a href="/seas/{{ sea.slug }}">View Sea Profile &rarr;</a>`);
+        .bindPopup(`
+          <div style="font-family: var(--font-sans);">
+            <strong style="font-size: 0.95rem; color: #1e293b;">{{ sea.name }}</strong><br>
+            <span style="font-size: 0.8rem; color: #0284c7; font-weight: 600;">Type: {{ sea.sea_type | capitalize }} Sea</span><br>
+            <span style="font-size: 0.78rem; color: #64748b;">Max Depth: {{ '{:,}'.format(sea.max_depth_m) if sea.max_depth_m else 'N/A' }} m</span><br>
+            <a href="/seas/{{ sea.slug }}" style="display: inline-block; margin-top: 4px; font-size: 0.8rem; color: #00f5d4; font-weight: 700;">View Sea Profile &rarr;</a>
+          </div>
+        `);
     {% endif %}
   {% endfor %}
+
+  // Invalidate size to guarantee crisp tile loading
+  setTimeout(() => { map.invalidateSize(); }, 200);
+  setTimeout(() => { map.invalidateSize(); }, 500);
+  window.addEventListener("resize", () => { map.invalidateSize(); });
 });
 </script>
 {% endblock %}

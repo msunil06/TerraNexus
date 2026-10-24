@@ -1,17 +1,27 @@
 {% extends "base.html" %}
 
-{% block title %}Oceans of the World - {{ app_name }}{% endblock %}
+{% block title %}Oceans of the World & Marine Bathymetry - {{ app_name }}{% endblock %}
+{% block meta_description %}Interactive Hydrographic & Bathymetric Atlas of Earth's 5 World Oceans, deepest submarine trenches, marginal seas, and real-time marine swell telemetry.{% endblock %}
 
 {% block content %}
-<div style="max-width: 1440px; margin: 2rem auto 4rem; padding: 0 1.5rem;">
+<div class="tn-container" style="margin: 2rem auto 4rem;">
+  <!-- Header Hero -->
   <div style="margin-bottom: 2rem;">
-    <h1 style="font-size: 2.4rem; margin-bottom: 0.5rem;">The World Oceans</h1>
-    <p style="color: var(--text-secondary); font-size: 1rem; max-width: 800px;">
-      Earth's continuous body of saline water divided into five principal oceanic basins. Explore verified bathymetric measurements, deepest trenches, and marine ecosystems.
+    <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.5rem; flex-wrap: wrap;">
+      <span style="font-size: 2.6rem;">🌊</span>
+      <h1 style="font-size: 2.4rem; margin: 0; font-family: var(--font-heading); font-weight: 800; color: var(--text-primary);">
+        The World Oceans & Marine Bathymetry
+      </h1>
+      <span class="tn-badge" style="background: rgba(0, 245, 212, 0.15); color: var(--accent-cyan); border: 1px solid rgba(0, 245, 212, 0.3); font-weight: 700;">
+        Interactive Satellite & Depth Cartography
+      </span>
+    </div>
+    <p style="color: var(--text-secondary); font-size: 1.05rem; max-width: 860px; line-height: 1.6; margin: 0;">
+      Earth's continuous body of saline water covering 71% of the planetary surface. Explore authoritative high-resolution satellite cartography, underwater trenches, submarine ridges, and bathymetric soundings.
     </p>
-    <div style="margin-top: 0.75rem; display: flex; flex-wrap: wrap; gap: 0.75rem; align-items: center;">
-      <span style="font-size: 0.8rem; color: var(--accent-cyan); font-weight: 600;">
-        🔒 Zero API Key Required &bull; 100% Free Public APIs &bull; Real-Time Satellite & Open-Meteo Marine Telemetry
+    <div style="margin-top: 0.85rem; display: flex; flex-wrap: wrap; gap: 0.75rem; align-items: center;">
+      <span style="font-size: 0.82rem; color: var(--accent-cyan); font-weight: 600;">
+        🔒 Zero API Key Required &bull; 100% Free Public APIs &bull; Real-Time Satellite & Open-Meteo Swell Telemetry
       </span>
       <a href="{{ url_for('maps.oceans_gallery') }}" class="tn-btn tn-btn-outline tn-btn-sm" style="font-size: 0.78rem; padding: 0.25rem 0.65rem;">
         🗺️ Open Oceans Map Gallery
@@ -19,45 +29,355 @@
     </div>
   </div>
 
-  <div class="tn-grid" style="grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));">
+  <!-- Interactive World Oceans & Marine Bathymetry Map Card -->
+  <div class="tn-map-card" id="oceanMapSection" style="margin-bottom: 3rem; background: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--radius-md); box-shadow: var(--shadow-md); overflow: hidden;">
+    <div class="tn-map-header" style="padding: 1rem 1.25rem; background: rgba(0, 0, 0, 0.25); border-bottom: 1px solid var(--border-color); display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 0.75rem;">
+      <div style="display: flex; align-items: center; gap: 0.6rem;">
+        <span style="font-size: 1.3rem;">🌐</span>
+        <div>
+          <h2 style="font-size: 1.15rem; font-weight: 700; color: var(--text-primary); margin: 0;">
+            Interactive World Oceans & Bathymetry Map
+          </h2>
+          <span style="font-size: 0.76rem; color: var(--text-muted);">
+            Switch between Bathymetric Relief, High-Res Satellite Imagery, and Marine Cosmos
+          </span>
+        </div>
+      </div>
+
+      <div style="display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap;">
+        <select id="worldOceansLayerSelect" style="
+          background: var(--bg-card); color: var(--text-primary); border: 1px solid var(--border-color);
+          border-radius: var(--radius-sm); padding: 0.4rem 0.75rem; font-size: 0.84rem; outline: none; cursor: pointer;
+        ">
+          <option value="bathymetry" selected>🌊 Ocean Bathymetry & Trenches (ESRI/GEBCO)</option>
+          <option value="satellite">🛰️ Satellite Imagery & Labels (ESRI)</option>
+          <option value="dark">🌙 Dark Marine Cosmos (CartoDB)</option>
+          <option value="streets">🗺️ Global Atlas (OpenStreetMap)</option>
+        </select>
+        <button id="resetWorldOceansView" class="tn-btn tn-btn-outline tn-btn-sm" style="font-size: 0.8rem; padding: 0.4rem 0.75rem;">
+          ⟲ Reset Global View
+        </button>
+      </div>
+    </div>
+
+    <!-- Ocean Navigation Filter Pills -->
+    <div style="display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap; padding: 0.75rem 1.25rem; background: rgba(0,0,0,0.15); border-bottom: 1px solid var(--border-color);">
+      <span style="font-size: 0.78rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; margin-right: 0.25rem;">Focus Ocean:</span>
+      <button class="tn-btn tn-btn-sm tn-btn-primary ocean-focus-pill active" data-ocean="all" data-lat="10" data-lon="0" data-zoom="2" style="font-size: 0.78rem; padding: 0.25rem 0.75rem; border-radius: 16px;">
+        🌍 All Oceans
+      </button>
+      <button class="tn-btn tn-btn-sm tn-btn-outline ocean-focus-pill" data-ocean="pacific" data-lat="0" data-lon="-160" data-zoom="3" style="font-size: 0.78rem; padding: 0.25rem 0.75rem; border-radius: 16px;">
+        🌀 Pacific Ocean
+      </button>
+      <button class="tn-btn tn-btn-sm tn-btn-outline ocean-focus-pill" data-ocean="atlantic" data-lat="15" data-lon="-35" data-zoom="3" style="font-size: 0.78rem; padding: 0.25rem 0.75rem; border-radius: 16px;">
+        🌊 Atlantic Ocean
+      </button>
+      <button class="tn-btn tn-btn-sm tn-btn-outline ocean-focus-pill" data-ocean="indian" data-lat="-15" data-lon="80" data-zoom="3" style="font-size: 0.78rem; padding: 0.25rem 0.75rem; border-radius: 16px;">
+        🌴 Indian Ocean
+      </button>
+      <button class="tn-btn tn-btn-sm tn-btn-outline ocean-focus-pill" data-ocean="southern" data-lat="-60" data-lon="0" data-zoom="3" style="font-size: 0.78rem; padding: 0.25rem 0.75rem; border-radius: 16px;">
+        🧊 Southern Ocean
+      </button>
+      <button class="tn-btn tn-btn-sm tn-btn-outline ocean-focus-pill" data-ocean="arctic" data-lat="82" data-lon="0" data-zoom="3" style="font-size: 0.78rem; padding: 0.25rem 0.75rem; border-radius: 16px;">
+        ❄️ Arctic Ocean
+      </button>
+    </div>
+
+    <!-- Map Canvas Container -->
+    <div id="worldOceansMap" style="height: 540px; width: 100%; position: relative;"></div>
+
+    <div style="padding: 0.65rem 1.25rem; background: rgba(0,0,0,0.25); display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 0.5rem; font-size: 0.78rem; color: var(--text-muted);">
+      <div>
+        💡 <strong>Map Legend:</strong> 🌊 Principal Ocean Basins &bull; 🔱 Earth's Deepest Submarine Trenches &bull; ⛵ Connected Marginal Seas
+      </div>
+      <div>
+        Click any marker for soundings, depths, and full dossiers
+      </div>
+    </div>
+  </div>
+
+  <!-- Ocean Cards Directory (5 Principal Basins) -->
+  <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 0.75rem;">
+    <div>
+      <h2 style="font-size: 1.5rem; font-weight: 700; color: var(--text-primary); margin: 0 0 2px;">
+        The 5 World Oceanic Basins
+      </h2>
+      <p style="font-size: 0.88rem; color: var(--text-muted); margin: 0;">
+        Ranked by surface area and volumetric displacement
+      </p>
+    </div>
+  </div>
+
+  <div class="tn-grid" style="grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 1.5rem;">
     {% for ocean in oceans %}
-      <a href="{{ url_for('oceans.ocean_detail', slug=ocean.slug) }}" class="tn-card">
-        <div class="tn-card-header">
-          <div>
-            <h3 class="tn-card-title" style="font-size: 1.35rem;">{{ ocean.name }}</h3>
-            <p class="tn-card-subtitle">{{ ocean.surrounding_continents }}</p>
+      <div class="tn-card" style="display: flex; flex-direction: column; justify-content: space-between; border: 1px solid var(--border-color); transition: all 0.2s ease;">
+        <div>
+          <!-- Card Header -->
+          <div class="tn-card-header" style="margin-bottom: 0.75rem;">
+            <div>
+              <h3 class="tn-card-title" style="font-size: 1.35rem; margin: 0 0 4px;">
+                <a href="{{ url_for('oceans.ocean_detail', slug=ocean.slug) }}" style="color: var(--text-primary); text-decoration: none;">
+                  {{ ocean.name }}
+                </a>
+              </h3>
+              <p class="tn-card-subtitle" style="font-size: 0.82rem; color: var(--text-muted); margin: 0;">
+                Surrounding: {{ ocean.surrounding_continents }}
+              </p>
+            </div>
+            <div style="font-size: 2.2rem; line-height: 1;">🌊</div>
           </div>
-          <div style="font-size: 2.2rem;">🌊</div>
+
+          <p style="font-size: 0.88rem; color: var(--text-secondary); margin: 0.75rem 0 1rem; line-height: 1.6;">
+            {{ ocean.overview[:150] }}...
+          </p>
+
+          <!-- Ocean Key Stats -->
+          <div class="tn-card-meta" style="margin-bottom: 1rem;">
+            <div>
+              <span class="tn-card-meta-label">Surface Area</span>
+              <span class="tn-card-meta-val">{{ "{:,}".format(ocean.area_km2) }} km²</span>
+            </div>
+            <div>
+              <span class="tn-card-meta-label">Average Depth</span>
+              <span class="tn-card-meta-val">{{ "{:,}".format(ocean.avg_depth_m) if ocean.avg_depth_m else 'N/A' }} m</span>
+            </div>
+            <div>
+              <span class="tn-card-meta-label">Maximum Depth</span>
+              <span class="tn-card-meta-val">{{ "{:,}".format(ocean.max_depth_m) if ocean.max_depth_m else 'N/A' }} m</span>
+            </div>
+            <div>
+              <span class="tn-card-meta-label">Deepest Abyss</span>
+              <span class="tn-card-meta-val">{{ ocean.max_depth_location[:20] if ocean.max_depth_location else 'N/A' }}</span>
+            </div>
+          </div>
         </div>
 
-        <p style="font-size: 0.88rem; color: var(--text-secondary); margin: 0.75rem 0; line-height: 1.6;">
-          {{ ocean.overview[:150] }}...
-        </p>
+        <!-- Action Footer with High-Visibility View Map Button -->
+        <div style="border-top: 1px solid var(--border-color); padding-top: 0.85rem; display: flex; align-items: center; justify-content: space-between; gap: 0.5rem; flex-wrap: wrap;">
+          <button 
+            type="button" 
+            class="tn-btn-view-map focus-ocean-map-btn"
+            data-ocean-slug="{{ ocean.slug }}"
+            title="Focus {{ ocean.name }} on the interactive bathymetry map above"
+          >
+            📍 View Map
+          </button>
 
-        <div class="tn-card-meta">
-          <div>
-            <span class="tn-card-meta-label">Surface Area</span>
-            <span class="tn-card-meta-val">{{ "{:,}".format(ocean.area_km2) }} km²</span>
-          </div>
-          <div>
-            <span class="tn-card-meta-label">Average Depth</span>
-            <span class="tn-card-meta-val">{{ "{:,}".format(ocean.avg_depth_m) if ocean.avg_depth_m else 'N/A' }} m</span>
-          </div>
-          <div>
-            <span class="tn-card-meta-label">Maximum Depth</span>
-            <span class="tn-card-meta-val">{{ "{:,}".format(ocean.max_depth_m) if ocean.max_depth_m else 'N/A' }} m</span>
-          </div>
-          <div>
-            <span class="tn-card-meta-label">Deepest Point</span>
-            <span class="tn-card-meta-val">{{ ocean.max_depth_location[:20] if ocean.max_depth_location else 'N/A' }}</span>
-          </div>
+          <a href="{{ url_for('oceans.ocean_detail', slug=ocean.slug) }}" style="font-size: 0.85rem; font-weight: 700; color: var(--accent-cyan); text-decoration: none; display: inline-flex; align-items: center; gap: 0.25rem;">
+            Explore Dossier &rarr;
+          </a>
         </div>
-
-        <div style="margin-top: 1rem; text-align: right; color: var(--accent-cyan); font-weight: 600; font-size: 0.85rem;">
-          Explore Bathymetry & Ecology &rarr;
-        </div>
-      </a>
+      </div>
     {% endfor %}
   </div>
 </div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+  // Initialize Global Oceans & Bathymetry Leaflet Map
+  const mapContainer = document.getElementById("worldOceansMap");
+  if (!mapContainer || typeof L === "undefined") return;
+
+  const map = L.map("worldOceansMap", {
+    center: [10.0, 0.0],
+    zoom: 2,
+    minZoom: 2,
+    maxZoom: 18,
+    zoomControl: true,
+    worldCopyJump: true
+  });
+
+  // Authoritative Ocean Map Tile Layers (Zero API Key Required)
+  const tileLayers = {
+    // 1. ESRI World Ocean Base + Detailed Ocean Reference (Best ocean bathymetry available)
+    bathymetry: L.layerGroup([
+      L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/Ocean/World_Ocean_Base/MapServer/tile/{z}/{y}/{x}", {
+        attribution: 'Tiles &copy; Esri, GEBCO, NOAA, National Geographic &mdash; Ocean Bathymetry (Zero Key)',
+        maxZoom: 16
+      }),
+      L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/Ocean/World_Ocean_Reference/MapServer/tile/{z}/{y}/{x}", {
+        attribution: '',
+        maxZoom: 16
+      })
+    ]),
+    // 2. High-Resolution Satellite with boundaries and coastal labels
+    satellite: L.layerGroup([
+      L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}", {
+        attribution: 'Tiles &copy; Esri &mdash; High-Resolution Satellite (Free Public)',
+        maxZoom: 18
+      }),
+      L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}", {
+        attribution: '',
+        maxZoom: 18
+      })
+    ]),
+    // 3. Dark Marine Cosmos (CartoDB Dark Matter)
+    dark: L.tileLayer("https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png", {
+      attribution: '&copy; CartoDB &copy; OpenStreetMap',
+      subdomains: 'abcd',
+      maxZoom: 19
+    }),
+    // 4. Global Street / Atlas (OpenStreetMap)
+    streets: L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+      attribution: '&copy; OpenStreetMap contributors',
+      maxZoom: 19
+    })
+  };
+
+  let activeKey = "bathymetry";
+  tileLayers.bathymetry.addTo(map);
+
+  const select = document.getElementById("worldOceansLayerSelect");
+  if (select) {
+    select.value = "bathymetry";
+    select.addEventListener("change", (e) => {
+      map.removeLayer(tileLayers[activeKey]);
+      tileLayers[e.target.value].addTo(map);
+      activeKey = e.target.value;
+    });
+  }
+
+  const resetBtn = document.getElementById("resetWorldOceansView");
+  if (resetBtn) {
+    resetBtn.addEventListener("click", () => {
+      map.setView([10.0, 0.0], 2);
+      updateActivePill("all");
+    });
+  }
+
+  // 1. Ocean Basin Centers & Metadata
+  const oceanCenters = {
+    "pacific-ocean": { name: "Pacific Ocean", lat: 0.0, lon: -160.0, zoom: 3, area: "168,723,000 km²", maxDepth: "10,994 m", abyss: "Mariana Trench" },
+    "atlantic-ocean": { name: "Atlantic Ocean", lat: 15.0, lon: -35.0, zoom: 3, area: "85,133,000 km²", maxDepth: "8,376 m", abyss: "Puerto Rico Trench" },
+    "indian-ocean": { name: "Indian Ocean", lat: -15.0, lon: 80.0, zoom: 3, area: "70,560,000 km²", maxDepth: "7,450 m", abyss: "Java / Sunda Trench" },
+    "southern-ocean": { name: "Southern Ocean", lat: -60.0, lon: 0.0, zoom: 3, area: "21,960,000 km²", maxDepth: "7,235 m", abyss: "South Sandwich Trench" },
+    "arctic-ocean": { name: "Arctic Ocean", lat: 82.0, lon: 0.0, zoom: 3, area: "15,558,000 km²", maxDepth: "5,550 m", abyss: "Molloy Deep" }
+  };
+
+  Object.entries(oceanCenters).forEach(([slug, oc]) => {
+    const icon = L.divIcon({
+      className: "tn-ocean-marker",
+      html: `<div style="background: rgba(3,64,120,0.9); border: 2px solid #00f5d4; border-radius: 50%; width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; font-size: 18px; box-shadow: 0 0 16px rgba(0,245,212,0.6); cursor: pointer;">🌊</div>`,
+      iconSize: [36, 36],
+      iconAnchor: [18, 18]
+    });
+
+    L.marker([oc.lat, oc.lon], { icon: icon })
+      .addTo(map)
+      .bindPopup(`
+        <div style="font-family: var(--font-sans); min-width: 210px;">
+          <div style="font-size: 0.72rem; text-transform: uppercase; color: #00f5d4; font-weight: 800; letter-spacing: 0.5px;">World Ocean Basin</div>
+          <strong style="font-size: 1.1rem; color: #1e293b; display: block; margin: 2px 0 4px;">${oc.name}</strong>
+          <div style="font-size: 0.8rem; color: #475569; margin-bottom: 2px;">Surface Area: <strong>${oc.area}</strong></div>
+          <div style="font-size: 0.8rem; color: #475569; margin-bottom: 2px;">Max Depth: <strong>${oc.maxDepth}</strong></div>
+          <div style="font-size: 0.8rem; color: #475569; margin-bottom: 6px;">Deepest Abyss: <strong>${oc.abyss}</strong></div>
+          <a href="/oceans/${slug}" style="display: inline-block; font-size: 0.82rem; color: #00f5d4; font-weight: 700;">Explore Full Dossier &rarr;</a>
+        </div>
+      `);
+  });
+
+  // 2. Deepest Oceanic Trenches in the World
+  const deepTrenches = [
+    { name: "Mariana Trench (Challenger Deep)", ocean: "Pacific Ocean", lat: 11.3493, lon: 142.1996, depth: "10,994 m (36,070 ft)", desc: "Deepest known location on planetary Earth." },
+    { name: "Puerto Rico Trench (Milwaukee Deep)", ocean: "Atlantic Ocean", lat: 19.8450, lon: -66.5000, depth: "8,376 m (27,480 ft)", desc: "Deepest location in the Atlantic Ocean basin." },
+    { name: "Java / Sunda Trench", ocean: "Indian Ocean", lat: -10.3167, lon: 109.9667, depth: "7,450 m (24,442 ft)", desc: "Deepest submarine trench in the Indian Ocean." },
+    { name: "South Sandwich Trench (Meteor Deep)", ocean: "Southern Ocean", lat: -55.6667, lon: -25.9167, depth: "7,235 m (23,737 ft)", desc: "Subduction abyss in the Southern Ocean quadrant." },
+    { name: "Molloy Deep (Fram Strait)", ocean: "Arctic Ocean", lat: 79.1417, lon: 2.7833, depth: "5,550 m (18,209 ft)", desc: "Deepest oceanic sounding in the Arctic basin." }
+  ];
+
+  deepTrenches.forEach(tr => {
+    const icon = L.divIcon({
+      className: "tn-trench-marker",
+      html: `<div style="background: linear-gradient(135deg, #7c3aed, #ec4899); border: 2px solid #ffffff; border-radius: 50%; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; font-size: 15px; box-shadow: 0 0 14px rgba(236,72,153,0.85); cursor: pointer;">🔱</div>`,
+      iconSize: [32, 32],
+      iconAnchor: [16, 16]
+    });
+
+    L.marker([tr.lat, tr.lon], { icon: icon })
+      .addTo(map)
+      .bindPopup(`
+        <div style="font-family: var(--font-sans); min-width: 200px;">
+          <div style="font-size: 0.7rem; text-transform: uppercase; color: #ec4899; font-weight: 800; letter-spacing: 0.5px;">Deepest Point Sounding</div>
+          <strong style="font-size: 1.05rem; color: #1e293b; display: block; margin: 2px 0 3px;">${tr.name}</strong>
+          <div style="font-size: 0.9rem; font-weight: 800; color: #7c3aed; margin-bottom: 3px;">Depth: ${tr.depth}</div>
+          <div style="font-size: 0.8rem; color: #64748b; margin-bottom: 2px;">Ocean: ${tr.ocean}</div>
+          <p style="font-size: 0.78rem; color: #64748b; margin: 0; line-height: 1.4;">${tr.desc}</p>
+        </div>
+      `);
+  });
+
+  // 3. Marginal Seas Markers (Define icon once outside loop to prevent variable redeclaration SyntaxError)
+  const seaIcon = L.divIcon({
+    className: "tn-sea-marker",
+    html: `<div style="background: rgba(6,182,212,0.9); border: 1.5px solid #ffffff; border-radius: 50%; width: 26px; height: 26px; display: flex; align-items: center; justify-content: center; font-size: 12px; box-shadow: 0 0 10px #06b6d4; cursor: pointer;">⛵</div>`,
+    iconSize: [26, 26],
+    iconAnchor: [13, 13]
+  });
+
+  {% for sea in seas %}
+    {% if sea.latitude and sea.longitude %}
+      L.marker([{{ sea.latitude }}, {{ sea.longitude }}], { icon: seaIcon })
+        .addTo(map)
+        .bindPopup(`
+          <div style="font-family: var(--font-sans);">
+            <strong style="font-size: 0.95rem; color: #1e293b;">{{ sea.name }}</strong><br>
+            <span style="font-size: 0.8rem; color: #0284c7; font-weight: 600;">Type: {{ sea.sea_type | capitalize }} Sea</span><br>
+            <span style="font-size: 0.78rem; color: #64748b;">Max Depth: {{ '{:,}'.format(sea.max_depth_m) if sea.max_depth_m else 'N/A' }} m</span><br>
+            <a href="/seas/{{ sea.slug }}" style="display: inline-block; margin-top: 4px; font-size: 0.8rem; color: #00f5d4; font-weight: 700;">View Sea Profile &rarr;</a>
+          </div>
+        `);
+    {% endif %}
+  {% endfor %}
+
+  // Pill filter interactions
+  const pills = document.querySelectorAll(".ocean-focus-pill");
+  function updateActivePill(oceanKey) {
+    pills.forEach(p => {
+      if (p.dataset.ocean === oceanKey) {
+        p.classList.remove("tn-btn-outline");
+        p.classList.add("tn-btn-primary", "active");
+      } else {
+        p.classList.remove("tn-btn-primary", "active");
+        p.classList.add("tn-btn-outline");
+      }
+    });
+  }
+
+  pills.forEach(p => {
+    p.addEventListener("click", () => {
+      const lat = parseFloat(p.dataset.lat);
+      const lon = parseFloat(p.dataset.lon);
+      const zoom = parseInt(p.dataset.zoom);
+      const ocean = p.dataset.ocean;
+
+      updateActivePill(ocean);
+      map.setView([lat, lon], zoom);
+    });
+  });
+
+  // Handle "View Map" button clicks on ocean cards
+  document.querySelectorAll(".focus-ocean-map-btn").forEach(btn => {
+    btn.addEventListener("click", (e) => {
+      e.preventDefault();
+      const slug = btn.dataset.oceanSlug;
+      const oc = oceanCenters[slug];
+      if (oc) {
+        // Scroll smoothly to map
+        document.getElementById("oceanMapSection").scrollIntoView({ behavior: "smooth", block: "start" });
+        setTimeout(() => {
+          map.setView([oc.lat, oc.lon], oc.zoom);
+          updateActivePill(slug.replace("-ocean", ""));
+        }, 300);
+      }
+    });
+  });
+
+  // Guarantee crisp tile loading
+  setTimeout(() => { map.invalidateSize(); }, 200);
+  setTimeout(() => { map.invalidateSize(); }, 600);
+  window.addEventListener("resize", () => { map.invalidateSize(); });
+});
+</script>
 {% endblock %}

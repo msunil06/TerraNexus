@@ -3,7 +3,8 @@ from services.alliance_service import AllianceService
 
 alliances_bp = Blueprint("alliances", __name__, url_prefix="/alliances")
 
-@alliances_bp.route("")
+@alliances_bp.route("", strict_slashes=False)
+@alliances_bp.route("/", strict_slashes=False)
 def index():
     alliances = AllianceService.get_all_alliances()
     return render_template(

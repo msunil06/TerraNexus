@@ -24,6 +24,7 @@
   --navy-mid: #001f54;
   --ocean-blue: #034078;
   --ocean-teal: #1282a2;
+  --accent: #00f5d4;
   --accent-cyan: #00f5d4;
   --accent-blue: #00bbf9;
   --accent-glow: rgba(0, 245, 212, 0.25);
@@ -70,6 +71,7 @@
   --navy-mid: #e2e8f0;
   --ocean-blue: #0284c7;
   --ocean-teal: #0284c7;
+  --accent: #0284c7;
   --accent-cyan: #0284c7; /* high-contrast azure blue in light mode */
   --accent-blue: #0369a1;
   --accent-glow: rgba(2, 132, 199, 0.18);
@@ -139,7 +141,7 @@ a:hover {
 }
 
 .tn-nav-container {
-  max-width: 1440px;
+  max-width: var(--container-max-width, 1440px);
   margin: 0 auto;
   display: flex;
   align-items: center;
@@ -468,6 +470,59 @@ a:hover {
 .tn-btn-sm {
   padding: 0.35rem 0.75rem;
   font-size: 0.8rem;
+}
+
+/* ==========================================================================
+   Universal High-Visibility "View Map" Buttons (Dark & Light Mode Guaranteed)
+   ========================================================================== */
+.tn-btn-view-map,
+button[data-view-map],
+a[data-view-map] {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 0.35rem !important;
+  background: rgba(0, 245, 212, 0.16) !important;
+  border: 1.5px solid #00f5d4 !important;
+  color: #00f5d4 !important;
+  font-weight: 700 !important;
+  font-family: var(--font-heading) !important;
+  border-radius: 20px !important;
+  padding: 0.32rem 0.85rem !important;
+  font-size: 0.82rem !important;
+  white-space: nowrap !important;
+  box-shadow: 0 0 12px rgba(0, 245, 212, 0.32) !important;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1) !important;
+  cursor: pointer !important;
+  text-decoration: none !important;
+}
+
+.tn-btn-view-map:hover,
+button[data-view-map]:hover,
+a[data-view-map]:hover {
+  background: #00f5d4 !important;
+  color: #060c18 !important;
+  border-color: #00f5d4 !important;
+  box-shadow: 0 0 20px rgba(0, 245, 212, 0.7) !important;
+  transform: translateY(-2px) !important;
+}
+
+[data-theme="light"] .tn-btn-view-map,
+[data-theme="light"] button[data-view-map],
+[data-theme="light"] a[data-view-map] {
+  background: rgba(2, 132, 199, 0.12) !important;
+  border: 1.5px solid #0284c7 !important;
+  color: #0284c7 !important;
+  box-shadow: 0 2px 8px rgba(2, 132, 199, 0.25) !important;
+}
+
+[data-theme="light"] .tn-btn-view-map:hover,
+[data-theme="light"] button[data-view-map]:hover,
+[data-theme="light"] a[data-view-map]:hover {
+  background: #0284c7 !important;
+  color: #ffffff !important;
+  border-color: #0284c7 !important;
+  box-shadow: 0 4px 14px rgba(2, 132, 199, 0.45) !important;
 }
 
 .tn-btn-icon {
@@ -807,7 +862,7 @@ a:hover {
 }
 
 .tn-detail-header {
-  max-width: 1200px;
+  max-width: var(--container-max-width, 1440px);
   margin: 0 auto;
   display: flex;
   align-items: center;
@@ -833,7 +888,7 @@ a:hover {
 }
 
 .tn-detail-tabs {
-  max-width: 1200px;
+  max-width: var(--container-max-width, 1440px);
   margin: 0 auto 2rem;
   display: flex;
   gap: 0.5rem;
@@ -963,7 +1018,7 @@ a:hover {
 }
 
 .tn-footer-container {
-  max-width: 1440px;
+  max-width: var(--container-max-width, 1440px);
   margin: 0 auto;
   display: grid;
   grid-template-columns: 2fr repeat(3, 1fr);
@@ -1004,7 +1059,7 @@ a:hover {
 }
 
 .tn-footer-bottom {
-  max-width: 1440px;
+  max-width: var(--container-max-width, 1440px);
   margin: 0 auto;
   padding-top: 1.5rem;
   border-top: 1px solid var(--border-color);

@@ -9,7 +9,8 @@ from models.geography import AdministrativeDivision, City
 
 countries_bp = Blueprint("countries", __name__, url_prefix="/countries")
 
-@countries_bp.route("")
+@countries_bp.route("", strict_slashes=False)
+@countries_bp.route("/", strict_slashes=False)
 def list_countries():
     continent = request.args.get("continent")
     search = request.args.get("q")

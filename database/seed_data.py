@@ -1251,8 +1251,12 @@ def run_all_seeds(app):
     seed_oceans(app)
     print("Seeding seas...")
     seed_seas(app)
-    print("Seeding countries, capitals, and borders...")
+    print("Seeding initial countries, capitals, and borders...")
     seed_countries(app)
+    # Populate complete catalog of all 196 sovereign nations
+    from database.populate_world_data import populate_all_world_data
+    print("Populating complete catalog of all 196 world sovereign countries...")
+    populate_all_world_data(app)
     print("Seeding administrative divisions...")
     seed_administrative_divisions(app)
     print("Seeding geographic physical features...")

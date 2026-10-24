@@ -30,18 +30,18 @@ class Country(db.Model):
     iso_a2 = db.Column(db.String(2), unique=True, nullable=False, index=True)
     iso_a3 = db.Column(db.String(3), unique=True, nullable=False, index=True)
     iso_numeric = db.Column(db.String(3), nullable=True)
-    common_name = db.Column(db.String(100), nullable=False, index=True)
-    official_name = db.Column(db.String(200), nullable=False)
+    common_name = db.Column(db.Unicode(150), nullable=False, index=True)
+    official_name = db.Column(db.Unicode(255), nullable=False)
     slug = db.Column(db.String(120), unique=True, nullable=False, index=True)
     
     continent_id = db.Column(db.Integer, db.ForeignKey("continents.id"), nullable=False, index=True)
-    subregion = db.Column(db.String(100), nullable=True)
+    subregion = db.Column(db.Unicode(100), nullable=True)
     
-    flag_emoji = db.Column(db.String(16), nullable=True)
+    flag_emoji = db.Column(db.Unicode(32), nullable=True)
     flag_svg_url = db.Column(db.String(255), nullable=True)
     
-    capital_name = db.Column(db.String(100), nullable=True)
-    largest_city = db.Column(db.String(100), nullable=True)
+    capital_name = db.Column(db.Unicode(150), nullable=True)
+    largest_city = db.Column(db.Unicode(150), nullable=True)
     
     area_km2 = db.Column(db.Float, nullable=True)
     area_sq_mi = db.Column(db.Float, nullable=True)
@@ -56,16 +56,16 @@ class Country(db.Model):
     latitude = db.Column(db.Float, nullable=True)
     longitude = db.Column(db.Float, nullable=True)
     
-    highest_point = db.Column(db.String(120), nullable=True)
+    highest_point = db.Column(db.Unicode(120), nullable=True)
     highest_elevation_m = db.Column(db.Integer, nullable=True)
-    lowest_point = db.Column(db.String(120), nullable=True)
+    lowest_point = db.Column(db.Unicode(120), nullable=True)
     lowest_elevation_m = db.Column(db.Integer, nullable=True)
     coastline_km = db.Column(db.Float, nullable=True)
     is_landlocked = db.Column(db.Boolean, default=False)
     
     currency_code = db.Column(db.String(10), nullable=True)
-    currency_name = db.Column(db.String(100), nullable=True)
-    currency_symbol = db.Column(db.String(10), nullable=True)
+    currency_name = db.Column(db.Unicode(100), nullable=True)
+    currency_symbol = db.Column(db.Unicode(32), nullable=True)
     
     official_languages = db.Column(db.String(255), nullable=True)
     widely_spoken_languages = db.Column(db.String(255), nullable=True)
@@ -140,7 +140,7 @@ class AdministrativeDivision(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
     country_id = db.Column(db.Integer, db.ForeignKey("countries.id", ondelete="CASCADE"), nullable=False, index=True)
-    parent_division_id = db.Column(db.Integer, db.ForeignKey("administrative_divisions.id", ondelete="CASCADE"), nullable=True)
+    parent_division_id = db.Column(db.Integer, db.ForeignKey("administrative_divisions.id", ondelete="NO ACTION"), nullable=True)
     name = db.Column(db.String(150), nullable=False, index=True)
     slug = db.Column(db.String(180), nullable=False, index=True)
     code = db.Column(db.String(30), nullable=True) # e.g. IN-MH, US-CA
@@ -152,7 +152,7 @@ class AdministrativeDivision(db.Model):
     latitude = db.Column(db.Float, nullable=True)
     longitude = db.Column(db.Float, nullable=True)
 
-    subdivisions = db.relationship("AdministrativeDivision", backref=db.backref("parent", remote_side=[id]), cascade="all, delete-orphan")
+    subdivisions = db.relationship("AdministrativeDivision", backref=db.backref("parent", remote_side=[id]))
     cities = db.relationship("City", backref="division", lazy="dynamic")
 
     def __repr__(self):
@@ -163,7 +163,7 @@ class City(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
     country_id = db.Column(db.Integer, db.ForeignKey("countries.id", ondelete="CASCADE"), nullable=False, index=True)
-    division_id = db.Column(db.Integer, db.ForeignKey("administrative_divisions.id", ondelete="SET NULL"), nullable=True, index=True)
+    division_id = db.Column(db.Integer, db.ForeignKey("administrative_divisions.id", ondelete="NO ACTION"), nullable=True, index=True)
     name = db.Column(db.String(120), nullable=False, index=True)
     slug = db.Column(db.String(150), nullable=False, index=True)
     latitude = db.Column(db.Float, nullable=False)

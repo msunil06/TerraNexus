@@ -3,7 +3,7 @@
 {% block title %}{{ division.name }} ({{ division.division_type }}) - {{ country.common_name }} - {{ app_name }}{% endblock %}
 
 {% block content %}
-<div style="max-width: 1200px; margin: 2rem auto 4rem; padding: 0 1.5rem;">
+<div class="tn-container" style="margin: 2rem auto 4rem;">
   <!-- Breadcrumbs -->
   <nav style="margin-bottom: 1.5rem; font-size: 0.9rem; color: var(--text-muted);" aria-label="Breadcrumb">
     <a href="{{ url_for('countries.list_countries') }}">Countries</a> &rsaquo;
@@ -39,14 +39,13 @@
           {% if division.capital_or_center %}
           <button 
             type="button" 
-            class="tn-btn tn-btn-outline tn-btn-xs" 
+            class="tn-btn-view-map" 
             data-view-map 
             data-map-name="{{ division.capital_or_center }}" 
             data-map-lat="{{ division.latitude or country.latitude or 0 }}" 
             data-map-lon="{{ division.longitude or country.longitude or 0 }}" 
             data-map-context="Administrative Center of {{ division.name }}, {{ country.common_name }}" 
             data-map-zoom="11"
-            style="border-color: var(--accent); color: var(--accent); padding: 2px 8px; font-size: 0.75rem;"
           >
             📍 View Map
           </button>
@@ -74,14 +73,13 @@
           <span>{{ division.latitude or '0' }}° N, {{ division.longitude or '0' }}° E</span>
           <button 
             type="button" 
-            class="tn-btn tn-btn-outline tn-btn-xs" 
+            class="tn-btn-view-map" 
             data-view-map 
             data-map-name="{{ division.name }}" 
             data-map-lat="{{ division.latitude or country.latitude or 0 }}" 
             data-map-lon="{{ division.longitude or country.longitude or 0 }}" 
             data-map-context="{{ division.division_type }} in {{ country.common_name }}" 
             data-map-zoom="9"
-            style="border-color: var(--accent); color: var(--accent); padding: 2px 8px; font-size: 0.75rem;"
           >
             📍 View Map
           </button>

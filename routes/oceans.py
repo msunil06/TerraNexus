@@ -5,10 +5,12 @@ from models.user import UserFavorite
 
 oceans_bp = Blueprint("oceans", __name__, url_prefix="/oceans")
 
-@oceans_bp.route("")
+@oceans_bp.route("", strict_slashes=False)
+@oceans_bp.route("/", strict_slashes=False)
 def list_oceans():
     oceans = GeographicService.get_all_oceans()
-    return render_template("oceans/index.html", oceans=oceans)
+    seas = GeographicService.get_all_seas()
+    return render_template("oceans/index.html", oceans=oceans, seas=seas)
 
 from services.live_data_service import LiveDataService
 

@@ -1,20 +1,35 @@
 # TerraNexus Production Deployment Guide
 
-This guide details deploying TerraNexus to production environments using **Gunicorn**, **Nginx**, and **MySQL 8.0+** with HTTPS.
+This guide details deploying TerraNexus to production environments:
+1. **Cloud Platforms** (Azure App Service, Render, Railway, Fly.io) via the included `Procfile`.
+2. **Linux VPS (Ubuntu / Debian)** using **Gunicorn**, **Nginx**, and **Azure SQL / MySQL** with HTTPS.
 
 ---
 
-## 1. System Requirements
+## 1. Quick Cloud Deployment (Render / Railway / Azure App Service)
 
-- **OS**: Ubuntu 22.04 LTS / Debian 12 / Rocky Linux 9
-- **Python**: 3.10+ (Python 3.12 recommended)
-- **Database**: MySQL 8.0+
-- **Reverse Proxy**: Nginx
-- **WSGI Server**: Gunicorn
+TerraNexus includes a production `Procfile` configured for Gunicorn:
+```
+web: gunicorn "app:create_app()"
+```
+
+### Environment Variables to Configure in your Cloud Dashboard:
+- `SECRET_KEY`: A secure random hex string (generate with `python -c 'import secrets; print(secrets.token_hex(32))'`)
+- `FLASK_ENV`: `production`
+- `DEBUG`: `False`
+
+#### For Azure SQL Database:
+- `DB_SERVER`: `your-server.database.windows.net`
+- `DB_PORT`: `1433`
+- `DB_NAME`: `your-database-name`
+- `DB_USER`: `your-username`
+- `DB_PASSWORD`: `your-password`
+
+> **Note**: In your Azure SQL firewall settings, ensure **"Allow Azure services and resources to access this server"** is set to **Yes**.
 
 ---
 
-## 2. Server Setup
+## 2. Linux VPS Deployment (Ubuntu 22.04 LTS / Debian 12)
 
 ```bash
 # Update and install system dependencies

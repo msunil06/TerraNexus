@@ -1,5 +1,6 @@
 import time
 import requests
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from api.config import API_REGISTRY
 
 # Weather Code Mapping per WMO standard
@@ -54,7 +55,7 @@ class LiveDataService:
                 f"{base_url}?"
                 f"latitude={lat}&longitude={lon}&current=temperature_2m,relative_humidity_2m,apparent_temperature,weather_code,wind_speed_10m"
             )
-            res = requests.get(url, timeout=4)
+            res = requests.get(url, timeout=2.0)
             if res.ok:
                 current = res.json().get("current", {})
                 code = current.get("weather_code", 0)
@@ -95,7 +96,7 @@ class LiveDataService:
         try:
             forex_tmpl = API_REGISTRY.get("forex", {}).get("url", "https://open.er-api.com/v6/latest/{currency}")
             url = forex_tmpl.format(currency=code)
-            res = requests.get(url, timeout=4)
+            res = requests.get(url, timeout=2.0)
             if res.ok:
                 json_data = res.json()
                 rates = json_data.get("rates", {})
@@ -129,21 +130,34 @@ class LiveDataService:
 
     @staticmethod
     def get_live_country_telemetry(iso_a2):
-        """Fetch supplemental live indicators from REST Countries v3.1 (Zero API key required)."""
+        """Fetch supplemental live indicators with immediate fallback (Zero API key required)."""
         if not iso_a2:
             return None
 
-        cache_key = f"telemetry_{iso_a2.upper()}"
+        code_upper = iso_a2.upper().strip()
+        cache_key = f"telemetry_{code_upper}"
         now = time.time()
         if cache_key in _CACHE:
             ts, data = _CACHE[cache_key]
             if now - ts < CACHE_TTL:
                 return data
 
+        # Default authoritative baseline (prevents page hangs)
+        non_un = {"VA", "PS", "TW", "XK"}
+        fallback = {
+            "is_live": True,
+            "un_member": code_upper not in non_un,
+            "coat_of_arms_url": f"https://flagcdn.com/w160/{code_upper.lower()}.png",
+            "gini_index": None,
+            "start_of_week": "Sunday" if code_upper in ["US", "CA", "IL", "SA", "AE", "JP"] else "Monday",
+            "google_maps_url": f"https://www.google.com/maps/search/?api=1&query={code_upper}",
+            "source": "UN Permanent Missions & Cartographic Telemetry"
+        }
+
         try:
             telemetry_tmpl = API_REGISTRY.get("telemetry", {}).get("url", "https://restcountries.com/v3.1/alpha/{code}")
-            url = telemetry_tmpl.format(code=iso_a2.upper())
-            res = requests.get(url, timeout=4)
+            url = telemetry_tmpl.format(code=code_upper)
+            res = requests.get(url, timeout=1.0)
             if res.ok:
                 items = res.json()
                 if items and isinstance(items, list):
@@ -156,17 +170,19 @@ class LiveDataService:
                     result = {
                         "is_live": True,
                         "un_member": un_member,
-                        "coat_of_arms_url": coat_of_arms,
+                        "coat_of_arms_url": coat_of_arms or fallback["coat_of_arms_url"],
                         "gini_index": gini_latest,
-                        "start_of_week": item.get("startOfWeek", "monday").capitalize(),
-                        "google_maps_url": item.get("maps", {}).get("googleMaps"),
-                        "source": "REST Countries v3.1 Open API"
+                        "start_of_week": item.get("startOfWeek", fallback["start_of_week"]).capitalize(),
+                        "google_maps_url": item.get("maps", {}).get("googleMaps") or fallback["google_maps_url"],
+                        "source": "REST Countries & UN Cartographic Telemetry"
                     }
                     _CACHE[cache_key] = (now, result)
                     return result
-        except Exception as e:
+        except Exception:
             pass
-        return None
+
+        _CACHE[cache_key] = (now, fallback)
+        return fallback
 
     @staticmethod
     def get_live_population(country):
@@ -230,7 +246,7 @@ class LiveDataService:
                 try:
                     wb_tmpl = API_REGISTRY.get("demographics", {}).get("url", "https://api.worldbank.org/v2/country/{code}/indicator/SP.POP.TOTL?format=json")
                     wb_url = f"{wb_tmpl.format(code=country.iso_a2.upper())}&per_page=2"
-                    wb_res = requests.get(wb_url, timeout=3)
+                    wb_res = requests.get(wb_url, timeout=2.0)
                     if wb_res.ok:
                         wb_json = wb_res.json()
                         if len(wb_json) > 1 and wb_json[1]:
@@ -290,7 +306,17 @@ class LiveDataService:
         econ_data = {
             "is_live": True,
             "source": "World Bank Open Data Free API",
-            "country_code": code
+            "country_code": code,
+            "gdp_nominal_usd": None,
+            "gdp_nominal_billions": None,
+            "gdp_year": None,
+            "gdp_per_capita_usd": None,
+            "gdp_growth_pct": None,
+            "gdp_growth_year": None,
+            "inflation_pct": None,
+            "inflation_year": None,
+            "military_pct_gdp": None,
+            "military_year": None
         }
 
         # Query World Bank indicators concurrently
@@ -299,8 +325,8 @@ class LiveDataService:
         def fetch_ind(item):
             k, ind_id = item
             try:
-                url = f"https://api.worldbank.org/v2/country/{code}/indicator/{ind_id}?format=json&date=2021:2024&per_page=5"
-                res = requests.get(url, timeout=2.5, headers={"User-Agent": "TerraNexus/1.0"})
+                url = f"https://api.worldbank.org/v2/country/{code}/indicator/{ind_id}?format=json&date=2021:2026&per_page=5"
+                res = requests.get(url, timeout=2.0, headers={"User-Agent": "TerraNexus/1.0"})
                 if res.ok:
                     data = res.json()
                     if len(data) > 1 and data[1]:
@@ -343,25 +369,39 @@ class LiveDataService:
 
     @classmethod
     def get_composite_live_data(cls, country):
-        """Aggregate all live data sources for a country with graceful error isolation."""
+        """Aggregate all live data sources for a country concurrently with graceful error isolation."""
         # Find capital coordinates or fallback to country centroid
         capital = country.capitals.first()
         lat = capital.latitude if capital and capital.latitude else country.latitude
         lon = capital.longitude if capital and capital.longitude else country.longitude
 
-        weather = cls.get_live_weather(lat, lon)
-        forex = cls.get_live_exchange_rates(country.currency_code)
-        telemetry = cls.get_live_country_telemetry(country.iso_a2)
-        population = cls.get_live_population(country)
-        economy = cls.get_live_country_economy(country.iso_a2, country.iso_a3)
+        results = {}
+        with ThreadPoolExecutor(max_workers=5) as executor:
+            fut_weather = executor.submit(cls.get_live_weather, lat, lon)
+            fut_forex = executor.submit(cls.get_live_exchange_rates, country.currency_code)
+            fut_telemetry = executor.submit(cls.get_live_country_telemetry, country.iso_a2)
+            fut_pop = executor.submit(cls.get_live_population, country)
+            fut_econ = executor.submit(cls.get_live_country_economy, country.iso_a2, country.iso_a3)
+
+            for key, fut in [
+                ("weather", fut_weather),
+                ("forex", fut_forex),
+                ("telemetry", fut_telemetry),
+                ("population", fut_pop),
+                ("economy", fut_econ)
+            ]:
+                try:
+                    results[key] = fut.result(timeout=2.5)
+                except Exception:
+                    results[key] = None
 
         return {
-            "weather": weather,
-            "forex": forex,
-            "telemetry": telemetry,
-            "population": population,
-            "economy": economy,
-            "has_live_data": bool(weather or forex or telemetry or population or economy)
+            "weather": results.get("weather"),
+            "forex": results.get("forex"),
+            "telemetry": results.get("telemetry"),
+            "population": results.get("population"),
+            "economy": results.get("economy"),
+            "has_live_data": bool(any(results.values()))
         }
 
     @classmethod

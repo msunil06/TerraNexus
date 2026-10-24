@@ -21,7 +21,7 @@
   </div>
 </section>
 
-<div style="max-width: 1440px; margin: 0 auto 4rem; padding: 0 1.5rem;">
+<div class="tn-container" style="margin: 0 auto 4rem;">
   <h2 style="font-size: 1.35rem; margin-bottom: 1.25rem; color: var(--text-primary);">The 5 World Oceans</h2>
   <div class="tn-grid" style="grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); margin-bottom: 3rem;">
     {% for ocean in oceans %}
@@ -45,9 +45,14 @@
           <span class="tn-card-meta-val">{{ "{:,}".format(ocean.avg_depth_m) if ocean.avg_depth_m else 'N/A' }} m</span>
         </div>
       </div>
-      <span style="color: var(--accent-cyan); font-weight: 600; font-size: 0.82rem; margin-top: 0.75rem; display: block;">
-        Open Marine Map &rarr;
-      </span>
+      <div style="margin-top: 0.85rem; display: flex; align-items: center; justify-content: space-between;">
+        <span class="tn-btn-view-map" style="font-size: 0.78rem; padding: 0.25rem 0.65rem;">
+          📍 View Map
+        </span>
+        <span style="color: var(--accent-cyan); font-weight: 700; font-size: 0.82rem;">
+          Open Marine Map &rarr;
+        </span>
+      </div>
     </a>
     {% endfor %}
   </div>
