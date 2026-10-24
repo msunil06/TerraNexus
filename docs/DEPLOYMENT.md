@@ -14,6 +14,7 @@ web: gunicorn "app:create_app()"
 ```
 
 ### Environment Variables to Configure in your Cloud Dashboard:
+- `TERRANEXUS_AUTH_KEY`: `TNX-CORE-9842-AUTHORIZED-2026` (Required security authorization key)
 - `SECRET_KEY`: A secure random hex string (generate with `python -c 'import secrets; print(secrets.token_hex(32))'`)
 - `FLASK_ENV`: `production`
 - `DEBUG`: `False`
