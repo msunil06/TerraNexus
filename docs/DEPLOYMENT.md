@@ -10,7 +10,7 @@ This guide details deploying TerraNexus to production environments:
 
 TerraNexus includes a production `Procfile` configured for Gunicorn:
 ```
-web: gunicorn "app:create_app()"
+web: gunicorn wsgi:app
 ```
 
 ### Environment Variables to Configure in your Cloud Dashboard:
